@@ -71,24 +71,64 @@ namespace asp_net_core_web_app_authentication_authorisation.Areas.Identity.Pages
         /// </summary>
         public class InputModel
         {
-            [Required]
+            /// <summary>
+            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+            ///     directly from your code. This API may change or be removed in future releases.
+            /// </summary>
+            [Required(ErrorMessage = "First name is required")]
+            [Display(Name = "First name")]
             public string FirstName { get; set; }
-
-            [Required]
-            public string LastName { get; set; }
-
-            [Required]
-            public string PhoneNumber { get; set; }
-
-            [Required]
-            public string Address { get; set; }
 
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
-            [Required]
-            [EmailAddress]
+            [Required(ErrorMessage = "Last name is required")]
+            [Display(Name = "Last name")]
+            public string LastName { get; set; }
+
+            /// <summary>
+            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+            ///     directly from your code. This API may change or be removed in future releases.
+            /// </summary>
+            [Required(ErrorMessage = "Username is required")]
+            [Display(Name = "Username")]
+            public string UserName { get; set; }
+
+            /// <summary>
+            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+            ///     directly from your code. This API may change or be removed in future releases.
+            /// </summary>
+            [Required(ErrorMessage = "Phone number is required")]
+            [DataType(DataType.PhoneNumber)]
+            [Display(Name = "PhoneNumber")]
+            public string PhoneNumber { get; set; }
+
+            [Required(ErrorMessage = "Confirm phone number is required")]
+            [DataType(DataType.PhoneNumber)]
+            [Display(Name = "ConfirmPhoneNumber")]
+            [Compare("PhoneNumber", ErrorMessage = "The phone number and confirmation phone number do not match")]
+            public string ConfirmPhoneNumber { get; set; }
+
+            /// <summary>
+            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+            ///     directly from your code. This API may change or be removed in future releases.
+            /// </summary>
+            [Required(ErrorMessage = "Passport number is required")]
+            [Display(Name = "PassportNumber")]
+            public string PassportNumber { get; set; }
+
+            [Required(ErrorMessage = "Confirm passport number is required")]
+            [Display(Name = "Confirm passport number")]
+            [Compare("PassportNumber", ErrorMessage = "The passport number and confirmation passport number do not match")]
+            public string ConfirmPassportNumber { get; set; }
+
+            /// <summary>
+            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+            ///     directly from your code. This API may change or be removed in future releases.
+            /// </summary>
+            [Required(ErrorMessage = "Email is required")]
+            [EmailAddress(ErrorMessage = "Invalid email")]
             [Display(Name = "Email")]
             public string Email { get; set; }
 
@@ -96,7 +136,17 @@ namespace asp_net_core_web_app_authentication_authorisation.Areas.Identity.Pages
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
-            [Required]
+            [Required(ErrorMessage = "Confirm email is required")]
+            [EmailAddress(ErrorMessage = "Invalid email")]
+            [Display(Name = "Confirm email")]
+            [Compare("Email", ErrorMessage = "The email and confirmation email do not match")]
+            public string ConfirmEmail { get; set; }
+
+            /// <summary>
+            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+            ///     directly from your code. This API may change or be removed in future releases.
+            /// </summary>
+            [Required(ErrorMessage = "Password is required")]
             [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
             [DataType(DataType.Password)]
             [Display(Name = "Password")]
@@ -106,6 +156,7 @@ namespace asp_net_core_web_app_authentication_authorisation.Areas.Identity.Pages
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
+            [Required(ErrorMessage = "Confrim password is required")]
             [DataType(DataType.Password)]
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
@@ -129,11 +180,11 @@ namespace asp_net_core_web_app_authentication_authorisation.Areas.Identity.Pages
                 {
                     FirstName = Input.FirstName,
                     LastName = Input.LastName,
-                    UserName = Input.Email,
+                    UserName = Input.UserName,
                     Email = Input.Email,
                     PhoneNumber = Input.PhoneNumber,
-                    Address = Input.Address,
-                    CreatedAt = DateTime.Now
+                    PassportNumber = Input.PassportNumber,
+                    CustomerNumber = Guid.NewGuid()
                 };
 
                 var result = await _userManager.CreateAsync(user, Input.Password);
