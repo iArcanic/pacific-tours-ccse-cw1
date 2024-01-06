@@ -83,6 +83,9 @@ namespace asp_net_core_web_app_authentication_authorisation.Areas.Identity.Pages
             [Required]
             public string Address { get; set; }
 
+            [Required]
+            public string PassportNumber { get; set; }
+
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
@@ -133,7 +136,8 @@ namespace asp_net_core_web_app_authentication_authorisation.Areas.Identity.Pages
                     Email = Input.Email,
                     PhoneNumber = Input.PhoneNumber,
                     Address = Input.Address,
-                    CreatedAt = DateTime.Now
+                    CreatedAt = DateTime.Now,
+                    PassportNumber = Input.PassportNumber
                 };
 
                 var result = await _userManager.CreateAsync(user, Input.Password);
