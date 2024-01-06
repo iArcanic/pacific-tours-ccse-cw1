@@ -7,6 +7,7 @@ namespace asp_net_core_web_app_authentication_authorisation.Services
     public class ApplicationDbContext: IdentityDbContext<ApplicationUser>
     {
         public DbSet<Hotel> Hotels { get; set; }
+        public DbSet<Tour> Tours { get; set; }
         public ApplicationDbContext(DbContextOptions options) : base(options)
         {
 
