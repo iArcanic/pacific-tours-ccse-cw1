@@ -1,0 +1,58 @@
+﻿@page
+@model BookingsModel
+@{
+    ViewData["Title"] = "Bookings";
+}
+
+<h2>Bookings</h2>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Search Hotels</h3>
+            <div class="form-group">
+                <label for="check-in-date">Select Check-in Date:</label>
+                <input type="date" id="check-in-date" />
+            </div>
+            <div class="form-group">
+                <label for="check-out-date">Select Check-out Date:</label>
+                <input type="date" id="check-out-date" />
+            </div>
+            <div class="form-group">
+                <label for="room-type">Select Room Type:</label>
+                <select id="room-type">
+                    <option value="single">Single</option>
+                    <option value="double">Double</option>
+                    <option value="family">Family Suite</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Search Tours</h3>
+            <div class="form-group">
+                <label for="tour-start-date">Select Tour Start Date:</label>
+                <input type="date" id="tour-start-date" />
+            </div>
+            <div class="form-group">
+                <label for="tour-end-date">Select Tour End Date:</label>
+                <input type="date" id="tour-end-date" />
+            </div>
+            <div class="form-group">
+                <label for="tour-location">Select Tour Location:</label>
+                <select id="tour-location">
+
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6">
+            <button type="submit" class="btn btn-primary">Book</button>
+        </div>
+    </div>
+</div>
