@@ -27,24 +27,27 @@
             <div class="row mb-3">
                 <label class="col-sm-4 col-form-label">Email</label>
                 <div class="col-sm-8">
-                    <input class="form-control" asp-for="Input.Email" />
+                    <input class="form-control" asp-for="Input.Email"/>
                     <span asp-validation-for="Input.Email" class="text-danger"></span>
                 </div>
             </div>
             <div class="row mb-3">
-                <label class="col-sm-4 col-form-label">Confirm email</label>
+                <label class="col-sm-4 col-form-label">Phone number</label>
                 <div class="col-sm-8">
-                    <input class="form-control" asp-for="Input.ConfirmEmail" />
-                    <span asp-validation-for="Input.ConfirmEmail" class="text-danger"></span>
+                    <input class="form-control" asp-for="Input.PhoneNumber" />
+                    <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
                 </div>
             </div>
             <div class="row mb-3">
-                <label class="col-sm-4 col-form-label">Username</label>
+                <label class="col-sm-4 col-form-label">Address</label>
                 <div class="col-sm-8">
-                    <input class="form-control" asp-for="Input.UserName" />
-                    <span asp-validation-for="Input.UserName" class="text-danger"></span>
+                    <input class="form-control" asp-for="Input.Address" />
+                    <span asp-validation-for="Input.Address" class="text-danger"></span>
                 </div>
             </div>
+            <h2 class="text-center p-3">Register.</h2>
+            <hr />
+            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
             <div class="row mb-3">
                 <label class="col-sm-4 col-form-label">Password</label>
                 <div class="col-sm-8">
@@ -60,35 +63,7 @@
                 </div>
             </div>
             <div class="row mb-3">
-                <label class="col-sm-4 col-form-label">Phone number</label>
-                <div class="col-sm-8">
-                    <input class="form-control" asp-for="Input.PhoneNumber" />
-                    <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
-                </div>
-            </div>
-            <div class="row mb-3">
-                <label class="col-sm-4 col-form-label">Confirm phone number</label>
-                <div class="col-sm-8">
-                    <input class="form-control" asp-for="Input.ConfirmPhoneNumber" />
-                    <span asp-validation-for="Input.ConfirmPhoneNumber" class="text-danger"></span>
-                </div>
-            </div>
-            <div class="row mb-3">
-                <label class="col-sm-4 col-form-label">Passport number</label>
-                <div class="col-sm-8">
-                    <input class="form-control" asp-for="Input.PassportNumber" />
-                    <span asp-validation-for="Input.PassportNumber" class="text-danger"></span>
-                </div>
-            </div>
-            <div class="row mb-3">
-                <label class="col-sm-4 col-form-label">Confirm passport number</label>
-                <div class="col-sm-8">
-                    <input class="form-control" asp-for="Input.ConfirmPassportNumber" />
-                    <span asp-validation-for="Input.ConfirmPassportNumber" class="text-danger"></span>
-                </div>
-            </div>
-            <div class="row mb-3">
-                <div class="colcol-sm-4 d-grid">
+                <div class="offset-sm-4 col-sm-4 d-grid">
                     <button type="submit" class="btn btn-primary">Register</button>
                 </div>
                 <div class="colcol-sm-4 d-grid">
