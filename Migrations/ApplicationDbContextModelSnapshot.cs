@@ -8,7 +8,7 @@ using asp_net_core_web_app_authentication_authorisation.Services;
 
 #nullable disable
 
-namespace aspnetcorewebappauthenticationauthorisation.Migrations
+namespace asp_net_core_web_app_authentication_authorisation.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
@@ -252,12 +252,6 @@ namespace aspnetcorewebappauthenticationauthorisation.Migrations
                     b.Property<int>("AvailableSpaces")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("CheckInDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("CheckOutDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<decimal>("Cost")
                         .HasColumnType("decimal(18,2)");
 
@@ -274,6 +268,30 @@ namespace aspnetcorewebappauthenticationauthorisation.Migrations
                     b.ToTable("Hotels");
                 });
 
+            modelBuilder.Entity("asp_net_core_web_app_authentication_authorisation.Models.Package", b =>
+                {
+                    b.Property<Guid>("PackageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Cost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("HotelId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TourId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("PackageId");
+
+                    b.HasIndex("HotelId");
+
+                    b.HasIndex("TourId");
+
+                    b.ToTable("Packages");
+                });
+
             modelBuilder.Entity("asp_net_core_web_app_authentication_authorisation.Models.Tour", b =>
                 {
                     b.Property<Guid>("TourId")
@@ -286,19 +304,12 @@ namespace aspnetcorewebappauthenticationauthorisation.Migrations
                     b.Property<decimal>("Cost")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Location")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("DurationInDays")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
 
                     b.HasKey("TourId");
 
@@ -354,6 +365,25 @@ namespace aspnetcorewebappauthenticationauthorisation.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("asp_net_core_web_app_authentication_authorisation.Models.Package", b =>
+                {
+                    b.HasOne("asp_net_core_web_app_authentication_authorisation.Models.Hotel", "Hotel")
+                        .WithMany()
+                        .HasForeignKey("HotelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("asp_net_core_web_app_authentication_authorisation.Models.Tour", "Tour")
+                        .WithMany()
+                        .HasForeignKey("TourId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Hotel");
+
+                    b.Navigation("Tour");
                 });
 #pragma warning restore 612, 618
         }

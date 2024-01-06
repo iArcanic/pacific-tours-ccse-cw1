@@ -9,18 +9,18 @@ using asp_net_core_web_app_authentication_authorisation.Services;
 
 #nullable disable
 
-namespace aspnetcorewebappauthenticationauthorisation.Migrations
+namespace asp_net_core_web_app_authentication_authorisation.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231211201207_FirstMigration")]
-    partial class FirstMigration
+    [Migration("20240106155906_AddPackageModelAddModelBuilderConfig")]
+    partial class AddPackageModelAddModelBuilderConfig
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.0")
+                .HasAnnotation("ProductVersion", "7.0.12")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -105,10 +105,12 @@ namespace aspnetcorewebappauthenticationauthorisation.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("ProviderKey")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("nvarchar(max)");
@@ -145,10 +147,12 @@ namespace aspnetcorewebappauthenticationauthorisation.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Value")
                         .HasColumnType("nvarchar(max)");
@@ -206,6 +210,10 @@ namespace aspnetcorewebappauthenticationauthorisation.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
+                    b.Property<string>("PassportNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
 
@@ -236,6 +244,79 @@ namespace aspnetcorewebappauthenticationauthorisation.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("asp_net_core_web_app_authentication_authorisation.Models.Hotel", b =>
+                {
+                    b.Property<Guid>("HotelId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("AvailableSpaces")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Cost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RoomType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("HotelId");
+
+                    b.ToTable("Hotels");
+                });
+
+            modelBuilder.Entity("asp_net_core_web_app_authentication_authorisation.Models.Package", b =>
+                {
+                    b.Property<Guid>("PackageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Cost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("HotelId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TourId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("PackageId");
+
+                    b.HasIndex("HotelId");
+
+                    b.HasIndex("TourId");
+
+                    b.ToTable("Packages");
+                });
+
+            modelBuilder.Entity("asp_net_core_web_app_authentication_authorisation.Models.Tour", b =>
+                {
+                    b.Property<Guid>("TourId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("AvailableSpaces")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Cost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("DurationInDays")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("TourId");
+
+                    b.ToTable("Tours");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -287,6 +368,25 @@ namespace aspnetcorewebappauthenticationauthorisation.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("asp_net_core_web_app_authentication_authorisation.Models.Package", b =>
+                {
+                    b.HasOne("asp_net_core_web_app_authentication_authorisation.Models.Hotel", "Hotel")
+                        .WithMany()
+                        .HasForeignKey("HotelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("asp_net_core_web_app_authentication_authorisation.Models.Tour", "Tour")
+                        .WithMany()
+                        .HasForeignKey("TourId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Hotel");
+
+                    b.Navigation("Tour");
                 });
 #pragma warning restore 612, 618
         }

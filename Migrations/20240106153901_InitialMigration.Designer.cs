@@ -9,11 +9,11 @@ using asp_net_core_web_app_authentication_authorisation.Services;
 
 #nullable disable
 
-namespace aspnetcorewebappauthenticationauthorisation.Migrations
+namespace asp_net_core_web_app_authentication_authorisation.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240105210617_RemoveIdentityRoles")]
-    partial class RemoveIdentityRoles
+    [Migration("20240106153901_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -210,6 +210,10 @@ namespace aspnetcorewebappauthenticationauthorisation.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
+                    b.Property<string>("PassportNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
 
@@ -240,6 +244,31 @@ namespace aspnetcorewebappauthenticationauthorisation.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("asp_net_core_web_app_authentication_authorisation.Models.Hotel", b =>
+                {
+                    b.Property<Guid>("HotelId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("AvailableSpaces")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Cost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RoomType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("HotelId");
+
+                    b.ToTable("Hotels");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

@@ -4,8 +4,6 @@
     {
         public Guid HotelId { get; set; }
         public string Name { get; set; }
-        public DateTime CheckInDate { get; set; }
-        public DateTime CheckOutDate { get; set; }
         public string RoomType { get; set; }
         public decimal Cost { get; set; }
         public int AvailableSpaces { get; set; }

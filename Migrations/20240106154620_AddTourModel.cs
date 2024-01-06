@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace aspnetcorewebappauthenticationauthorisation.Migrations
+namespace asp_net_core_web_app_authentication_authorisation.Migrations
 {
     /// <inheritdoc />
     public partial class AddTourModel : Migration
@@ -17,9 +17,7 @@ namespace aspnetcorewebappauthenticationauthorisation.Migrations
                 {
                     TourId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Location = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DurationInDays = table.Column<int>(type: "int", nullable: false),
                     Cost = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     AvailableSpaces = table.Column<int>(type: "int", nullable: false)
                 },

@@ -9,11 +9,11 @@ using asp_net_core_web_app_authentication_authorisation.Services;
 
 #nullable disable
 
-namespace aspnetcorewebappauthenticationauthorisation.Migrations
+namespace asp_net_core_web_app_authentication_authorisation.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240106121600_AddPassportNumber")]
-    partial class AddPassportNumber
+    [Migration("20240106154620_AddTourModel")]
+    partial class AddTourModel
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -244,6 +244,55 @@ namespace aspnetcorewebappauthenticationauthorisation.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("asp_net_core_web_app_authentication_authorisation.Models.Hotel", b =>
+                {
+                    b.Property<Guid>("HotelId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("AvailableSpaces")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Cost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RoomType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("HotelId");
+
+                    b.ToTable("Hotels");
+                });
+
+            modelBuilder.Entity("asp_net_core_web_app_authentication_authorisation.Models.Tour", b =>
+                {
+                    b.Property<Guid>("TourId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("AvailableSpaces")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Cost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("DurationInDays")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("TourId");
+
+                    b.ToTable("Tours");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
