@@ -10,22 +10,26 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
     public class BookingsModel : PageModel
     {
         [BindProperty]
-        public InputModel Input { get; set; }
+        public HotelSearchModel HotelSearch { get; set; }
+
+        [BindProperty]
+        public TourSearchModel TourSearch { get; set; }
+
+        [BindProperty]
+        public PackageSearchModel PackageSearch { get; set; }
 
         private readonly ApplicationDbContext _dbContext;
 
         public BookingsModel(ApplicationDbContext dbContext)
         { 
-            Input = new InputModel();
+            HotelSearch = new HotelSearchModel();
+            TourSearch = new TourSearchModel();
+            PackageSearch = new PackageSearchModel();
             _dbContext = dbContext;
         }
 
-        public class InputModel
+        public class HotelSearchModel
         {
-            public string HotelActiveTab { get; set; } = "HotelsTabSelected";
-            public string TourActiveTab { get; set; } = "ToursTabSelected";
-            public string PackageActiveTab { get; set; } = "PackagesTabSelected";
-
             [Required(ErrorMessage = "Please select a check-in date")]
             [DataType(DataType.DateTime)]
             [Display(Name = "Check in date")]
@@ -61,7 +65,10 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             };
 
             public List<String> AvailableHotels { get; set; } = new List<string>();
+        }
 
+        public class TourSearchModel
+        {
             [Required(ErrorMessage = "Please select a tour start date")]
             [DataType(DataType.DateTime)]
             [Display(Name = "Tour start date")]
@@ -75,7 +82,12 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             public List<String> AvailableTours { get; set; } = new List<string>();
         }
 
-        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+        public class PackageSearchModel
+        {
+
+        }
+
+        public async Task<IActionResult> OnPostHotelSearchAsync(string returnUrl = null)
         {
             if (!ModelState.IsValid)
             {
@@ -83,21 +95,42 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             }
 
             var availableHotels = await _dbContext.HotelAvailabilities
-                .Where(ha => 
-                    ha.AvailableFrom <= Input.CheckInDate && ha.AvailableTo >= Input.CheckOutDate)
+                .Where(ha =>
+                    ha.AvailableFrom <= HotelSearch.CheckInDate && ha.AvailableTo >= HotelSearch.CheckOutDate)
                 .Select(ha => ha.Hotel.Name)
                 .Distinct()
                 .ToListAsync();
 
+            HotelSearch.AvailableHotels = availableHotels;
+
+            return Page();
+        }
+
+        public async Task<IActionResult> OnPostTourSearchAsync(string returnUrl = null)
+        {
+            if (!ModelState.IsValid)
+            {
+                return Page();
+            }
+
             var availableTours = await _dbContext.TourAvailabilities
                 .Where(ta =>
-                    ta.AvailableFrom <= Input.TourStartDate && ta.AvailableTo >= Input.TourEndDate)
+                    ta.AvailableFrom <= TourSearch.TourStartDate && ta.AvailableTo >= TourSearch.TourEndDate)
                 .Select(ta => ta.Tour.Name)
                 .Distinct()
                 .ToListAsync();
 
-            Input.AvailableHotels = availableHotels;
-            Input.AvailableTours = availableTours;
+            TourSearch.AvailableTours = availableTours;
+
+            return Page();
+        }
+
+        public async Task<IActionResult> OnPostPackageBookAsync(string returnUrl = null)
+        {
+            if (!ModelState.IsValid)
+            {
+                return Page();
+            }
 
             return Page();
         }

@@ -44,34 +44,34 @@
     }
 </style>
 <div class="tab">
-    <button class="tablinks" onclick="openTab(event, 'Hotels')" id="@Model.Input.HotelActiveTab">Hotels</button>
-    <button class="tablinks" onclick="openTab(event, 'Tours')" id="@Model.Input.TourActiveTab">Tours</button>
-    <button class="tablinks" onclick="openTab(event, 'Packages')" id="@Model.Input.PackageActiveTab">Packages</button>
+    <button class="tablinks" onclick="openTab(event, 'Hotels')" id="HotelTab">Hotels</button>
+    <button class="tablinks" onclick="openTab(event, 'Tours')" id="TourTab">Tours</button>
+    <button class="tablinks" onclick="openTab(event, 'Packages')" id="PackageTab">Packages</button>
 </div>
 <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-<form id="hotelSearchForm" method="post">
+<form id="hotelSearchForm" method="post" asp-page-handler="HotelSearch">
     <div id="Hotels" class="tabcontent">
         <h3>Search Hotels</h3>
         <hr />
         <div class="form-group">
-            <label asp-for="Input.CheckInDate">Select check-in date:</label>
-            <input asp-for="Input.CheckInDate" type="date" class="form-control" />
-            <span asp-validation-for="Input.CheckInDate" class="text-danger"></span>
+            <label asp-for="HotelSearch.CheckInDate">Select check-in date:</label>
+            <input asp-for="HotelSearch.CheckInDate" type="date" class="form-control" />
+            <span asp-validation-for="HotelSearch.CheckInDate" class="text-danger"></span>
         </div>
         <div class="form-group">
-            <label asp-for="Input.CheckInDate">Select check-out date:</label>
-            <input asp-for="Input.CheckOutDate" type="date" class="form-control" />
-            <span asp-validation-for="Input.CheckOutDate" class="text-danger"></span>
+            <label asp-for="HotelSearch.CheckInDate">Select check-out date:</label>
+            <input asp-for="HotelSearch.CheckOutDate" type="date" class="form-control" />
+            <span asp-validation-for="HotelSearch.CheckOutDate" class="text-danger"></span>
         </div>
         <div class="form-group">
-            <label asp-for="Input.RoomType">Select room type:</label>
-            <select asp-for="Input.RoomType" asp-items="@Model.Input.RoomTypes" class="form-control"></select>
-            <span asp-validation-for="Input.RoomType" class="text-danger"></span>
+            <label asp-for="HotelSearch.RoomType">Select room type:</label>
+            <select asp-for="HotelSearch.RoomType" asp-items="@Model.HotelSearch.RoomTypes" class="form-control"></select>
+            <span asp-validation-for="HotelSearch.RoomType" class="text-danger"></span>
         </div>
         <div class="form-group">
             <label for="hotels">Hotels:</label>
             <select id="hotels">
-                @foreach (var hotel in Model.Input.AvailableHotels)
+                @foreach (var hotel in Model.HotelSearch.AvailableHotels)
                 {
                     <option value="@hotel">@hotel</option>
                 }
@@ -80,32 +80,30 @@
         <div class="form-group">
             <button type="submit" class="btn btn-primary">Search</button>
         </div>
+        <div class="form-group">
+            <button class="btn btn-primary">Book Hotel</button>
+        </div>
     </div>
 </form>
 <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-<form id="tourSearchForm" method="post">
+<form id="tourSearchForm" method="post" asp-page-handler="TourSearch">
     <div id="Tours" class="tabcontent">
         <h3>Search Tours</h3>
         <hr />
         <div class="form-group">
-            <label asp-for="Input.TourStartDate">Select Tour Start Date:</label>
-            <input asp-for="Input.TourStartDate" type="date" class="form-control" />
-            <span asp-validation-for="Input.TourEndDate" class="text-danger"></span>
+            <label asp-for="TourSearch.TourStartDate">Select Tour Start Date:</label>
+            <input asp-for="TourSearch.TourStartDate" type="date" class="form-control" />
+            <span asp-validation-for="TourSearch.TourEndDate" class="text-danger"></span>
         </div>
         <div class="form-group">
-            <label asp-for="Input.TourEndDate">Select Tour End Date:</label>
-            <input asp-for="Input.TourEndDate" type="date" class="form-control" />
-            <span asp-validation-for="Input.TourEndDate" class="text-danger"></span>
+            <label asp-for="TourSearch.TourEndDate">Select Tour End Date:</label>
+            <input asp-for="TourSearch.TourEndDate" type="date" class="form-control" />
+            <span asp-validation-for="TourSearch.TourEndDate" class="text-danger"></span>
         </div>
-        @*     <div class="form-group">
-        <label for="tour-location">Select Tour Location:</label>
-        <select id="tour-location">
-        </select>
-        </div> *@
         <div class="form-group">
             <label for="tours">Tours:</label>
             <select id="tours">
-                @foreach (var tour in Model.Input.AvailableTours)
+                @foreach (var tour in Model.TourSearch.AvailableTours)
                 {
                     <option value="@tour">@tour</option>
                 }
@@ -114,11 +112,19 @@
         <div class="form-group">
             <button type="submit" class="btn btn-primary">Search</button>
         </div>
+        <div class="form-group">
+            <button class="btn btn-primary">Book Tour</button>
+        </div>
     </div>
-    <div id="Packages" class="tabcontent">
-        <h3>Packages</h3>
-        <p>Packages and any relevant discounts will be displayed here based on your selected hotel and tour.</p>
+</form>
+<form id="tourSearchForm" method="post" asp-page-handler="PackageSearch">
+<div id="Packages" class="tabcontent">
+    <h3>Packages</h3>
+    <p>Packages and any relevant discounts will be displayed here based on your selected hotel and tour.</p>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Book Package</button>
     </div>
+</div>
 </form>
 <script>
     function openTab(evt, tabName) {
@@ -135,16 +141,20 @@
         evt.currentTarget.className += " active";
     }
 
-    if (document.getElementById("HotelsTabSelected") != null) {
-        document.getElementById("HotelsTabSelected").click();
-    }
+    let params = (new URL(document.location)).searchParams;
+    let handler = params.get("handler");
 
-    if (document.getElementById("ToursTabSelected") != null) {
-        document.getElementById("Tours").click();
+    switch (handler) {
+        case "HotelSearch":
+            document.getElementById("HotelTab").click();
+            break;
+        case "TourSearch":
+            document.getElementById("TourTab").click();
+            break;
+        case "PackageSearch":
+            document.getElementById("PackageTab").click();
+            break;
+        default:
+            break;
     }
-
-    if (document.getElementById("PackageTabSelected") != null) {
-        document.getElementById("Package").click();
-    }
-
 </script>
