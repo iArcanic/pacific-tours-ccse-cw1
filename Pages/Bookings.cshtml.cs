@@ -22,6 +22,10 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
 
         public class InputModel
         {
+            public string HotelActiveTab { get; set; } = "HotelsTabSelected";
+            public string TourActiveTab { get; set; } = "ToursTabSelected";
+            public string PackageActiveTab { get; set; } = "PackagesTabSelected";
+
             [Required(ErrorMessage = "Please select a check-in date")]
             [DataType(DataType.DateTime)]
             [Display(Name = "Check in date")]
@@ -35,11 +39,7 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             [Required(ErrorMessage = "Please select a room type")]
             [DataType(DataType.Text)]
             [Display(Name = "Room type")]
-            public string RoomType { get; set; }
-
-            public string HotelActiveTab { get; set; } = "HotelsTabSelected";
-            public string TourActiveTab { get; set; } = "ToursTabSelected";
-            public string PackageActiveTab { get; set; } = "PackagesTabSelected";
+            public string RoomType { get; set; } = "Single";
 
             public List<SelectListItem> RoomTypes { get; set; } = new List<SelectListItem>
             {
@@ -61,6 +61,18 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             };
 
             public List<String> AvailableHotels { get; set; } = new List<string>();
+
+            [Required(ErrorMessage = "Please select a tour start date")]
+            [DataType(DataType.DateTime)]
+            [Display(Name = "Tour start date")]
+            public DateTime TourStartDate { get; set; }
+
+            [Required(ErrorMessage = "Please select a tour end date")]
+            [DataType(DataType.DateTime)]
+            [Display(Name = "Tour end date")]
+            public DateTime TourEndDate { get; set; }
+
+            public List<String> AvailableTours { get; set; } = new List<string>();
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
@@ -77,7 +89,15 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
                 .Distinct()
                 .ToListAsync();
 
+            var availableTours = await _dbContext.TourAvailabilities
+                .Where(ta =>
+                    ta.AvailableFrom <= Input.TourStartDate && ta.AvailableTo >= Input.TourEndDate)
+                .Select(ta => ta.Tour.Name)
+                .Distinct()
+                .ToListAsync();
+
             Input.AvailableHotels = availableHotels;
+            Input.AvailableTours = availableTours;
 
             return Page();
         }
