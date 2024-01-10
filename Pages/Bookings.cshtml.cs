@@ -16,7 +16,7 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
         public TourSearchModel TourSearch { get; set; }
 
         [BindProperty]
-        public PackageSearchModel PackageSearch { get; set; }
+        public PackageBookModel PackageBook { get; set; }
 
         private readonly ApplicationDbContext _dbContext;
 
@@ -24,7 +24,7 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
         { 
             HotelSearch = new HotelSearchModel();
             TourSearch = new TourSearchModel();
-            PackageSearch = new PackageSearchModel();
+            PackageBook = new PackageBookModel();
             _dbContext = dbContext;
         }
 
@@ -82,9 +82,55 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             public List<String> AvailableTours { get; set; } = new List<string>();
         }
 
-        public class PackageSearchModel
+        public class PackageBookModel
         {
+            [Required(ErrorMessage = "Please select a check-in date")]
+            [DataType(DataType.DateTime)]
+            [Display(Name = "Check in date")]
+            public DateTime CheckInDate { get; set; }
 
+            [Required(ErrorMessage = "Please select a check-out date")]
+            [DataType(DataType.DateTime)]
+            [Display(Name = "Check out date")]
+            public DateTime CheckOutDate { get; set; }
+
+            [Required(ErrorMessage = "Please select a room type")]
+            [DataType(DataType.Text)]
+            [Display(Name = "Room type")]
+            public string RoomType { get; set; } = "Single";
+
+            public List<SelectListItem> RoomTypes { get; set; } = new List<SelectListItem>
+            {
+                new SelectListItem
+                {
+                    Value = "single",
+                    Text = "Single"
+                },
+                new SelectListItem
+                {
+                    Value = "double",
+                    Text = "Double"
+                },
+                new SelectListItem
+                {
+                    Value = "family suite",
+                    Text = "Family Suite"
+                }
+            };
+
+            public List<String> AvailableHotels { get; set; } = new List<string>();
+
+            [Required(ErrorMessage = "Please select a tour start date")]
+            [DataType(DataType.DateTime)]
+            [Display(Name = "Tour start date")]
+            public DateTime TourStartDate { get; set; }
+
+            [Required(ErrorMessage = "Please select a tour end date")]
+            [DataType(DataType.DateTime)]
+            [Display(Name = "Tour end date")]
+            public DateTime TourEndDate { get; set; }
+
+            public List<String> AvailableTours { get; set; } = new List<string>();
         }
 
         public async Task<IActionResult> OnPostHotelSearchAsync(string returnUrl = null)
@@ -131,6 +177,24 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             {
                 return Page();
             }
+
+            var availableHotels = await _dbContext.HotelAvailabilities
+                .Where(ha =>
+                    ha.AvailableFrom <= PackageBook.CheckInDate && ha.AvailableTo >= PackageBook.CheckOutDate)
+                .Select(ha => ha.Hotel.Name)
+                .Distinct()
+                .ToListAsync();
+
+            PackageBook.AvailableHotels = availableHotels;
+
+            var availableTours = await _dbContext.TourAvailabilities
+                .Where(ta =>
+                    ta.AvailableFrom <= PackageBook.TourStartDate && ta.AvailableTo >= PackageBook.TourEndDate)
+                .Select(ta => ta.Tour.Name)
+                .Distinct()
+                .ToListAsync();
+
+            PackageBook.AvailableTours = availableTours;
 
             return Page();
         }
