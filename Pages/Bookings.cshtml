@@ -76,12 +76,13 @@
                     <option value="@hotel.HotelId">@hotel.Name</option>
                 }
             </select>
+            <p id="hotelsDropdownErrorMessage" class="text-danger"></p>
         </div>
         <div class="form-group">
             <input type="submit" name="command" class="btn btn-primary" value="Search" />
         </div>
         <div class="form-group">
-            <input type="submit" class="btn btn-primary" name="command" value="Book" />
+            <input class="btn btn-primary" name="command" value="Book" onclick="submitHotelSearchForm()" />
         </div>
     </div>
 </form>
@@ -209,5 +210,21 @@
             break;
         default:
             break;
+    }
+
+    function submitHotelSearchForm() {
+        var dropdownErrorMessage = document.getElementById("hotelsDropdownErrorMessage");
+        dropdownErrorMessage.innerHTML = "";
+
+        var form = document.getElementById("hotelSearchForm");
+        var selectBoxValue = form.elements["hotelsDropdown"].value;
+
+        if (!selectBoxValue) {
+            dropdownErrorMessage.innerHTML = "Please select a hotel for booking";
+            return;
+        }
+
+        form.elements["command"].value = "Book";
+        form.submit();
     }
 </script>
