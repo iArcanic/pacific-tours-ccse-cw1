@@ -1,9 +1,12 @@
+using asp_net_core_web_app_authentication_authorisation.Models;
 using asp_net_core_web_app_authentication_authorisation.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.Media;
 
 namespace asp_net_core_web_app_authentication_authorisation.Pages
 {
@@ -20,12 +23,15 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
 
         private readonly ApplicationDbContext _dbContext;
 
-        public BookingsModel(ApplicationDbContext dbContext)
+        private readonly UserManager<ApplicationUser> _userManager;
+
+        public BookingsModel(ApplicationDbContext dbContext, UserManager<ApplicationUser> userManager)
         { 
             HotelSearch = new HotelSearchModel();
             TourSearch = new TourSearchModel();
             PackageBook = new PackageBookModel();
             _dbContext = dbContext;
+            _userManager = userManager;
         }
 
         public class HotelSearchModel
@@ -64,7 +70,7 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
                 }
             };
 
-            public List<String> AvailableHotels { get; set; } = new List<string>();
+            public List<Hotel> HotelsList { get; set; } = new List<Hotel>();
         }
 
         public class TourSearchModel
@@ -133,23 +139,50 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             public List<String> AvailableTours { get; set; } = new List<string>();
         }
 
-        public async Task<IActionResult> OnPostHotelSearchAsync(string returnUrl = null)
+        public async Task<IActionResult> OnPostHotelSearchAsync(string command, string returnUrl = null)
         {
             if (!ModelState.IsValid)
             {
                 return Page();
             }
 
-            var availableHotels = await _dbContext.HotelAvailabilities
-                .Where(ha =>
-                    ha.AvailableFrom <= HotelSearch.CheckInDate && ha.AvailableTo >= HotelSearch.CheckOutDate)
-                .Select(ha => ha.Hotel.Name)
-                .Distinct()
-                .ToListAsync();
+            if (command == "Search")
+            {
+                var availableHotels = await _dbContext.HotelAvailabilities
+                    .Where(ha =>
+                        ha.AvailableFrom <= HotelSearch.CheckInDate && ha.AvailableTo >= HotelSearch.CheckOutDate)
+                    .Select(ha => ha.Hotel)
+                    .Distinct()
+                    .ToListAsync();
 
-            HotelSearch.AvailableHotels = availableHotels;
+                HotelSearch.HotelsList = availableHotels;
 
-            return Page();
+                return Page();
+            }
+            else
+            {
+                var SelectedHotelId = new Guid(Request.Form["hotels"]);
+
+                var currentUser = await _userManager.GetUserAsync(User);
+
+                Hotel selectedHotel = await _dbContext.Hotels.FindAsync(SelectedHotelId);
+
+                var hotelBooking = new HotelBooking
+                {
+                    HotelBookingId = new Guid(),
+                    HotelId = SelectedHotelId,
+                    UserId = currentUser.Id,
+                    CheckInDate = HotelSearch.CheckInDate,
+                    CheckOutDate = HotelSearch.CheckOutDate,
+                    Hotel = selectedHotel,
+                    ApplicationUser = currentUser
+                };
+
+                _dbContext.HotelBookings.Add(hotelBooking);
+                await _dbContext.SaveChangesAsync();
+
+                return Page();
+            }
         }
 
         public async Task<IActionResult> OnPostTourSearchAsync(string returnUrl = null)

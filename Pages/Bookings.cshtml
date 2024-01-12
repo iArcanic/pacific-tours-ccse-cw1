@@ -70,18 +70,18 @@
         </div>
         <div class="form-group">
             <label for="hotels">Hotels:</label>
-            <select id="hotels">
-                @foreach (var hotel in Model.HotelSearch.AvailableHotels)
+            <select name="hotels" id="hotelsDropdown">
+                @foreach (var hotel in Model.HotelSearch.HotelsList)
                 {
-                    <option value="@hotel">@hotel</option>
+                    <option value="@hotel.HotelId">@hotel.Name</option>
                 }
             </select>
         </div>
         <div class="form-group">
-            <button type="submit" class="btn btn-primary">Search</button>
+            <input type="submit" name="command" class="btn btn-primary" value="Search" />
         </div>
         <div class="form-group">
-            <button class="btn btn-primary">Book Hotel</button>
+            <input type="submit" class="btn btn-primary" name="command" value="Book" />
         </div>
     </div>
 </form>
