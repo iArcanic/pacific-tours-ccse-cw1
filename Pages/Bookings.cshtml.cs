@@ -126,7 +126,7 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
                 }
             };
 
-            public List<String> AvailableHotels { get; set; } = new List<string>();
+            public List<Hotel> HotelsList { get; set; } = new List<Hotel>();
 
             [Required(ErrorMessage = "Please select a tour start date")]
             [DataType(DataType.DateTime)]
@@ -138,7 +138,7 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             [Display(Name = "Tour end date")]
             public DateTime TourEndDate { get; set; }
 
-            public List<String> AvailableTours { get; set; } = new List<string>();
+            public List<Tour> ToursList { get; set; } = new List<Tour>();
         }
 
         public async Task<IActionResult> OnPostHotelSearchAsync(string command, string returnUrl = null)
@@ -229,32 +229,66 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             }
         }
 
-        public async Task<IActionResult> OnPostPackageBookAsync(string returnUrl = null)
+        public async Task<IActionResult> OnPostPackageBookAsync(string command, string returnUrl = null)
         {
             if (!ModelState.IsValid)
             {
                 return Page();
             }
 
-            var availableHotels = await _dbContext.HotelAvailabilities
+            if (command == "Search")
+            {
+                var availableHotels = await _dbContext.HotelAvailabilities
                 .Where(ha =>
                     ha.AvailableFrom <= PackageBook.CheckInDate && ha.AvailableTo >= PackageBook.CheckOutDate)
-                .Select(ha => ha.Hotel.Name)
+                .Select(ha => ha.Hotel)
                 .Distinct()
                 .ToListAsync();
 
-            PackageBook.AvailableHotels = availableHotels;
+                PackageBook.HotelsList = availableHotels;
 
-            var availableTours = await _dbContext.TourAvailabilities
-                .Where(ta =>
-                    ta.AvailableFrom <= PackageBook.TourStartDate && ta.AvailableTo >= PackageBook.TourEndDate)
-                .Select(ta => ta.Tour.Name)
-                .Distinct()
-                .ToListAsync();
+                var availableTours = await _dbContext.TourAvailabilities
+                    .Where(ta =>
+                        ta.AvailableFrom <= PackageBook.TourStartDate && ta.AvailableTo >= PackageBook.TourEndDate)
+                    .Select(ta => ta.Tour)
+                    .Distinct()
+                    .ToListAsync();
 
-            PackageBook.AvailableTours = availableTours;
+                PackageBook.ToursList = availableTours;
 
-            return Page();
+                return Page();
+            }
+            else
+            {
+                var CurrentUser = await _userManager.GetUserAsync(User);
+
+                var SelectedHotelId = new Guid(Request.Form["packageHotelsDropdown"]);
+                Hotel SelectedHotel = await _dbContext.Hotels.FindAsync(SelectedHotelId);
+
+                var SelectedTourId = new Guid(Request.Form["packageToursDropdown"]);
+                Tour SelectedTour = await _dbContext.Tours.FindAsync(SelectedTourId);
+
+                var packageBooking = new PackageBooking
+                {
+                    PackageBookingId = new Guid(),
+                    UserId = CurrentUser.Id,
+                    HotelId = SelectedHotelId,
+                    CheckInDate = PackageBook.CheckInDate,
+                    CheckOutDate = PackageBook.CheckOutDate,
+                    TourId = SelectedTourId,
+                    TourStartDate = PackageBook.TourStartDate,
+                    TourEndDate = PackageBook.TourEndDate,
+                    Hotel = SelectedHotel,
+                    Tour = SelectedTour,
+                    ApplicationUser = CurrentUser
+                };
+
+                _dbContext.PackageBookings.Add(packageBooking);
+
+                await _dbContext.SaveChangesAsync();
+
+                return Page();
+            }
         }
     }
 }

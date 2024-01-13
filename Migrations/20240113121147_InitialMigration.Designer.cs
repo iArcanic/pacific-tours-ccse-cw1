@@ -12,8 +12,8 @@ using asp_net_core_web_app_authentication_authorisation.Services;
 namespace asp_net_core_web_app_authentication_authorisation.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240106162150_AddHotelAvailabilityAddModelBuilderConfig")]
-    partial class AddHotelAvailabilityAddModelBuilderConfig
+    [Migration("20240113121147_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -293,28 +293,71 @@ namespace asp_net_core_web_app_authentication_authorisation.Migrations
                     b.ToTable("HotelAvailabilities");
                 });
 
-            modelBuilder.Entity("asp_net_core_web_app_authentication_authorisation.Models.Package", b =>
+            modelBuilder.Entity("asp_net_core_web_app_authentication_authorisation.Models.HotelBooking", b =>
                 {
-                    b.Property<Guid>("PackageId")
+                    b.Property<Guid>("HotelBookingId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal>("Cost")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<DateTime>("CheckInDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CheckOutDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<Guid>("HotelId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("HotelBookingId");
+
+                    b.HasIndex("HotelId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("HotelBookings");
+                });
+
+            modelBuilder.Entity("asp_net_core_web_app_authentication_authorisation.Models.PackageBooking", b =>
+                {
+                    b.Property<Guid>("PackageBookingId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CheckInDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CheckOutDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("HotelId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("TourEndDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<Guid>("TourId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("PackageId");
+                    b.Property<DateTime>("TourStartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("PackageBookingId");
 
                     b.HasIndex("HotelId");
 
                     b.HasIndex("TourId");
 
-                    b.ToTable("Packages");
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PackageBookings");
                 });
 
             modelBuilder.Entity("asp_net_core_web_app_authentication_authorisation.Models.Tour", b =>
@@ -339,6 +382,56 @@ namespace asp_net_core_web_app_authentication_authorisation.Migrations
                     b.HasKey("TourId");
 
                     b.ToTable("Tours");
+                });
+
+            modelBuilder.Entity("asp_net_core_web_app_authentication_authorisation.Models.TourAvailability", b =>
+                {
+                    b.Property<Guid>("TourAvailabilityId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("AvailableFrom")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("AvailableTo")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("TourId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("TourAvailabilityId");
+
+                    b.HasIndex("TourId");
+
+                    b.ToTable("TourAvailabilities");
+                });
+
+            modelBuilder.Entity("asp_net_core_web_app_authentication_authorisation.Models.TourBooking", b =>
+                {
+                    b.Property<Guid>("TourBookingId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("TourEndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("TourId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("TourStartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("TourBookingId");
+
+                    b.HasIndex("TourId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("TourBookings");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -403,7 +496,26 @@ namespace asp_net_core_web_app_authentication_authorisation.Migrations
                     b.Navigation("Hotel");
                 });
 
-            modelBuilder.Entity("asp_net_core_web_app_authentication_authorisation.Models.Package", b =>
+            modelBuilder.Entity("asp_net_core_web_app_authentication_authorisation.Models.HotelBooking", b =>
+                {
+                    b.HasOne("asp_net_core_web_app_authentication_authorisation.Models.Hotel", "Hotel")
+                        .WithMany()
+                        .HasForeignKey("HotelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("asp_net_core_web_app_authentication_authorisation.Models.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApplicationUser");
+
+                    b.Navigation("Hotel");
+                });
+
+            modelBuilder.Entity("asp_net_core_web_app_authentication_authorisation.Models.PackageBooking", b =>
                 {
                     b.HasOne("asp_net_core_web_app_authentication_authorisation.Models.Hotel", "Hotel")
                         .WithMany()
@@ -417,7 +529,45 @@ namespace asp_net_core_web_app_authentication_authorisation.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("asp_net_core_web_app_authentication_authorisation.Models.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApplicationUser");
+
                     b.Navigation("Hotel");
+
+                    b.Navigation("Tour");
+                });
+
+            modelBuilder.Entity("asp_net_core_web_app_authentication_authorisation.Models.TourAvailability", b =>
+                {
+                    b.HasOne("asp_net_core_web_app_authentication_authorisation.Models.Tour", "Tour")
+                        .WithMany()
+                        .HasForeignKey("TourId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tour");
+                });
+
+            modelBuilder.Entity("asp_net_core_web_app_authentication_authorisation.Models.TourBooking", b =>
+                {
+                    b.HasOne("asp_net_core_web_app_authentication_authorisation.Models.Tour", "Tour")
+                        .WithMany()
+                        .HasForeignKey("TourId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("asp_net_core_web_app_authentication_authorisation.Models.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApplicationUser");
 
                     b.Navigation("Tour");
                 });
