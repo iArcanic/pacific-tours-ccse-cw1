@@ -103,18 +103,19 @@
         </div>
         <div class="form-group">
             <label for="tours">Tours:</label>
-            <select id="tours">
-                @foreach (var tour in Model.TourSearch.AvailableTours)
+            <select name="tours" id="toursDropdown">
+                @foreach (var tour in Model.TourSearch.ToursList)
                 {
-                    <option value="@tour">@tour</option>
+                    <option value="@tour.TourId">@tour.Name</option>
                 }
             </select>
+            <p id="toursDropdownErrorMessage" class="text-danger"></p>
         </div>
         <div class="form-group">
-            <button type="submit" class="btn btn-primary">Search</button>
+            <input type="submit" name="command" class="btn btn-primary" value="Search"/>
         </div>
         <div class="form-group">
-            <button class="btn btn-primary">Book Tour</button>
+            <input class="btn btn-primary" name="command" value="Book" onclick="submitTourSearchForm()"/>
         </div>
     </div>
 </form>
@@ -221,6 +222,22 @@
 
         if (!selectBoxValue) {
             dropdownErrorMessage.innerHTML = "Please select a hotel for booking";
+            return;
+        }
+
+        form.elements["command"].value = "Book";
+        form.submit();
+    }
+
+    function submitTourSearchForm() { 
+        var dropdownErrorMessage = document.getElementById("toursDropdownErrorMessage");
+        dropdownErrorMessage.innerHTML = "";
+
+        var form = document.getElementById("tourSearchForm");
+        var selectBoxValue = form.elements["toursDropdown"].value;
+
+        if (!selectBoxValue) { 
+            dropdownErrorMessage.innerHTML = "Please select a tour for booking";
             return;
         }
 

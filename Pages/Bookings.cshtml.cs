@@ -86,6 +86,8 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             public DateTime TourEndDate { get; set; }
 
             public List<String> AvailableTours { get; set; } = new List<string>();
+
+            public List<Tour> ToursList { get; set; } = new List<Tour>();
         }
 
         public class PackageBookModel
@@ -162,20 +164,18 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             else
             {
                 var SelectedHotelId = new Guid(Request.Form["hotels"]);
-
-                var currentUser = await _userManager.GetUserAsync(User);
-
-                Hotel selectedHotel = await _dbContext.Hotels.FindAsync(SelectedHotelId);
+                var CurrentUser = await _userManager.GetUserAsync(User);
+                Hotel SelectedHotel = await _dbContext.Hotels.FindAsync(SelectedHotelId);
 
                 var hotelBooking = new HotelBooking
                 {
                     HotelBookingId = new Guid(),
                     HotelId = SelectedHotelId,
-                    UserId = currentUser.Id,
+                    UserId = CurrentUser.Id,
                     CheckInDate = HotelSearch.CheckInDate,
                     CheckOutDate = HotelSearch.CheckOutDate,
-                    Hotel = selectedHotel,
-                    ApplicationUser = currentUser
+                    Hotel = SelectedHotel,
+                    ApplicationUser = CurrentUser
                 };
 
                 _dbContext.HotelBookings.Add(hotelBooking);
@@ -185,23 +185,48 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             }
         }
 
-        public async Task<IActionResult> OnPostTourSearchAsync(string returnUrl = null)
+        public async Task<IActionResult> OnPostTourSearchAsync(string command, string returnUrl = null)
         {
             if (!ModelState.IsValid)
             {
                 return Page();
             }
 
-            var availableTours = await _dbContext.TourAvailabilities
+            if (command == "Search")
+            {
+                var availableTours = await _dbContext.TourAvailabilities
                 .Where(ta =>
                     ta.AvailableFrom <= TourSearch.TourStartDate && ta.AvailableTo >= TourSearch.TourEndDate)
-                .Select(ta => ta.Tour.Name)
+                .Select(ta => ta.Tour)
                 .Distinct()
                 .ToListAsync();
 
-            TourSearch.AvailableTours = availableTours;
+                TourSearch.ToursList = availableTours;
 
-            return Page();
+                return Page();
+            }
+            else
+            {
+                var SelectedTourId = new Guid(Request.Form["tours"]);
+                var CurrentUser = await _userManager.GetUserAsync(User);
+                Tour SelectedTour = await _dbContext.Tours.FindAsync(SelectedTourId);
+
+                var tourBooking = new TourBooking
+                {
+                    TourBookingId = new Guid(),
+                    TourId = SelectedTourId,
+                    UserId = CurrentUser.Id,
+                    TourStartDate = TourSearch.TourStartDate,
+                    TourEndDate = TourSearch.TourEndDate,
+                    Tour = SelectedTour,
+                    ApplicationUser = CurrentUser
+                };
+
+                _dbContext.TourBookings.Add(tourBooking);
+                await _dbContext.SaveChangesAsync();
+
+                return Page();
+            }
         }
 
         public async Task<IActionResult> OnPostPackageBookAsync(string returnUrl = null)
