@@ -47,6 +47,24 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
 
             ViewBookingsTable.TourBookingsList = tourBookingsList;
 
+            var packageBookingsList = await _dbContext.PackageBookings
+                .Where(pb => pb.UserId.Equals(CurrentUser.Id))
+                .Include(pb => pb.Hotel)
+                .Include(pb => pb.Tour)
+                .ToListAsync();
+
+            ViewBookingsTable.PackageBookingsList = packageBookingsList;
+
+            return Page();
+        }
+
+        public async Task<IActionResult> OnPostHotelTourTableAsync(string command, string returnUrl = null)
+        {
+            if (command == "Cancel")
+            {
+                var HotelBookingId = new Guid(Request.Form["hotelBookingId"]);
+            }
+
             return Page();
         }
     }

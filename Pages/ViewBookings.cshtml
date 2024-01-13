@@ -7,88 +7,115 @@
 <h2>Your bookings</h2>
 <p>Any bookings you have made will be displayed here</p>
 <hr />
-<h3>Hotels/Tours</h3>
-<div class="container">
-    <div class="row">
-        <div class="col-md-12">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Type</th>
-                        <th>Check-in/Start Date</th>
-                        <th>Check-out/End Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model.ViewBookingsTable.HotelBookingsList)
-                    {
+<form id="hotelTourTableForm" method="post" asp-page-handler="HotelTourTable">
+    <h3>Hotels/Tours</h3>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <table class="table">
+                    <thead>
                         <tr>
-                            <td>@item.Hotel.Name</td>
-                            <td>Hotel</td>
-                            <td>@item.CheckInDate.ToShortDateString()</td>
-                            <td>@item.CheckOutDate.ToShortDateString()</td>
-                            <td>
-                                <div class="btn-group" role="group">
-                                    <button type="button" class="btn btn-primary">Edit</button>
-                                </div>
-                            </td>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Check-in/Start Date</th>
+                            <th>Check-out/End Date</th>
                         </tr>
-                    }
-                    @foreach (var item in Model.ViewBookingsTable.TourBookingsList)
-                    {
-                        <tr>
-                            <td>@item.Tour.Name</td>
-                            <td>Tour</td>
-                            <td>@item.TourStartDate.ToShortDateString()</td>
-                            <td>@item.TourEndDate.ToShortDateString()</td>
-                            <td>
-                                <div class="btn-group" role="group">
-                                    <button type="button" class="btn btn-primary">Edit</button>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <input type="hidden" id="hotelBookingIdInput" name="hotelBookingId" value="">
+                        @foreach (var item in Model.ViewBookingsTable.HotelBookingsList)
+                        {
+                            <tr>
+                                <td>@item.Hotel.Name</td>
+                                <td>Hotel</td>
+                                <td>@item.CheckInDate.ToShortDateString()</td>
+                                <td>@item.CheckOutDate.ToShortDateString()</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-primary">Edit</button>
+                                    </div>
+                                    <div class="btn-group" role="group">
+                                        <input type="submit" class="btn btn-danger" name="command" value="Cancel" onclick="onCancelClick('@item.HotelBookingId')" />
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                        @foreach (var item in Model.ViewBookingsTable.TourBookingsList)
+                        {
+                            <tr>
+                                <td>@item.Tour.Name</td>
+                                <td>Tour</td>
+                                <td>@item.TourStartDate.ToShortDateString()</td>
+                                <td>@item.TourEndDate.ToShortDateString()</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-primary">Edit</button>
+                                    </div>
+                                    <div class="btn-group" role="group">
+                                        <input type="submit" name="command" class="btn btn-primary" value="Cancel" onclick="onCancelClick()" />
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-</div>
+</form>
 <hr />
-<h3>Packages</h3>
-<div class="container">
-    <div class="row">
-        <div class="col-md-12">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Hotel</th>
-                        <th>Check-in Date</th>
-                        <th>Check-out Date</th>
-                        <th>Tour</th>
-                        <th>Start Date</th>
-                        <th>End Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model.ViewBookingsTable.PackageBookingsList)
-                    {
+<form id="packageTableForm" method="post" asp-page-handler="PackageTable">
+    <h3>Packages</h3>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <table class="table">
+                    <thead>
                         <tr>
-                            <td>@item.Hotel.Name</td>
-                            <td>@item.CheckInDate.ToShortDateString()</td>
-                            <td>@item.CheckOutDate.ToShortDateString()</td>
-                            <td>@item.Tour.Name</td>
-                            <td>@item.TourStartDate.ToShortDateString()</td>
-                            <td>@item.TourEndDate.ToShortDateString()</td>
-                            <td>
-                                <div class="btn-group" role="group">
-                                    <button type="button" class="btn btn-primary">Edit</button>
-                                </div>
-                            </td>
+                            <th>Hotel</th>
+                            <th>Check-in Date</th>
+                            <th>Check-out Date</th>
+                            <th>Tour</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.ViewBookingsTable.PackageBookingsList)
+                        {
+                            <tr>
+                                <td>@item.Hotel.Name</td>
+                                <td>@item.CheckInDate.ToShortDateString()</td>
+                                <td>@item.CheckOutDate.ToShortDateString()</td>
+                                <td>@item.Tour.Name</td>
+                                <td>@item.TourStartDate.ToShortDateString()</td>
+                                <td>@item.TourEndDate.ToShortDateString()</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-primary">Edit</button>
+                                    </div>
+                                    <div class="btn-group" role="group">
+                                        <input type="submit" name="command" class="btn btn-primary" value="Cancel" onclick="onCancelClick()" />
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-</div>
+</form>
+<script>
+    function onCancelClick(bookingId) {
+        var isConfirmed = window.confirm("Are you sure you want to delete this item?");
+
+        if (isConfirmed) {
+            var form = document.getElementById("hotelTourTableForm");
+
+            document.getElementById("hotelBookingIdInput").value = bookingId;
+
+            form.submit();
+        }
+    }
+</script>
