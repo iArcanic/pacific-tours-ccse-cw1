@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
-using System.Media;
 
 namespace asp_net_core_web_app_authentication_authorisation.Pages
 {
@@ -22,7 +21,6 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
         public PackageBookModel PackageBook { get; set; }
 
         private readonly ApplicationDbContext _dbContext;
-
         private readonly UserManager<ApplicationUser> _userManager;
 
         public BookingsModel(ApplicationDbContext dbContext, UserManager<ApplicationUser> userManager)
