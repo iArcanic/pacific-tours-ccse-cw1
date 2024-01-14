@@ -58,7 +58,7 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             return Page();
         }
 
-        public async Task<IActionResult> OnPostHotelTourTableAsync(string command, string returnUrl = null)
+        public async Task<IActionResult> OnPostHotelTableAsync(string command, string returnUrl = null)
         {
             if (command == "Cancel")
             {
@@ -69,6 +69,46 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
                     .FirstOrDefaultAsync();
 
                 hotelBooking.IsCancelled = true;
+
+                await _dbContext.SaveChangesAsync();
+
+                return RedirectToPage("/ViewBookings");
+            }
+
+            return Page();
+        }
+
+        public async Task<IActionResult> OnPostTourTableAsync(string command, string returnUrl = null)
+        {
+            if (command == "Cancel")
+            {
+                var TourBookingId = new Guid(Request.Form["tourBookingId"]);
+
+                var tourBooking = await _dbContext.TourBookings
+                    .Where(tb => tb.TourBookingId == TourBookingId)
+                    .FirstOrDefaultAsync();
+
+                tourBooking.IsCancelled = true;
+
+                await _dbContext.SaveChangesAsync();
+
+                return RedirectToPage("/ViewBookings");
+            }
+
+            return Page();
+        }
+
+        public async Task<IActionResult> OnPostPackageTableAsync(string command, string returnUrl = null)
+        {
+            if (command == "Cancel")
+            {
+                var PackageBookingId = new Guid(Request.Form["packageBookingId"]);
+
+                var packageBooking = await _dbContext.PackageBookings
+                    .Where(pb => pb.PackageBookingId == PackageBookingId)
+                    .FirstOrDefaultAsync();
+
+                packageBooking.IsCancelled = true;
 
                 await _dbContext.SaveChangesAsync();
 
