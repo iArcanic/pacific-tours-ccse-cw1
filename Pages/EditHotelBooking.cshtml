@@ -1,0 +1,64 @@
+﻿@page
+@model EditHotelBookingModel
+@{
+    ViewData["Title"] = "EditHotelBooking";
+}
+
+<h2>Edit Hotel Booking</h2>
+<div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+<form id="hotelSearchForm" method="post" asp-page-handler="HotelSearch">
+        <hr />
+        <div class="form-group">
+            <label asp-for="HotelSearch.CheckInDate">Select check-in date:</label>
+            <input asp-for="HotelSearch.CheckInDate" type="date" class="form-control" value="@Model.HotelSearch.CheckInDate.ToString("yyyy-MM-dd")" />
+            <span asp-validation-for="HotelSearch.CheckInDate" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="HotelSearch.CheckInDate">Select check-out date:</label>
+            <input asp-for="HotelSearch.CheckOutDate" type="date" class="form-control" value="@Model.HotelSearch.CheckOutDate.ToString("yyyy-MM-dd")" />
+            <span asp-validation-for="HotelSearch.CheckOutDate" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="HotelSearch.RoomType">Select room type:</label>
+            <select asp-for="HotelSearch.RoomType" class="form-control">
+                @foreach (var roomType in Model.HotelSearch.RoomTypes)
+                {
+                    <option value="@roomType.Value" asp-selected="@Equals(roomType.Value, Model.HotelSearch.RoomType)">@roomType.Text</option>
+                }
+            </select>
+            <span asp-validation-for="HotelSearch.RoomType" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label for="hotels">Hotels:</label>
+            <select name="hotels" id="hotelsDropdown">
+                @foreach (var hotel in Model.HotelSearch.HotelsList)
+                {
+                    <option value="@hotel.HotelId">@hotel.Name</option>
+                }
+            </select>
+            <p id="hotelsDropdownErrorMessage" class="text-danger"></p>
+        </div>
+        <div class="form-group">
+            <input type="submit" name="command" class="btn btn-primary" value="Search" />
+        </div>
+        <div class="form-group">
+            <input class="btn btn-primary" name="command" value="Modify" onclick="submitHotelSearchForm()" />
+        </div>
+</form>
+<script>
+    function submitHotelSearchForm() {
+        var dropdownErrorMessage = document.getElementById("hotelsDropdownErrorMessage");
+        dropdownErrorMessage.innerHTML = "";
+
+        var form = document.getElementById("hotelSearchForm");
+        var selectBoxValue = form.elements["hotelsDropdown"].value;
+
+        if (!selectBoxValue) {
+            dropdownErrorMessage.innerHTML = "Please select a hotel for booking";
+            return;
+        }
+
+        form.elements["command"].value = "Modify";
+        form.submit();
+    }
+</script>

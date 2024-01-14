@@ -74,8 +74,14 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
 
                 return RedirectToPage("/ViewBookings");
             }
+            else
+            {
+                var ppothika = Request.Form["hotelBookingId"];
 
-            return Page();
+                return RedirectToPage("/EditHotelBooking", new {
+                    hotelBookingId = Request.Form["hotelBookingId"]
+                });
+            }
         }
 
         public async Task<IActionResult> OnPostTourTableAsync(string command, string returnUrl = null)

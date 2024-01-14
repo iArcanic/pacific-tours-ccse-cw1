@@ -23,17 +23,16 @@
                     </thead>
                     <tbody>
                         <input type="hidden" id="hotelBookingIdInput" name="hotelBookingId" value="">
-                        @for (var i = 0; i < Model.ViewBookingsTable.HotelBookingsList.Count; i++)
+                        @foreach (var item in Model.ViewBookingsTable.HotelBookingsList)
                         {
-                            var item = Model.ViewBookingsTable.HotelBookingsList[i];
                             <tr>
                                 <td>@item.Hotel.Name</td>
                                 <td>@item.Hotel.RoomType</td>
-                                <td id="checkInDateCell@(i)">@item.CheckInDate.ToShortDateString()</td>
-                                <td id="checkOutDateCell@(i)">@item.CheckOutDate.ToShortDateString()</td>
+                                <td>@item.CheckInDate.ToShortDateString()</td>
+                                <td>@item.CheckOutDate.ToShortDateString()</td>
                                 <td>
                                     <div class="btn-group" role="group">
-                                        <input id="hotelEditButtonId@(i)" type="button" name="command" onclick="toggleEditSave(['checkOutDateCell@(i)', 'checkInDateCell@(i)'], 'hotelEditButtonId@(i)')" class="btn btn-primary" value="Edit"/>
+                                        <input type="submit" class="btn btn-primary" name="command" value="Edit" onclick="submitForm('hotelBookingIdInput', 'hotelTableForm', '@item.HotelBookingId')" />
                                     </div>
                                     <div class="btn-group" role="group">
                                         <input type="submit" class="btn btn-danger" name="command" value="Cancel" onclick="onCancelClick('hotelBookingIdInput', 'hotelTableForm', '@item.HotelBookingId')" />
@@ -140,68 +139,13 @@
         var isConfirmed = window.confirm("Are you sure you want to cancel your booking?");
 
         if (isConfirmed) {
-            var form = document.getElementById(submitFormId);
-
-            document.getElementById(bookingInputId).value = bookingId;
-
-            form.submit();
+            submitForm(bookingInputId, submitFormId, bookingId)
         }
     }
 
-    function toggleEditSave(elementIds, buttonId) {
-        var editButton = document.getElementById(buttonId);
-
-        if (editButton.value === 'Edit') {
-            editButton.value = 'Save';
-
-            elementIds.forEach(function (elementId) {
-                var targetCell = document.getElementById(elementId);
-                makeEditable(targetCell);
-            });
-        } else {
-            editButton.value = 'Edit';
-
-            elementIds.forEach(function (elementId) {
-                var targetCell = document.getElementById(elementId);
-                saveChanges(targetCell);
-            });
-        }
-    }
-
-    function makeEditable(targetCell) {
-        var input = document.createElement('input');
-        input.type = 'date';
-
-        var currentDate = parseDate(targetCell.innerText);
-
-        var formattedDate = currentDate.getFullYear() + '-' +
-            pad((currentDate.getMonth() + 1), 2) + '-' +
-            pad(currentDate.getDate(), 2);
-
-        input.value = formattedDate;
-
-        targetCell.innerHTML = '';
-        targetCell.appendChild(input);
-
-        input.focus();
-    }
-
-    function saveChanges(targetCell) {
-        var input = targetCell.querySelector('input');
-
-        targetCell.innerText = input.value;
-    }
-
-    function parseDate(dateString) {
-        var parts = dateString.split('/');
-        return new Date(parts[2], parts[1] - 1, parts[0]);
-    }
-
-    function pad(number, length) {
-        var str = String(number);
-        while (str.length < length) {
-            str = '0' + str;
-        }
-        return str;
+    function submitForm(bookingInputId, submitFormId, bookingId) {
+        var form = document.getElementById(submitFormId);
+        document.getElementById(bookingInputId).value = bookingId;
+        form.submit();
     }
 </script>
