@@ -150,7 +150,9 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             {
                 var availableHotels = await _dbContext.HotelAvailabilities
                     .Where(ha =>
-                        ha.AvailableFrom <= HotelSearch.CheckInDate && ha.AvailableTo >= HotelSearch.CheckOutDate)
+                        ha.AvailableFrom <= HotelSearch.CheckInDate &&
+                        ha.AvailableTo >= HotelSearch.CheckOutDate &&
+                        ha.Hotel.RoomType == HotelSearch.RoomType)
                     .Select(ha => ha.Hotel)
                     .Distinct()
                     .ToListAsync();
