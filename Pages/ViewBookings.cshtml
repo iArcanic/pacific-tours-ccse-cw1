@@ -35,7 +35,7 @@
                                         <button type="button" class="btn btn-primary">Edit</button>
                                     </div>
                                     <div class="btn-group" role="group">
-                                        <input type="submit" class="btn btn-danger" name="command" value="Cancel" onclick="onCancelClick('@item.HotelBookingId')" />
+                                        <input type="submit" class="btn btn-danger" name="command" value="Cancel" onclick="onCancelClick('hotelBookingIdInput', 'hotelTourTableForm', '@item.HotelBookingId')" />
                                     </div>
                                 </td>
                             </tr>
@@ -107,13 +107,13 @@
     </div>
 </form>
 <script>
-    function onCancelClick(bookingId) {
+    function onCancelClick(bookingInputId, submitFormId, bookingId) {
         var isConfirmed = window.confirm("Are you sure you want to delete this item?");
 
         if (isConfirmed) {
-            var form = document.getElementById("hotelTourTableForm");
+            var form = document.getElementById(submitFormId);
 
-            document.getElementById("hotelBookingIdInput").value = bookingId;
+            document.getElementById(bookingInputId).value = bookingId;
 
             form.submit();
         }
