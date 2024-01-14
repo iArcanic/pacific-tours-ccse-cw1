@@ -34,21 +34,21 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             var CurrentUser = await _userManager.GetUserAsync(User);
 
             var hotelBookingsList = await _dbContext.HotelBookings
-                .Where(hb => hb.UserId.Equals(CurrentUser.Id))
+                .Where(hb => hb.UserId.Equals(CurrentUser.Id) && hb.IsCancelled == false)
                 .Include(hb => hb.Hotel)
                 .ToListAsync();
             
             ViewBookingsTable.HotelBookingsList = hotelBookingsList;
 
             var tourBookingsList = await _dbContext.TourBookings
-                .Where(tb => tb.UserId.Equals(CurrentUser.Id))
+                .Where(tb => tb.UserId.Equals(CurrentUser.Id) && tb.IsCancelled == false)
                 .Include(tb => tb.Tour)
                 .ToListAsync();
-
+             
             ViewBookingsTable.TourBookingsList = tourBookingsList;
 
             var packageBookingsList = await _dbContext.PackageBookings
-                .Where(pb => pb.UserId.Equals(CurrentUser.Id))
+                .Where(pb => pb.UserId.Equals(CurrentUser.Id) && pb.IsCancelled == false)
                 .Include(pb => pb.Hotel)
                 .Include(pb => pb.Tour)
                 .ToListAsync();
@@ -63,6 +63,16 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             if (command == "Cancel")
             {
                 var HotelBookingId = new Guid(Request.Form["hotelBookingId"]);
+
+                var hotelBooking = await _dbContext.HotelBookings
+                    .Where(hb => hb.HotelBookingId == HotelBookingId)
+                    .FirstOrDefaultAsync();
+
+                hotelBooking.IsCancelled = true;
+
+                await _dbContext.SaveChangesAsync();
+
+                return RedirectToPage("/ViewBookings");
             }
 
             return Page();
