@@ -1,0 +1,30 @@
+﻿@page
+@model EditTourBookingModel
+@{
+    ViewData["Title"] = "EditTourBooking";
+}
+
+<h2>Edit Tour Booking</h2>
+<div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+<form id="tourSearchForm" method="post">
+        <input type="hidden" asp-for="EditBooking.TourBookingId" value="@Model.EditBooking.TourBookingId" />
+        <hr />
+        <div class="form-group">
+            <label asp-for="EditBooking.TourStartDate">Select start date:</label>
+            <input asp-for="EditBooking.TourStartDate" type="date" class="form-control" value="@Model.EditBooking.TourStartDate.ToString("yyyy-MM-dd")" />
+            <span asp-validation-for="EditBooking.TourStartDate" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="EditBooking.TourEndDate">Select end date:</label>
+            <input asp-for="EditBooking.TourEndDate" type="date" class="form-control" value="@Model.EditBooking.TourEndDate.ToString("yyyy-MM-dd")" />
+            <span asp-validation-for="EditBooking.TourEndDate" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label>Tour:</label>
+            <input type="text" value="@Model.EditBooking.ToursList.First().Name" disabled />
+        </div>
+        <p class="text-danger">@Model.EditBooking.ErrorMessage</p>
+        <div class="form-group">
+            <input type="submit" class="btn btn-primary" name="command" value="Modify" />
+        </div>
+</form>

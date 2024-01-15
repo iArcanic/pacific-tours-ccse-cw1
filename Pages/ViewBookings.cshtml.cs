@@ -103,8 +103,13 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
 
                 return RedirectToPage("/ViewBookings");
             }
-
-            return Page();
+            else
+            {
+                return RedirectToPage("/EditTourBooking", new
+                {
+                    tourBookingId = Request.Form["tourBookingId"]
+                });
+            }
         }
 
         public async Task<IActionResult> OnPostPackageTableAsync(string command, string returnUrl = null)

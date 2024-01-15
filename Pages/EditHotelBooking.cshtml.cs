@@ -97,7 +97,7 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
 
                 return RedirectToPage("/ViewBookings", new
                 {
-                    successMessage = "Your booking has been successfully modified!"
+                    successMessage = "Your Hotel booking has been successfully modified!"
                 });
             }
             else
