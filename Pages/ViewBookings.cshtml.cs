@@ -76,8 +76,6 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             }
             else
             {
-                var ppothika = Request.Form["hotelBookingId"];
-
                 return RedirectToPage("/EditHotelBooking", new {
                     hotelBookingId = Request.Form["hotelBookingId"]
                 });

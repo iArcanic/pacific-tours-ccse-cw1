@@ -3,7 +3,6 @@ using asp_net_core_web_app_authentication_authorisation.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
@@ -12,19 +11,19 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
     public class EditHotelBookingModel : PageModel
     {
         [BindProperty]
-        public HotelSearchModel HotelSearch { get; set; }
+        public EditBookingModel EditBooking { get; set; }
 
         private readonly ApplicationDbContext _dbContext;
         private readonly UserManager<ApplicationUser> _userManager;
 
         public EditHotelBookingModel(ApplicationDbContext dbContext, UserManager<ApplicationUser> userManager)
         {
-            HotelSearch = new HotelSearchModel();
+            EditBooking = new EditBookingModel();
             _dbContext = dbContext;
             _userManager = userManager;
         }
 
-        public class HotelSearchModel
+        public class EditBookingModel
         {
             [Required(ErrorMessage = "Please select a check-in date")]
             [DataType(DataType.DateTime)]
@@ -36,38 +35,18 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             [Display(Name = "Check out date")]
             public DateTime CheckOutDate { get; set; }
 
-            [Required(ErrorMessage = "Please select a room type")]
-            [DataType(DataType.Text)]
-            [Display(Name = "Room type")]
             public string RoomType { get; set; }
 
-            public List<SelectListItem> RoomTypes { get; set; } = new List<SelectListItem>
-            {
-                new SelectListItem
-                {
-                    Value = "single",
-                    Text = "Single"
-                },
-                new SelectListItem
-                {
-                    Value = "double",
-                    Text = "Double"
-                },
-                new SelectListItem
-                {
-                    Value = "family suite",
-                    Text = "Family Suite"
-                }
-            };
-
             public List<Hotel> HotelsList { get; set; } = new List<Hotel>();
+
+            public string HotelBookingId { get; set; }
+
+            public string ErrorMessage { get; set; }
         }
 
         public async Task<IActionResult> OnGet()
         {
-
             var HotelBookingIdValue = Request.Query["hotelBookingId"];
-
             var HotelBookingId = new Guid(HotelBookingIdValue.ToString());
 
             var hotelBooking = await _dbContext.HotelBookings
@@ -75,53 +54,57 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
                 .Include(hb => hb.Hotel)
                 .FirstOrDefaultAsync();
 
-            HotelSearch.CheckInDate = hotelBooking.CheckInDate;
-            HotelSearch.CheckOutDate = hotelBooking.CheckOutDate;
-            HotelSearch.RoomType = hotelBooking.Hotel.RoomType;
-            HotelSearch.HotelsList.Add(hotelBooking.Hotel);
+            EditBooking.CheckInDate = hotelBooking.CheckInDate;
+            EditBooking.CheckOutDate = hotelBooking.CheckOutDate;
+            EditBooking.RoomType = hotelBooking.Hotel.RoomType;
+            EditBooking.HotelsList.Add(hotelBooking.Hotel);
+
+            EditBooking.HotelBookingId = HotelBookingIdValue;
 
             return Page();
         }
 
-        public async Task<IActionResult> OnPostHotelSearchAsync(string command, string returnUrl = null)
+        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
-            if (!ModelState.IsValid)
+            EditBooking.ErrorMessage = null;
+
+            var HotelBookingIdValue = Request.Query["hotelBookingId"];
+            var HotelBookingId = new Guid(HotelBookingIdValue.ToString());
+
+            var HotelBooking = await _dbContext.HotelBookings
+                .Where(hb => hb.HotelBookingId == HotelBookingId)
+                .Include(hb => hb.Hotel)
+                .FirstOrDefaultAsync();
+
+            var CurrentUser = await _userManager.GetUserAsync(User);
+
+            var HotelAvailability = await _dbContext.HotelAvailabilities
+                .Where(ha =>
+                    ha.HotelId == HotelBooking.HotelId &&
+                    ha.AvailableFrom <= EditBooking.CheckInDate &&
+                    ha.AvailableTo >= EditBooking.CheckOutDate)
+                .Select(ha => ha.Hotel)
+                .Distinct()
+                .ToListAsync();
+
+            if (HotelAvailability.Count == 1)
             {
-                return Page();
-            }
+                HotelBooking.CheckInDate = EditBooking.CheckInDate;
+                HotelBooking.CheckOutDate = EditBooking.CheckOutDate;
 
-            if (command == "Search")
-            {
-                var availableHotels = await _dbContext.HotelAvailabilities
-                    .Where(ha =>
-                        ha.AvailableFrom <= HotelSearch.CheckInDate && ha.AvailableTo >= HotelSearch.CheckOutDate)
-                    .Select(ha => ha.Hotel)
-                    .Distinct()
-                    .ToListAsync();
+                _dbContext.HotelBookings.Update(HotelBooking);
+                await _dbContext.SaveChangesAsync();
 
-                HotelSearch.HotelsList = availableHotels;
-
-                return Page();
+                return RedirectToPage("/ViewBookings");
             }
             else
             {
-                var SelectedHotelId = new Guid(Request.Form["hotels"]);
-                var CurrentUser = await _userManager.GetUserAsync(User);
-                Hotel SelectedHotel = await _dbContext.Hotels.FindAsync(SelectedHotelId);
+                EditBooking.ErrorMessage = "Hotels not available for selected dates";
 
-                var hotelBooking = new HotelBooking
-                {
-                    HotelBookingId = new Guid(),
-                    HotelId = SelectedHotelId,
-                    UserId = CurrentUser.Id,
-                    CheckInDate = HotelSearch.CheckInDate,
-                    CheckOutDate = HotelSearch.CheckOutDate,
-                    Hotel = SelectedHotel,
-                    ApplicationUser = CurrentUser
-                };
-
-                _dbContext.HotelBookings.Add(hotelBooking);
-                await _dbContext.SaveChangesAsync();
+                EditBooking.HotelsList.Add(HotelBooking.Hotel);
+                EditBooking.CheckInDate = EditBooking.CheckInDate;
+                EditBooking.CheckOutDate = EditBooking.CheckOutDate;
+                EditBooking.RoomType = HotelBooking.Hotel.RoomType;
 
                 return Page();
             }
