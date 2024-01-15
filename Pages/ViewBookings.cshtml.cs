@@ -27,6 +27,8 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             public List<HotelBooking> HotelBookingsList { get; set; } = new List<HotelBooking>();
             public List<TourBooking> TourBookingsList { get; set; } = new List<TourBooking>();
             public List<PackageBooking> PackageBookingsList { get; set; } = new List<PackageBooking>();
+
+            public string SuccessMessage { get; set; }
         }
 
         public async Task<IActionResult> OnGet()
@@ -55,6 +57,8 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
 
             ViewBookingsTable.PackageBookingsList = packageBookingsList;
 
+            ViewBookingsTable.SuccessMessage = Request.Query["successMessage"];
+
             return Page();
         }
 
@@ -76,7 +80,8 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             }
             else
             {
-                return RedirectToPage("/EditHotelBooking", new {
+                return RedirectToPage("/EditHotelBooking", new 
+                {
                     hotelBookingId = Request.Form["hotelBookingId"]
                 });
             }
