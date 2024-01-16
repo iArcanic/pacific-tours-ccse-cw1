@@ -8,6 +8,7 @@
         public DateTime CheckInDate { get; set; }
         public DateTime CheckOutDate { get; set; }
         public bool IsCancelled { get; set; } = false;
+        public bool IsPaid { get; set; } = false;
 
         // Navigation properties
         public Hotel Hotel { get; set; }

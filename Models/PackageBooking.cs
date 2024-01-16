@@ -11,6 +11,7 @@
         public DateTime TourStartDate { get; set; }
         public DateTime TourEndDate { get; set; }
         public bool IsCancelled { get; set; } = false;
+        public bool IsPaid { get; set; } = false;
 
         // Navigation properties
         public Hotel Hotel { get; set; }

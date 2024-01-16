@@ -8,6 +8,7 @@
         public DateTime TourStartDate { get; set; }
         public DateTime TourEndDate { get; set; }
         public bool IsCancelled { get; set; } = false;
+        public bool IsPaid { get; set; } = false;
 
         // Navigation properties
         public Tour Tour { get; set; }
