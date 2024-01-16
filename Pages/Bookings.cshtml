@@ -68,7 +68,7 @@
             <select name="hotels" id="hotelsDropdown">
                 @foreach (var hotel in Model.HotelSearch.HotelsList)
                 {
-                    <option value="@hotel.HotelId">@hotel.Name</option>
+                    <option value="@hotel.HotelId">@(hotel.Name + " £" + hotel.Cost)</option>
                 }
             </select>
             <p id="hotelsDropdownErrorMessage" class="text-danger"></p>
@@ -101,7 +101,7 @@
             <select name="tours" id="toursDropdown">
                 @foreach (var tour in Model.TourSearch.ToursList)
                 {
-                    <option value="@tour.TourId">@tour.Name</option>
+                    <option value="@tour.TourId">@(tour.Name + " £" + tour.Cost)</option>
                 }
             </select>
             <p id="toursDropdownErrorMessage" class="text-danger"></p>
@@ -141,7 +141,7 @@
             <select name="packageHotelsDropdown">
                 @foreach (var hotel in Model.PackageBook.HotelsList)
                 {
-                    <option value="@hotel.HotelId">@hotel.Name</option>
+                    <option value="@hotel.HotelId">@(hotel.Name + " £" + hotel.Cost)</option>
                 }
             </select>
             <p id="packageHotelsDropdownErrorMessage" class="text-danger"></p>
@@ -164,7 +164,7 @@
             <select name="packageToursDropdown">
                 @foreach (var tour in Model.PackageBook.ToursList)
                 {
-                    <option value="@tour.TourId">@tour.Name</option>
+                    <option value="@tour.TourId">@(tour.Name + " £" + tour.Cost)</option>
                 }
             </select>
             <p id="packageToursDropdownErrorMessage" class="text-danger"></p>

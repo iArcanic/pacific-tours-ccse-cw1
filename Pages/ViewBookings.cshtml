@@ -20,6 +20,7 @@
                             <th>Room Type</th>
                             <th>Check-in Date</th>
                             <th>Check-out Date</th>
+                            <th>Cost</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -31,6 +32,7 @@
                                 <td>@item.Hotel.RoomType</td>
                                 <td>@item.CheckInDate.ToShortDateString()</td>
                                 <td>@item.CheckOutDate.ToShortDateString()</td>
+                                <td>@("£" + item.Hotel.Cost)</td>
                                 <td>
                                     <div class="btn-group" role="group">
                                         <input type="submit" class="btn btn-primary" name="command" value="Edit" onclick="submitForm('hotelBookingIdInput', 'hotelTableForm', '@item.HotelBookingId')" />
@@ -60,6 +62,7 @@
                             <th>Duration (Days)</th>
                             <th>Start Date</th>
                             <th>End Date</th>
+                            <th>Cost</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -71,6 +74,7 @@
                                 <td>@item.Tour.DurationInDays</td>
                                 <td>@item.TourStartDate.ToShortDateString()</td>
                                 <td>@item.TourEndDate.ToShortDateString()</td>
+                                <td>@("£" + item.Tour.Cost)</td>
                                 <td>
                                     <div class="btn-group" role="group">
                                         <input type="submit" class="btn btn-primary" name="command" value="Edit" onclick="submitForm('tourBookingIdInput', 'tourTableForm', '@item.TourBookingId')" />
