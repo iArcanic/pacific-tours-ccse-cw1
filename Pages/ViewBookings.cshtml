@@ -32,7 +32,7 @@
                                 <td>@item.Hotel.RoomType</td>
                                 <td>@item.CheckInDate.ToShortDateString()</td>
                                 <td>@item.CheckOutDate.ToShortDateString()</td>
-                                <td>@("£" + item.Hotel.Cost)</td>
+                                <td>@("£" + ((item.CheckOutDate - item.CheckInDate).Days * item.Hotel.Cost).ToString("0.00"))</td>
                                 <td>
                                     <div class="btn-group" role="group">
                                         <input type="submit" class="btn btn-primary" name="command" value="Edit" onclick="submitForm('hotelBookingIdInput', 'hotelTableForm', '@item.HotelBookingId')" />
@@ -74,7 +74,7 @@
                                 <td>@item.Tour.DurationInDays</td>
                                 <td>@item.TourStartDate.ToShortDateString()</td>
                                 <td>@item.TourEndDate.ToShortDateString()</td>
-                                <td>@("£" + item.Tour.Cost)</td>
+                                <td>@("£" + ((item.TourEndDate - item.TourStartDate).Days * item.Tour.Cost).ToString("0.00"))</td>
                                 <td>
                                     <div class="btn-group" role="group">
                                         <input type="submit" class="btn btn-primary" name="command" value="Edit" onclick="submitForm('tourBookingIdInput', 'tourTableForm', '@item.TourBookingId')" />
@@ -108,6 +108,7 @@
                             <th>Duration (Days)</th>
                             <th>Start Date</th>
                             <th>End Date</th>
+                            <th>Total Cost</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -123,6 +124,14 @@
                                 <td>@item.Tour.DurationInDays</td>
                                 <td>@item.TourStartDate.ToShortDateString()</td>
                                 <td>@item.TourEndDate.ToShortDateString()</td>
+                                <td>
+                                    @{
+                                        var hotelCost = (item.CheckOutDate - item.CheckInDate).Days * item.Hotel.Cost;
+                                        var tourCost = (item.TourEndDate - item.TourStartDate).Days * item.Tour.Cost;
+                                        var totalCost = hotelCost + tourCost;
+                                    }
+                                    @("£" + totalCost.ToString("0.00"))
+                                </td>
                                 <td>
                                     <div class="btn-group" role="group">
                                         <input type="submit" class="btn btn-primary" name="command" value="Edit" onclick="submitForm('packageBookingIdInput', 'packageTableForm', '@item.PackageBookingId')" />
