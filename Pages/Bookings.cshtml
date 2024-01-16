@@ -50,12 +50,12 @@
         <hr />
         <div class="form-group">
             <label asp-for="HotelSearch.CheckInDate">Select check-in date:</label>
-            <input asp-for="HotelSearch.CheckInDate" type="date" class="form-control" />
+            <input id="hotelCheckInDate" asp-for="HotelSearch.CheckInDate" type="date" class="form-control" value="2024-01-09" />
             <span asp-validation-for="HotelSearch.CheckInDate" class="text-danger"></span>
         </div>
         <div class="form-group">
             <label asp-for="HotelSearch.CheckInDate">Select check-out date:</label>
-            <input asp-for="HotelSearch.CheckOutDate" type="date" class="form-control" />
+            <input id="hotelCheckOutDate" asp-for="HotelSearch.CheckOutDate" type="date" class="form-control" value="2024-01-27" />
             <span asp-validation-for="HotelSearch.CheckOutDate" class="text-danger"></span>
         </div>
         <div class="form-group">
@@ -65,10 +65,10 @@
         </div>
         <div class="form-group">
             <label for="hotels">Hotels:</label>
-            <select name="hotels" id="hotelsDropdown">
+            <select name="hotels" id="hotelsDropdown" onchange='calculateTotalCost("hotelsDropdown", "hotelCheckInDate", "hotelCheckOutDate", "hotelTotalCostMessage")'>
                 @foreach (var hotel in Model.HotelSearch.HotelsList)
                 {
-                    <option value="@hotel.HotelId">@(hotel.Name + " £" + hotel.Cost)</option>
+                    <option value="@hotel.HotelId">@(hotel.Name + " £" + hotel.Cost + " (per night)")</option>
                 }
             </select>
             <p id="hotelsDropdownErrorMessage" class="text-danger"></p>
@@ -76,6 +76,8 @@
         <div class="form-group">
             <input type="submit" name="command" class="btn btn-primary" value="Search" />
         </div>
+        <hr />
+        <p id="hotelTotalCostMessage">Total Cost: £0</p>
         <div class="form-group">
             <input class="btn btn-primary" name="command" value="Book" onclick="submitHotelSearchForm()" />
         </div>
@@ -88,17 +90,17 @@
         <hr />
         <div class="form-group">
             <label asp-for="TourSearch.TourStartDate">Select Tour Start Date:</label>
-            <input asp-for="TourSearch.TourStartDate" type="date" class="form-control" value="2024-01-15" />
+            <input id="tourStartDate" asp-for="TourSearch.TourStartDate" type="date" class="form-control" value="2024-01-15" />
             <span asp-validation-for="TourSearch.TourEndDate" class="text-danger"></span>
         </div>
         <div class="form-group">
             <label asp-for="TourSearch.TourEndDate">Select Tour End Date:</label>
-            <input asp-for="TourSearch.TourEndDate" type="date" class="form-control" value="2024-01-20" />
+            <input id="tourEndDate"  asp-for="TourSearch.TourEndDate" type="date" class="form-control" value="2024-01-20" />
             <span asp-validation-for="TourSearch.TourEndDate" class="text-danger"></span>
         </div>
         <div class="form-group">
             <label for="tours">Tours:</label>
-            <select name="tours" id="toursDropdown">
+            <select name="tours" id="toursDropdown" onchange='calculateTotalCost("toursDropdown", "tourStartDate", "tourEndDate", "tourTotalCostMessage")'>
                 @foreach (var tour in Model.TourSearch.ToursList)
                 {
                     <option value="@tour.TourId">@(tour.Name + " £" + tour.Cost)</option>
@@ -109,6 +111,8 @@
         <div class="form-group">
             <input type="submit" name="command" class="btn btn-primary" value="Search"/>
         </div>
+        <hr />
+        <p id="tourTotalCostMessage">Total Cost: £0</p>
         <div class="form-group">
             <input class="btn btn-primary" name="command" value="Book" onclick="submitTourSearchForm()"/>
         </div>
@@ -123,12 +127,12 @@
         <hr />
         <div class="form-group">
             <label asp-for="PackageBook.CheckInDate">Select check-in date:</label>
-            <input asp-for="PackageBook.CheckInDate" type="date" class="form-control" value="2024-01-08" />
+            <input id="packageHotelCheckInDate" asp-for="PackageBook.CheckInDate" type="date" class="form-control" value="2024-01-09" />
             <span asp-validation-for="PackageBook.CheckInDate" class="text-danger"></span>
         </div>
         <div class="form-group">
             <label asp-for="PackageBook.CheckInDate">Select check-out date:</label>
-            <input asp-for="PackageBook.CheckOutDate" type="date" class="form-control" value="2024-01-28" />
+            <input id="packageHotelCheckOutDate" asp-for="PackageBook.CheckOutDate" type="date" class="form-control" value="2024-01-27" />
             <span asp-validation-for="PackageBook.CheckOutDate" class="text-danger"></span>
         </div>
         <div class="form-group">
@@ -138,7 +142,7 @@
         </div>
         <div class="form-group">
             <label for="packageHotels">Hotels:</label>
-            <select name="packageHotelsDropdown">
+            <select name="packageHotelsDropdown" id="packageHotelsDropdownId" onchange='calculateTotalPackageCost()'>
                 @foreach (var hotel in Model.PackageBook.HotelsList)
                 {
                     <option value="@hotel.HotelId">@(hotel.Name + " £" + hotel.Cost)</option>
@@ -151,17 +155,17 @@
         <hr />
         <div class="form-group">
             <label asp-for="PackageBook.TourStartDate">Select Tour Start Date:</label>
-            <input asp-for="PackageBook.TourStartDate" type="date" class="form-control" value="2024-01-15" />
+            <input id="packageTourStartDate" asp-for="PackageBook.TourStartDate" type="date" class="form-control" value="2024-01-15" />
             <span asp-validation-for="PackageBook.TourEndDate" class="text-danger"></span>
         </div>
         <div class="form-group">
             <label asp-for="PackageBook.TourEndDate">Select Tour End Date:</label>
-            <input asp-for="PackageBook.TourEndDate" type="date" class="form-control" value="2024-01-20" />
+            <input id="packageTourEndDate" asp-for="PackageBook.TourEndDate" type="date" class="form-control" value="2024-01-20" />
             <span asp-validation-for="PackageBook.TourEndDate" class="text-danger"></span>
         </div>
         <div class="form-group">
             <label for="packageTours">Tours:</label>
-            <select name="packageToursDropdown">
+            <select name="packageToursDropdown" id="packageToursDropdownId" onchange='calculateTotalPackageCost()'>
                 @foreach (var tour in Model.PackageBook.ToursList)
                 {
                     <option value="@tour.TourId">@(tour.Name + " £" + tour.Cost)</option>
@@ -173,6 +177,8 @@
         <div class="form-group">
             <input type="submit" name="command" class="btn btn-primary" value="Search" />
         </div>
+        <hr />
+        <p id="packageTotalCostMessage">Total Cost: £0</p>
         <div class="form-group">
             <input class="btn btn-primary" name="command" value="Book" onclick="submitPackageBookForm()" />
         </div>
@@ -273,4 +279,43 @@
         form.elements["command"].value = "Book";
         form.submit();
     }
+
+    function calculateTotal(dropdown, fromDate, toDate) {
+        var selectedDropdown = document.getElementById(dropdown);
+        var selectedOption = selectedDropdown.options[selectedDropdown.selectedIndex];
+        var cost = selectedOption.textContent.split(' £')[1].split(' ')[0];
+
+        var startDate = new Date(document.getElementById(fromDate).value);
+        var endDate = new Date(document.getElementById(toDate).value);
+
+        var durationInDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+
+        return parseFloat((cost * durationInDays).toFixed(2));
+    }
+
+    function calculateTotalCost(dropdown, fromDate, toDate, totalCostMessageId) {
+        document.getElementById(totalCostMessageId).innerHTML = "Total Cost: £" + calculateTotal(dropdown, fromDate, toDate);
+    }
+
+    function calculateTotalPackageCost() { 
+        var packageHotelCost = calculateTotal("packageHotelsDropdownId", "packageHotelCheckInDate", "packageHotelCheckOutDate");
+        var packageTourCost = calculateTotal("packageToursDropdownId", "packageTourStartDate", "packageTourEndDate");
+
+        var packageTotalCost = packageHotelCost + packageTourCost
+
+        document.getElementById("packageTotalCostMessage").innerHTML = "Total Cost: £" + packageTotalCost;
+    }
+
+    window.addEventListener('load', function () {
+        if (document.getElementById("HotelTab").className == "tablinks active") {
+            calculateTotalCost("hotelsDropdown", "hotelCheckInDate", "hotelCheckOutDate", "hotelTotalCostMessage");
+        }
+        else if (document.getElementById("TourTab").className == "tablinks active") {
+            calculateTotalCost("toursDropdown", "tourStartDate", "tourEndDate", "tourTotalCostMessage");
+        }
+        else if (document.getElementById("PackageTab").className == "tablinks active") {
+            calculateTotalPackageCost();
+        }
+    });
+
 </script>
