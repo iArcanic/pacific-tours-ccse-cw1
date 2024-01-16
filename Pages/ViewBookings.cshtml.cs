@@ -128,8 +128,13 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
 
                 return RedirectToPage("/ViewBookings");
             }
-
-            return Page();
+            else
+            {
+                return RedirectToPage("/EditPackageBooking", new
+                {
+                    packageBookingId = Request.Form["packageBookingId"]
+                });
+            }
         }
     }
 }

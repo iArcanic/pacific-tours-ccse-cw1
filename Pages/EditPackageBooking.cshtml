@@ -1,0 +1,49 @@
+﻿@page
+@model EditPackageBookingModel
+@{
+    ViewData["Title"] = "EditPackageBooking";
+}
+
+<h2>Edit Package Booking</h2>
+<div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+<form id="packageBookForm" method="post">
+    <input type="hidden" asp-for="EditBooking.PackageBookingId" value="@Model.EditBooking.PackageBookingId" />
+        <hr />
+        <div class="form-group">
+            <label asp-for="EditBooking.CheckInDate">Select check-in date:</label>
+            <input asp-for="EditBooking.CheckInDate" type="date" class="form-control" value="@Model.EditBooking.CheckInDate.ToString("yyyy-MM-dd")" />
+            <span asp-validation-for="EditBooking.CheckInDate" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="EditBooking.CheckInDate">Select check-out date:</label>
+            <input asp-for="EditBooking.CheckOutDate" type="date" class="form-control" value="@Model.EditBooking.CheckOutDate.ToString("yyyy-MM-dd")" />
+            <span asp-validation-for="EditBooking.CheckOutDate" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label>Room type:</label>
+            <input type="text" value="@Model.EditBooking.RoomType" disabled/>
+        </div>
+        <div class="form-group">
+            <label>Hotel:</label>
+            <input type="text" value="@Model.EditBooking.HotelsList.First().Name" disabled />
+        </div>
+        <hr />
+        <div class="form-group">
+            <label asp-for="EditBooking.TourStartDate">Select start date:</label>
+            <input asp-for="EditBooking.TourStartDate" type="date" class="form-control" value="@Model.EditBooking.TourStartDate.ToString("yyyy-MM-dd")" />
+            <span asp-validation-for="EditBooking.TourStartDate" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="EditBooking.TourEndDate">Select end date:</label>
+            <input asp-for="EditBooking.TourEndDate" type="date" class="form-control" value="@Model.EditBooking.TourEndDate.ToString("yyyy-MM-dd")" />
+            <span asp-validation-for="EditBooking.TourEndDate" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label>Tour:</label>
+            <input type="text" value="@Model.EditBooking.ToursList.First().Name" disabled />
+        </div>
+        <p class="text-danger">@Model.EditBooking.ErrorMessage</p>
+        <div class="form-group">
+            <input type="submit" class="btn btn-primary" name="command" value="Modify" />
+        </div>
+</form>
