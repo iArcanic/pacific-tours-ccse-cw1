@@ -1,0 +1,40 @@
+﻿@page
+@model PaymentModel
+@{
+    ViewData["Title"] = "Payment";
+}
+
+<h2>Payment</h2>
+
+<div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+<form id="paymentForm" method="post">
+    <hr />
+    <div class="form-group">
+        <label asp-for="PaymentForm.CardName">Name on card:</label>
+        <input asp-for="PaymentForm.CardName" type="text" class="form-control" value="@Model.PaymentForm.CardName" />
+        <span asp-validation-for="PaymentForm.CardName" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="PaymentForm.CardNumber">Card number:</label>
+        <input asp-for="PaymentForm.CardNumber" type="text" class="form-control" value="@Model.PaymentForm.CardNumber" />
+        <span asp-validation-for="PaymentForm.CardNumber" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="PaymentForm.BillingAddress">Billing address:</label>
+        <input asp-for="PaymentForm.BillingAddress" type="text" class="form-control" value="@Model.PaymentForm.BillingAddress" />
+        <span asp-validation-for="PaymentForm.BillingAddress" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="PaymentForm.CardExpiryDate">Expires:</label>
+        <input asp-for="PaymentForm.CardExpiryDate" type="date" class="form-control" value="@Model.PaymentForm.CardExpiryDate.ToString("yyyy-MM-dd")" />
+        <span asp-validation-for="PaymentForm.CardExpiryDate" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="PaymentForm.CvcNumber">CVC:</label>
+        <input asp-for="PaymentForm.CvcNumber" type="password" class="form-control" value="@Model.PaymentForm.CvcNumber" />
+        <span asp-validation-for="PaymentForm.CvcNumber" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <input type="submit" class="btn btn-primary" value="Pay" />
+    </div>
+</form>
