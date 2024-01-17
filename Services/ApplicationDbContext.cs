@@ -14,6 +14,7 @@ namespace asp_net_core_web_app_authentication_authorisation.Services
         public DbSet<HotelBooking> HotelBookings { get; set; }
         public DbSet<TourBooking> TourBookings { get; set; }
         public DbSet<PackageBooking> PackageBookings { get; set; }
+        public DbSet<HotelDiscount> HotelDiscounts { get; set; }
 
         public ApplicationDbContext(DbContextOptions options) : base(options)
         {
@@ -30,6 +31,7 @@ namespace asp_net_core_web_app_authentication_authorisation.Services
             modelBuilder.Entity<HotelBooking>().HasKey(hb => hb.HotelBookingId);
             modelBuilder.Entity<TourBooking>().HasKey(tb => tb.TourBookingId);
             modelBuilder.Entity<PackageBooking>().HasKey(pb => pb.PackageBookingId);
+            modelBuilder.Entity<HotelDiscount>().HasKey(hd => hd.HotelDiscountId);
 
             // Database relationships
             modelBuilder.Entity<HotelAvailability>()
