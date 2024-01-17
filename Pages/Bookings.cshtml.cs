@@ -181,7 +181,11 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
                 _dbContext.HotelBookings.Add(hotelBooking);
                 await _dbContext.SaveChangesAsync();
 
-                return Page();
+                return RedirectToPage("/Payment", new
+                {
+                    bookingId = hotelBooking.HotelBookingId.ToString(),
+                    bookingType = "hotel"
+                });
             }
         }
 
@@ -225,7 +229,11 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
                 _dbContext.TourBookings.Add(tourBooking);
                 await _dbContext.SaveChangesAsync();
 
-                return Page();
+                return RedirectToPage("/Payment", new
+                {
+                    bookingId = tourBooking.TourBookingId.ToString(),
+                    bookingType = "tour"
+                });
             }
         }
 
@@ -287,7 +295,11 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
 
                 await _dbContext.SaveChangesAsync();
 
-                return Page();
+                return RedirectToPage("/Payment", new
+                {
+                    bookingId = packageBooking.PackageBookingId.ToString(),
+                    bookingType = "package"
+                });
             }
         }
     }

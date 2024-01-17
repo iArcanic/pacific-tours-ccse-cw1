@@ -92,9 +92,10 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
                 _dbContext.TourBookings.Update(TourBooking);
                 await _dbContext.SaveChangesAsync();
 
-                return RedirectToPage("/ViewBookings", new
+                return RedirectToPage("/Payment", new
                 {
-                    successMessage = "Your Tour booking has been successfully modified!"
+                    bookingId = TourBookingIdValue,
+                    bookingType = "tour"
                 });
             }
             else

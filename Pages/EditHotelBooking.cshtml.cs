@@ -95,9 +95,10 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
                 _dbContext.HotelBookings.Update(HotelBooking);
                 await _dbContext.SaveChangesAsync();
 
-                return RedirectToPage("/ViewBookings", new
+                return RedirectToPage("/Payment", new
                 {
-                    successMessage = "Your Hotel booking has been successfully modified!"
+                    bookingId = HotelBookingIdValue,
+                    bookingType = "hotel"
                 });
             }
             else

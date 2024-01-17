@@ -30,8 +30,9 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             public string CardName { get; set; }
 
             [Required(ErrorMessage = "Please enter card number")]
+            [DataType(DataType.Text)]
             [Display(Name = "Card name")]
-            [CreditCard(ErrorMessage = "Invalid credit card number")]
+            [RegularExpression(@"^\d{16}$", ErrorMessage = "Invalid credit card number. Must be 16 digits.")]
             public string CardNumber { get; set; }
 
             [Required(ErrorMessage = "Please enter billing address")]
@@ -48,16 +49,59 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             [Display(Name = "CVC number")]
             [RegularExpression(@"^\d{3,4}$", ErrorMessage = "Invalid CVC number")]
             public string CvcNumber { get; set; }
+
+            public string ErrorMessage { get; set; }
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
-            if (!ModelState.IsValid)
+            var BookingId = new Guid(Request.Query["bookingId"]);
+            var BookingType = Request.Query["bookingType"];
+
+            if (BookingType == "hotel")
             {
+                HotelBooking hotelBooking = await _dbContext.HotelBookings.FindAsync(BookingId);
+
+                hotelBooking.IsPaid = true;
+                await _dbContext.SaveChangesAsync();
+
+                return RedirectToPage("/ViewBookings", new
+                { 
+                    successMessage = "Success!"
+                });
+            }
+            else if (BookingType == "tour")
+            {
+                TourBooking tourBooking = await _dbContext.TourBookings.FindAsync(BookingId);
+
+                tourBooking.IsPaid = true;
+                await _dbContext.SaveChangesAsync();
+
+                return RedirectToPage("/ViewBookings", new
+                {
+                    successMessage = "Success!"
+                });
+            }
+            else if (BookingType == "package")
+            {
+                PackageBooking packageBooking = await _dbContext.PackageBookings.FindAsync(BookingId);
+
+                packageBooking.IsPaid = true;
+                await _dbContext.SaveChangesAsync();
+
+                return RedirectToPage("/ViewBookings", new
+                {
+                    successMessage = "Success!"
+                });
+            }
+            else
+            {
+                PaymentForm.ErrorMessage = null;
+
+                PaymentForm.ErrorMessage = "A payment error has occured. Please try again later.";
+
                 return Page();
             }
-
-            return Page();
         }
     }
 }

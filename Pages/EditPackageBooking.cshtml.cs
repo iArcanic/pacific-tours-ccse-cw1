@@ -148,9 +148,10 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
                 _dbContext.PackageBookings.Update(packageBooking);
                 await _dbContext.SaveChangesAsync();
 
-                return RedirectToPage("/ViewBookings", new
+                return RedirectToPage("/Payment", new
                 {
-                    successMessage = "Your Package booking has been successfully modified!"
+                    bookingId = PackageBookingIdValue,
+                    bookingType = "package"
                 });
             }
             else
