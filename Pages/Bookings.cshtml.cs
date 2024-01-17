@@ -135,8 +135,15 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             [DataType(DataType.DateTime)]
             [Display(Name = "Tour end date")]
             public DateTime TourEndDate { get; set; }
-
             public List<Tour> ToursList { get; set; } = new List<Tour>();
+            public List<HotelDiscount> HotelDiscountsList { get; set; } = new List<HotelDiscount>();
+        }
+
+        public async Task<IActionResult> OnGet()
+        {
+            PackageBook.HotelDiscountsList = await _dbContext.HotelDiscounts.ToListAsync();
+ 
+            return Page();
         }
 
         public async Task<IActionResult> OnPostHotelSearchAsync(string command, string returnUrl = null)
@@ -243,6 +250,8 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             {
                 return Page();
             }
+
+            PackageBook.HotelDiscountsList = await _dbContext.HotelDiscounts.ToListAsync();
 
             if (command == "Search")
             {

@@ -122,6 +122,10 @@
 <form id="packageBookForm" method="post" asp-page-handler="PackageBook">
     <div id="Packages" class="tabcontent">
         <h3>Packages</h3>
+        @foreach (var item in Model.PackageBook.HotelDiscountsList)
+        {
+            <input type="text" id="@item.RoomType" value="@item.HotelDiscountPercentage" />
+        }
         <hr />
         <h4>Search Hotels</h4>
         <hr />
@@ -137,7 +141,7 @@
         </div>
         <div class="form-group">
             <label asp-for="PackageBook.RoomType">Select room type:</label>
-            <select asp-for="PackageBook.RoomType" asp-items="@Model.PackageBook.RoomTypes" class="form-control"></select>
+            <select id="packageHotelRoomTypeDropDown" asp-for="PackageBook.RoomType" asp-items="@Model.PackageBook.RoomTypes" class="form-control" onchange="updateDiscount()"></select>
             <span asp-validation-for="PackageBook.RoomType" class="text-danger"></span>
         </div>
         <div class="form-group">
@@ -147,7 +151,7 @@
                 {
                     <option value="@hotel.HotelId">@(hotel.Name + " £" + hotel.Cost)</option>
                 }
-            </select>
+            </select>&nbsp;&nbsp;&nbsp;<label id="packageHotelDiscountLable">Discount :0%</label>
             <p id="packageHotelsDropdownErrorMessage" class="text-danger"></p>
         </div>
         <hr />
@@ -314,8 +318,40 @@
             calculateTotalCost("toursDropdown", "tourStartDate", "tourEndDate", "tourTotalCostMessage");
         }
         else if (document.getElementById("PackageTab").className == "tablinks active") {
+            updateDiscount();
             calculateTotalPackageCost();
-        }
+        } 
     });
 
+    function findDicount() {
+        var discount = 0
+        var singleDiscount = document.getElementById("Single").value
+        var doubleDiscount = document.getElementById("Double").value
+        var familySuiteDiscount = document.getElementById("Family Suite").value
+
+        var packageHotelRoomTypeSelected = document.getElementById("packageHotelRoomTypeDropDown")
+        var selectedRoomType = packageHotelRoomTypeSelected.options[packageHotelRoomTypeSelected.selectedIndex].textContent
+
+        switch (selectedRoomType) {
+            case "Single":
+                discount = singleDiscount;
+                break;
+            case "Double":
+                discount = doubleDiscount;
+                break;
+            case "Family Suite":
+                discount = familySuiteDiscount;
+                break;
+            default:
+                break;
+        }
+        return discount;
+    }
+
+    function updateDiscount() {
+        var discount = findDicount();
+ 
+        document.getElementById("packageHotelDiscountLable").innerHTML = "Discount :" + discount + "%";
+                
+    }
 </script>
