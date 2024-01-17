@@ -124,7 +124,7 @@
         <h3>Packages</h3>
         @foreach (var item in Model.PackageBook.HotelDiscountsList)
         {
-            <input type="text" id="@item.RoomType" value="@item.HotelDiscountPercentage" />
+            <input type="hidden" id="@item.RoomType" value="@item.HotelDiscountPercentage" />
         }
         <hr />
         <h4>Search Hotels</h4>
@@ -304,10 +304,18 @@
     function calculateTotalPackageCost() { 
         var packageHotelCost = calculateTotal("packageHotelsDropdownId", "packageHotelCheckInDate", "packageHotelCheckOutDate");
         var packageTourCost = calculateTotal("packageToursDropdownId", "packageTourStartDate", "packageTourEndDate");
-
-        var packageTotalCost = packageHotelCost + packageTourCost
-
-        document.getElementById("packageTotalCostMessage").innerHTML = "Total Cost: £" + packageTotalCost;
+        var discount = findDicount();
+        console.log("Discount " + discount);
+        console.log("packageHotelCost " + packageHotelCost);
+        console.log("packageTourCost " + packageTourCost);
+        var packageTotalCost = packageHotelCost + packageTourCost;
+        console.log("packageTotalCost " + packageTotalCost);
+        var discountAmount = (discount / 100) * packageTotalCost;
+        console.log("discountAmount " + discountAmount);
+        var discountedTotalCost = packageTotalCost - discountAmount;
+        console.log("discountedTotalCost " + discountedTotalCost);
+   
+        document.getElementById("packageTotalCostMessage").innerHTML = "Total Cost: £" + discountedTotalCost;
     }
 
     window.addEventListener('load', function () {
