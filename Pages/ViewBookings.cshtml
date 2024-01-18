@@ -74,7 +74,7 @@
                                 <td>@item.Tour.DurationInDays</td>
                                 <td>@item.TourStartDate.ToShortDateString()</td>
                                 <td>@item.TourEndDate.ToShortDateString()</td>
-                                <td>@("£" + ((item.TourEndDate - item.TourStartDate).Days * item.Tour.Cost).ToString("0.00"))</td>
+                                <td>@("£" + item.Tour.Cost)</td>
                                 <td>
                                     <div class="btn-group" role="group">
                                         <input type="submit" class="btn btn-primary" name="command" value="Edit" onclick="submitForm('tourBookingIdInput', 'tourTableForm', '@item.TourBookingId')" />
