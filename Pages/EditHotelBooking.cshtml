@@ -1,4 +1,6 @@
 ﻿@page
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "client")]
 @model EditHotelBookingModel
 @{
     ViewData["Title"] = "EditHotelBooking";
