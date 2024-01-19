@@ -39,7 +39,7 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
                 .Where(hb => hb.UserId.Equals(CurrentUser.Id) && hb.IsCancelled == false)
                 .Include(hb => hb.Hotel)
                 .ToListAsync();
-            
+
             ViewBookingsTable.HotelBookingsList = hotelBookingsList;
 
             var tourBookingsList = await _dbContext.TourBookings

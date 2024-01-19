@@ -144,6 +144,8 @@ namespace asp_net_core_web_app_authentication_authorisation.Areas.Identity.Pages
 
                 if (result.Succeeded)
                 {
+                    await _userManager.AddToRoleAsync(user, "client");
+
                     _logger.LogInformation("User created a new account with password.");
 
                     var userId = await _userManager.GetUserIdAsync(user);

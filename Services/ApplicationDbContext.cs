@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using asp_net_core_web_app_authentication_authorisation.Models;
+using Microsoft.AspNetCore.Identity;
+using NuGet.Protocol.Plugins;
 
 namespace asp_net_core_web_app_authentication_authorisation.Services
 {
@@ -80,6 +82,14 @@ namespace asp_net_core_web_app_authentication_authorisation.Services
                 .HasForeignKey(p => p.UserId);
 
             base.OnModelCreating(modelBuilder);
+
+            var manager = new IdentityRole("manager");
+            manager.NormalizedName = "manager";
+
+            var client = new IdentityRole("client");
+            client.NormalizedName = "client";
+
+            modelBuilder.Entity<IdentityRole>().HasData(manager, client);
         }
     }
 }
