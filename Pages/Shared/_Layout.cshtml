@@ -33,6 +33,12 @@
                                     <a class="nav-link text-dark" asp-area="" asp-page="/ViewBookings">Your Bookings</a>
                                 </li>
                             }
+                            else if (User.IsInRole("manager"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-page="/Report">Report</a>
+                                </li>
+                            }
                         }
                     </ul>
                     <partial name="_LoginPartial" />

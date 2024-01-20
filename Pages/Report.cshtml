@@ -1,0 +1,135 @@
+﻿@page
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "manager")]
+@model ReportModel
+@{
+    ViewData["Title"] = "Report";
+}
+
+<h2>Report</h2>
+<hr />
+<h3>Hotels</h3>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Room Type</th>
+                        <th>Check-in Date</th>
+                        <th>Check-out Date</th>
+                        <th>Cost</th>
+                        <th>Username</th>
+                        <th>User Full Name</th>
+                        <th>Booking cancelled</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.ReportTable.HotelBookingsList)
+                    {
+                        <tr>
+                            <td>@item.Hotel.Name</td>
+                            <td>@item.Hotel.RoomType</td>
+                            <td>@item.CheckInDate.ToShortDateString()</td>
+                            <td>@item.CheckOutDate.ToShortDateString()</td>
+                            <td>@("£" + ((item.CheckOutDate - item.CheckInDate).Days * item.Hotel.Cost).ToString("0.00"))</td>
+                            <td>@item.ApplicationUser.UserName</td>
+                            <td>@(item.ApplicationUser.FirstName + " " + item.ApplicationUser.LastName)</td>
+                            <td>@item.IsCancelled</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<hr />
+<h3>Tours</h3>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Duration (Days)</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Cost</th>
+                        <th>Username</th>
+                        <th>User Full Name</th>
+                        <th>Booking cancelled</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.ReportTable.TourBookingsList)
+                    {
+                        <tr>
+                            <td>@item.Tour.Name</td>
+                            <td>@item.Tour.DurationInDays</td>
+                            <td>@item.TourStartDate.ToShortDateString()</td>
+                            <td>@item.TourEndDate.ToShortDateString()</td>
+                            <td>@("£" + item.Tour.Cost)</td>
+                            <td>@item.ApplicationUser.UserName</td>
+                            <td>@(item.ApplicationUser.FirstName + " " + item.ApplicationUser.LastName)</td>
+                            <td>@item.IsCancelled</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<hr />
+<h3>Packages</h3>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Hotel</th>
+                        <th>Room Type</th>
+                        <th>Check-in Date</th>
+                        <th>Check-out Date</th>
+                        <th>Tour</th>
+                        <th>Duration (Days)</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Total Cost</th>
+                        <th>Username</th>
+                        <th>User Full Name</th>
+                        <th>Booking cancelled</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.ReportTable.PackageBookingsList)
+                    {
+                        <tr>
+                            <td>@item.Hotel.Name</td>
+                            <td>@item.Hotel.RoomType</td>
+                            <td>@item.CheckInDate.ToShortDateString()</td>
+                            <td>@item.CheckOutDate.ToShortDateString()</td>
+                            <td>@item.Tour.Name</td>
+                            <td>@item.Tour.DurationInDays</td>
+                            <td>@item.TourStartDate.ToShortDateString()</td>
+                            <td>@item.TourEndDate.ToShortDateString()</td>
+                            <td>
+                                @{
+                                    var hotelCost = (item.CheckOutDate - item.CheckInDate).Days * item.Hotel.Cost;
+                                    var tourCost = (item.TourEndDate - item.TourStartDate).Days * item.Tour.Cost;
+                                    var totalCost = hotelCost + tourCost;
+                                }
+                                @("£" + totalCost.ToString("0.00"))
+                            </td>
+                            <td>@item.ApplicationUser.UserName</td>
+                            <td>@(item.ApplicationUser.FirstName + " " + item.ApplicationUser.LastName)</td>
+                            <td>@item.IsCancelled</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
