@@ -3,6 +3,7 @@ using asp_net_core_web_app_authentication_authorisation.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.ComponentModel.DataAnnotations;
 
 namespace asp_net_core_web_app_authentication_authorisation.Pages
@@ -50,11 +51,16 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             [RegularExpression(@"^\d{3,4}$", ErrorMessage = "Invalid CVC number")]
             public string CvcNumber { get; set; }
 
-            public string ErrorMessage { get; set; }
+            public string ErrorMessage { get; set; } = "";
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
+            if (!ModelState.IsValid)
+            {
+                return Page();
+            }
+
             var BookingId = new Guid(Request.Query["bookingId"]);
             var BookingType = Request.Query["bookingType"];
 
