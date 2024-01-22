@@ -4,6 +4,89 @@
     ViewData["Title"] = "Home page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome to Pacific Tours</h1>
+<h1 class="display-4">Welcome to Pacific Tours</h1>
+<hr />
+<h2>Prices</h2>
+<h3>Hotels</h3>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Hotel</th>
+                        <th>Room Type</th>
+                        <th>Cost</th>
+                        <th>Available spaces</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach(var item in Model.PricesTable.HotelList)
+                    {
+                        <tr>
+                            <td>@item.Name</td>
+                            <td>@item.RoomType</td>
+                            <td>@("£" + item.Cost)</td>
+                            <td>@item.AvailableSpaces</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<hr />
+<h3>Tours</h3>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Tour</th>
+                        <th>Duration</th>
+                        <th>Cost</th>
+                        <th>Available Spaces</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach(var item in Model.PricesTable.TourList)
+                    {
+                        <tr>
+                            <td>@item.Name</td>
+                            <td>@(item.DurationInDays + " days")</td>
+                            <td>@("£" + item.Cost)</td>
+                            <td>@item.AvailableSpaces</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<hr />
+<h2>Discounts</h2>
+<h3>Hotels</h3>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Room type</th>
+                        <th>Discount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach(var item in Model.PricesTable.HotelDiscountList)
+                    {
+                        <tr>
+                            <td>@item.RoomType</td>
+                            <td>@(item.HotelDiscountPercentage + "%")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
