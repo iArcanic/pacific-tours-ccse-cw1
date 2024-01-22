@@ -159,7 +159,8 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
                     .Where(ha =>
                         ha.AvailableFrom <= HotelSearch.CheckInDate &&
                         ha.AvailableTo >= HotelSearch.CheckOutDate &&
-                        ha.Hotel.RoomType == HotelSearch.RoomType)
+                        ha.Hotel.RoomType == HotelSearch.RoomType &&
+                        ha.Hotel.AvailableSpaces > 0)
                     .Select(ha => ha.Hotel)
                     .Distinct()
                     .ToListAsync();
@@ -186,6 +187,9 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
                 };
 
                 _dbContext.HotelBookings.Add(hotelBooking);
+
+                hotelBooking.Hotel.AvailableSpaces -= 1;
+
                 await _dbContext.SaveChangesAsync();
 
                 return RedirectToPage("/Payment", new
@@ -207,7 +211,9 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             {
                 var availableTours = await _dbContext.TourAvailabilities
                 .Where(ta =>
-                    ta.AvailableFrom <= TourSearch.TourStartDate && ta.AvailableTo >= TourSearch.TourEndDate)
+                    ta.AvailableFrom <= TourSearch.TourStartDate && 
+                    ta.AvailableTo >= TourSearch.TourEndDate &&
+                    ta.Tour.AvailableSpaces > 0)
                 .Select(ta => ta.Tour)
                 .Distinct()
                 .ToListAsync();
@@ -234,6 +240,9 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
                 };
 
                 _dbContext.TourBookings.Add(tourBooking);
+
+                tourBooking.Tour.AvailableSpaces -= 1;
+
                 await _dbContext.SaveChangesAsync();
 
                 return RedirectToPage("/Payment", new
@@ -257,7 +266,10 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             {
                 var availableHotels = await _dbContext.HotelAvailabilities
                 .Where(ha =>
-                    ha.AvailableFrom <= PackageBook.CheckInDate && ha.AvailableTo >= PackageBook.CheckOutDate)
+                    ha.AvailableFrom <= PackageBook.CheckInDate && 
+                    ha.AvailableTo >= PackageBook.CheckOutDate &&
+                    ha.Hotel.RoomType == PackageBook.RoomType &&
+                    ha.Hotel.AvailableSpaces > 0)
                 .Select(ha => ha.Hotel)
                 .Distinct()
                 .ToListAsync();
@@ -266,7 +278,9 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
 
                 var availableTours = await _dbContext.TourAvailabilities
                     .Where(ta =>
-                        ta.AvailableFrom <= PackageBook.TourStartDate && ta.AvailableTo >= PackageBook.TourEndDate)
+                        ta.AvailableFrom <= PackageBook.TourStartDate && 
+                        ta.AvailableTo >= PackageBook.TourEndDate &&
+                        ta.Tour.AvailableSpaces > 0)
                     .Select(ta => ta.Tour)
                     .Distinct()
                     .ToListAsync();
@@ -301,6 +315,9 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
                 };
 
                 _dbContext.PackageBookings.Add(packageBooking);
+
+                packageBooking.Hotel.AvailableSpaces -= 1;
+                packageBooking.Tour.AvailableSpaces -= 1;
 
                 await _dbContext.SaveChangesAsync();
 

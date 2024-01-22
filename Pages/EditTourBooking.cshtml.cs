@@ -79,7 +79,8 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
                 .Where(ta =>
                     ta.TourId == TourBooking.TourId &&
                     ta.AvailableFrom <= EditBooking.TourStartDate &&
-                    ta.AvailableTo >= EditBooking.TourEndDate)
+                    ta.AvailableTo >= EditBooking.TourEndDate &&
+                    ta.Tour.AvailableSpaces > 0)
                 .Select(ha => ha.Tour)
                 .Distinct()
                 .ToListAsync();
@@ -90,6 +91,9 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
                 TourBooking.TourEndDate = EditBooking.TourEndDate;
 
                 _dbContext.TourBookings.Update(TourBooking);
+
+                TourBooking.Tour.AvailableSpaces -= 1;
+
                 await _dbContext.SaveChangesAsync();
 
                 return RedirectToPage("/Payment", new

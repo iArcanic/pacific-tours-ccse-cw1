@@ -123,7 +123,8 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
                 .Where(ha =>
                     ha.HotelId == packageBooking.HotelId &&
                     ha.AvailableFrom <= EditBooking.CheckInDate &&
-                    ha.AvailableTo >= EditBooking.CheckOutDate)
+                    ha.AvailableTo >= EditBooking.CheckOutDate &&
+                    ha.Hotel.AvailableSpaces > 0)
                 .Select(ha => ha.Hotel)
                 .Distinct()
                 .ToListAsync();
@@ -132,7 +133,8 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
                 .Where(ta =>
                     ta.TourId == packageBooking.TourId &&
                     ta.AvailableFrom <= EditBooking.TourStartDate &&
-                    ta.AvailableTo >= EditBooking.TourEndDate)
+                    ta.AvailableTo >= EditBooking.TourEndDate &&
+                    ta.Tour.AvailableSpaces > 0)
                 .Select(ha => ha.Tour)
                 .Distinct()
                 .ToListAsync();
@@ -146,6 +148,10 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
                 packageBooking.TourEndDate = EditBooking.TourEndDate;
 
                 _dbContext.PackageBookings.Update(packageBooking);
+
+                packageBooking.Hotel.AvailableSpaces -= 1;
+                packageBooking.Tour.AvailableSpaces -= 1;
+
                 await _dbContext.SaveChangesAsync();
 
                 return RedirectToPage("/Payment", new
