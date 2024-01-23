@@ -14,7 +14,10 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
         [BindProperty]
         public EditBookingModel EditBooking { get; set; }
 
+        // Application database context
         private readonly ApplicationDbContext _dbContext;
+
+        // User manager to access current user
         private readonly UserManager<ApplicationUser> _userManager;
 
         public EditPackageBookingModel(ApplicationDbContext dbContext, UserManager<ApplicationUser> userManager)
@@ -24,6 +27,7 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             _userManager = userManager;
         }
 
+        // Class containing variables binding to UI
         public class EditBookingModel
         {
             public string PackageBookingId { get; set; }
@@ -79,46 +83,66 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             public string ErrorMessage { get; set; }
         }
 
+        // When page loads
         public async Task<IActionResult> OnGet()
         {
+            // Get package booking ID from form
             var PackageBookingIdValue = Request.Query["packageBookingId"];
+
+            // Convert string value to GUID
             var PackageBookingId = new Guid(PackageBookingIdValue.ToString());
 
+            // Find package booking based on package booking ID
             var packageBooking = await _dbContext.PackageBookings
                 .Where(pb => pb.PackageBookingId == PackageBookingId)
                 .Include(pb => pb.Hotel)
                 .Include(pb => pb.Tour)
                 .FirstOrDefaultAsync();
 
+            // Set the database object's properties to UI values
             EditBooking.CheckInDate = packageBooking.CheckInDate;
             EditBooking.CheckOutDate = packageBooking.CheckOutDate;
             EditBooking.RoomType = packageBooking.Hotel.RoomType;
+
+            // Add hotel booking object to UI hotel list
             EditBooking.HotelsList.Add(packageBooking.Hotel);
 
+            // Set the database object's properties to UI values
             EditBooking.TourStartDate = packageBooking.TourStartDate;
             EditBooking.TourEndDate = packageBooking.TourEndDate;
+
+            // Add tour booking object to UI hotel list
             EditBooking.ToursList.Add(packageBooking.Tour);
 
+            // Set UI booking ID to model's package booking ID
             EditBooking.PackageBookingId = PackageBookingIdValue;
 
             return Page();
         }
 
+        // On form submit
         public async Task<IActionResult> OnPostAsync()
         {
+            // Clear error message each time
             EditBooking.ErrorMessage = null;
 
+            // Get tour booking ID from form
             var PackageBookingIdValue = Request.Query["packageBookingId"];
+
+            // Convert string value to GUID
             var PackageBookingId = new Guid(PackageBookingIdValue.ToString());
 
+            // Find package booking based on pacakge booking ID
             var packageBooking = await _dbContext.PackageBookings
                 .Where(pb => pb.PackageBookingId == PackageBookingId)
                 .Include(pb => pb.Hotel)
                 .Include(pb => pb.Tour)
                 .FirstOrDefaultAsync();
 
+            // Get current user
             var CurrentUser = await _userManager.GetUserAsync(User);
 
+            // Get hotel based on hotel booking ID, selected dates, and available spaces
             var hotelAvailability = await _dbContext.HotelAvailabilities
                 .Where(ha =>
                     ha.HotelId == packageBooking.HotelId &&
@@ -129,6 +153,7 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
                 .Distinct()
                 .ToListAsync();
 
+            // Get tour based on tour booking ID, selected dates, and available spaces
             var tourAvailability = await _dbContext.TourAvailabilities
                 .Where(ta =>
                     ta.TourId == packageBooking.TourId &&
@@ -139,37 +164,50 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
                 .Distinct()
                 .ToListAsync();
 
+            // If hotel and tour is found
             if (hotelAvailability.Count == 1 && tourAvailability.Count == 1)
             {
+                // Set package booking database object properties to model variables
                 packageBooking.CheckInDate = EditBooking.CheckInDate;
                 packageBooking.CheckOutDate = EditBooking.CheckOutDate;
-
                 packageBooking.TourStartDate = EditBooking.TourStartDate;
                 packageBooking.TourEndDate = EditBooking.TourEndDate;
 
+                // Update database tour booking object
                 _dbContext.PackageBookings.Update(packageBooking);
 
+                // Decrement available spaces
                 packageBooking.Hotel.AvailableSpaces -= 1;
                 packageBooking.Tour.AvailableSpaces -= 1;
 
+                // Save to database
                 await _dbContext.SaveChangesAsync();
 
+                // Redirect to "Payment" page, passing package booking ID and booking type
                 return RedirectToPage("/Payment", new
                 {
                     bookingId = PackageBookingIdValue,
                     bookingType = "package"
                 });
             }
+            // If hotel and tour is not found
             else
             {
+                // Display error message to UI
                 EditBooking.ErrorMessage = "Hotels and/or Tours not available for selected dates";
-
+                
+                // Add hotel booking object to UI hotel list
                 EditBooking.HotelsList.Add(packageBooking.Hotel);
+
+                // Set hotel database object properties to model variables
                 EditBooking.CheckInDate = EditBooking.CheckInDate;
                 EditBooking.CheckOutDate = EditBooking.CheckOutDate;
                 EditBooking.RoomType = packageBooking.Hotel.RoomType;
 
+                // Add tour booking object to UI tour list
                 EditBooking.ToursList.Add(packageBooking.Tour);
+
+                // Set tour database object properties to model variables
                 EditBooking.TourStartDate = EditBooking.TourStartDate;
                 EditBooking.TourEndDate = EditBooking.TourEndDate;
 

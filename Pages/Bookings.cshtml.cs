@@ -20,7 +20,10 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
         [BindProperty]
         public PackageBookModel PackageBook { get; set; }
 
+        // Application database context
         private readonly ApplicationDbContext _dbContext;
+
+        // User manager to access current user
         private readonly UserManager<ApplicationUser> _userManager;
 
         public BookingsModel(ApplicationDbContext dbContext, UserManager<ApplicationUser> userManager)
@@ -32,6 +35,7 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             _userManager = userManager;
         }
 
+        // Class containing hotel variables binding to UI
         public class HotelSearchModel
         {
             [Required(ErrorMessage = "Please select a check-in date")]
@@ -71,6 +75,7 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             public List<Hotel> HotelsList { get; set; } = new List<Hotel>();
         }
 
+        // Class containing tour variables binding to UI
         public class TourSearchModel
         {
             [Required(ErrorMessage = "Please select a tour start date")]
@@ -88,6 +93,7 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             public List<Tour> ToursList { get; set; } = new List<Tour>();
         }
 
+        // Class containing package variables binding to UI
         public class PackageBookModel
         {
             [Required(ErrorMessage = "Please select a check-in date")]
@@ -139,22 +145,28 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             public List<HotelDiscount> HotelDiscountsList { get; set; } = new List<HotelDiscount>();
         }
 
+        // When page loads
         public async Task<IActionResult> OnGet()
         {
+            // Set hotel discounts to hotel discounts list in UI
             PackageBook.HotelDiscountsList = await _dbContext.HotelDiscounts.ToListAsync();
  
             return Page();
         }
 
+        // On hotel form submit
         public async Task<IActionResult> OnPostHotelSearchAsync(string command, string returnUrl = null)
         {
+            // Check if the page is valid
             if (!ModelState.IsValid)
             {
                 return Page();
             }
 
+            // If "Search" button is clicked
             if (command == "Search")
             {
+                // Get all available hotels
                 var availableHotels = await _dbContext.HotelAvailabilities
                     .Where(ha =>
                         ha.AvailableFrom <= HotelSearch.CheckInDate &&
@@ -165,16 +177,24 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
                     .Distinct()
                     .ToListAsync();
 
+                // Bind available hotels to UI hotels list
                 HotelSearch.HotelsList = availableHotels;
 
                 return Page();
             }
+            // If "Book" button is clicked
             else
             {
+                // Get hotel ID from form
                 var SelectedHotelId = new Guid(Request.Form["hotels"]);
+
+                // Get current user
                 var CurrentUser = await _userManager.GetUserAsync(User);
+
+                // Get hotel based on hotel ID
                 Hotel SelectedHotel = await _dbContext.Hotels.FindAsync(SelectedHotelId);
 
+                // Make a new hotel booking record
                 var hotelBooking = new HotelBooking
                 {
                     HotelBookingId = new Guid(),
@@ -186,12 +206,17 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
                     ApplicationUser = CurrentUser
                 };
 
+                // Add to database
                 _dbContext.HotelBookings.Add(hotelBooking);
 
+                // Decrement available spaces
                 hotelBooking.Hotel.AvailableSpaces -= 1;
 
+
+                // Save changes to database
                 await _dbContext.SaveChangesAsync();
 
+                // Redirect to "Payment" page, passing hotel booking ID and booking type
                 return RedirectToPage("/Payment", new
                 {
                     bookingId = hotelBooking.HotelBookingId.ToString(),
@@ -200,15 +225,19 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             }
         }
 
+        // On tour form submit
         public async Task<IActionResult> OnPostTourSearchAsync(string command, string returnUrl = null)
         {
+            // Check if the page is valid
             if (!ModelState.IsValid)
             {
                 return Page();
             }
 
+            // If the "Search" button is clicked
             if (command == "Search")
             {
+                // Get all available tours
                 var availableTours = await _dbContext.TourAvailabilities
                 .Where(ta =>
                     ta.AvailableFrom <= TourSearch.TourStartDate && 
@@ -218,16 +247,23 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
                 .Distinct()
                 .ToListAsync();
 
+                // Bind available tours to UI tours list
                 TourSearch.ToursList = availableTours;
 
                 return Page();
             }
             else
             {
+                // Get hotel ID from form
                 var SelectedTourId = new Guid(Request.Form["tours"]);
+
+                // Get current user
                 var CurrentUser = await _userManager.GetUserAsync(User);
+
+                // Get tour based on tour ID
                 Tour SelectedTour = await _dbContext.Tours.FindAsync(SelectedTourId);
 
+                // Make a new tour booking record
                 var tourBooking = new TourBooking
                 {
                     TourBookingId = new Guid(),
@@ -239,12 +275,16 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
                     ApplicationUser = CurrentUser
                 };
 
+                // Add to database
                 _dbContext.TourBookings.Add(tourBooking);
 
+                // Decrement available spaces
                 tourBooking.Tour.AvailableSpaces -= 1;
 
+                // Save changes to database
                 await _dbContext.SaveChangesAsync();
 
+                // Redirect to "Payment" page, passing tour booking ID and booking type
                 return RedirectToPage("/Payment", new
                 {
                     bookingId = tourBooking.TourBookingId.ToString(),
@@ -253,17 +293,22 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
             }
         }
 
+        // On package form submit
         public async Task<IActionResult> OnPostPackageBookAsync(string command, string returnUrl = null)
         {
+            // Check if the page is valid
             if (!ModelState.IsValid)
             {
                 return Page();
             }
 
+            // Get hotel discounts and bind to hotel discounts UI list
             PackageBook.HotelDiscountsList = await _dbContext.HotelDiscounts.ToListAsync();
 
+            // If "Search" button is clicked
             if (command == "Search")
             {
+                // Get all available hotels
                 var availableHotels = await _dbContext.HotelAvailabilities
                 .Where(ha =>
                     ha.AvailableFrom <= PackageBook.CheckInDate && 
@@ -274,8 +319,10 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
                 .Distinct()
                 .ToListAsync();
 
+                // Bind available hotel to UI hotel list
                 PackageBook.HotelsList = availableHotels;
 
+                // Get all available tours
                 var availableTours = await _dbContext.TourAvailabilities
                     .Where(ta =>
                         ta.AvailableFrom <= PackageBook.TourStartDate && 
@@ -285,20 +332,30 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
                     .Distinct()
                     .ToListAsync();
 
+                // Bind available tours to UI tours list
                 PackageBook.ToursList = availableTours;
 
                 return Page();
             }
+            // If "Book" button is clicked
             else
             {
+                // Get current user
                 var CurrentUser = await _userManager.GetUserAsync(User);
-
+                
+                // Get hotel ID from form
                 var SelectedHotelId = new Guid(Request.Form["packageHotelsDropdown"]);
+
+                // Get hotel from hotel ID
                 Hotel SelectedHotel = await _dbContext.Hotels.FindAsync(SelectedHotelId);
 
+                // Get tour ID from form
                 var SelectedTourId = new Guid(Request.Form["packageToursDropdown"]);
+
+                // Get tour from tour ID
                 Tour SelectedTour = await _dbContext.Tours.FindAsync(SelectedTourId);
 
+                // Make new package booking
                 var packageBooking = new PackageBooking
                 {
                     PackageBookingId = new Guid(),
@@ -314,13 +371,17 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
                     ApplicationUser = CurrentUser
                 };
 
+                // Add to database
                 _dbContext.PackageBookings.Add(packageBooking);
 
+                // Decrement available spaces
                 packageBooking.Hotel.AvailableSpaces -= 1;
                 packageBooking.Tour.AvailableSpaces -= 1;
 
+                // Save changes to database
                 await _dbContext.SaveChangesAsync();
 
+                // Redirect to "Payment" page, passing package booking ID and booking type
                 return RedirectToPage("/Payment", new
                 {
                     bookingId = packageBooking.PackageBookingId.ToString(),

@@ -83,6 +83,7 @@ namespace asp_net_core_web_app_authentication_authorisation.Services
 
             base.OnModelCreating(modelBuilder);
 
+            // Identity roles
             var manager = new IdentityRole("manager");
             manager.NormalizedName = "manager";
 
