@@ -5,7 +5,7 @@ bibliography: references.bib
 toc: true
 toc-title: Table of Contents
 toc-depth: 4
-csl: ../../Shared/harvard-imperial-college-london.csl
+csl: harvard-imperial-college-london.csl
 ---
 
 ---
