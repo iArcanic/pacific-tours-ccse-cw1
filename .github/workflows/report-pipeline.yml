@@ -1,0 +1,60 @@
+name: Report Build CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  report_build:
+    name: Report PDF Build
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "14"
+
+      - name: Install dependencies
+        run: npm install -g markdownlint-cli
+
+      - name: Install Pandoc and LaTeX
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc
+          sudo apt-get install -y pandoc-citeproc
+          sudo apt-get install -y texlive-xetex
+
+      - name: Install BibTeX
+        run: |
+          sudo apt-get install -y bibtex2html
+
+      - name: Set timestamp
+        id: timestamp
+        run: echo "::set-output name=timestamp::$(date +'%Y%m%d%H%M%S')"
+
+      - name: Compile CCSE CW1 report to PDF
+        run: |
+          timestamp=$(date +"%Y%m%d%H%M%S")
+          pandoc Docs/CcseCw1Report/report.md --filter pandoc-citeproc -o "ccse-cw1-report-${{ steps.timestamp.outputs.timestamp }}.pdf"
+
+      - name: Compile CCSE CW2 report to PDF
+        run: |
+          timestamp=$(date +"%Y%m%d%H%M%S")
+          pandoc Docs/CcseCw2Report/report.md --filter pandoc-citeproc -o "ccse-cw2-report-${{ steps.timestamp.outputs.timestamp }}.pdf"
+
+      - name: Upload CCSE CW1 report PDF artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ccse-cw1-report-artifact
+          path: "ccse-cw1-report-${{ steps.timestamp.outputs.timestamp }}.pdf"
+
+      - name: Upload CCSE CW2 report PDF artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ccse-cw2-report-artifact
+          path: "ccse-cw2-report-${{ steps.timestamp.outputs.timestamp }}.pdf"
