@@ -1,11 +1,11 @@
 ---
 title: "Pacific Tours CCSE-CW2 Report"
 author: "2242090"
-bibliography: references.bib
+bibliography: Docs/CcseCw2Report/references.bib
 toc: true
 toc-title: Table of Contents
 toc-depth: 4
-csl: harvard-imperial-college-london.csl
+csl: Docs/Shared/harvard-imperial-college-london.csl
 ---
 
 ---
