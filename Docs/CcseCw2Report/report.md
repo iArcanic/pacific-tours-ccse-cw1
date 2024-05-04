@@ -34,9 +34,13 @@ The second section, [Section B](#3-section-b-software-automation), covers the pr
 
 <!-- 50 words maximum -->
 
+The purpose of this section is to identify any security vulnerabilities in the codebase of the ASP.NET C# project through both static and dynamic analysis. Through this, secure development practices as recommended by OWASP [@owasp2024] are considered. This can help in mitigating potential security risks in the codebase.
+
 ### 2.1.2 Tools used
 
 <!-- 50 words maximum -->
+
+The SAST scanning was performed using Synk [@snyk2024] and the DAST analysis was carried out by OWASP ZAP [@owaspzap2024]. These industry-grade tools allow for detailed vulnerability auditing whilst adhering to security practices defined by the National Institute of Standards and Technology (NIST) [@nist2024].
 
 ## 2.2 Static Application Security Testing (SAST)
 
@@ -45,6 +49,8 @@ The second section, [Section B](#3-section-b-software-automation), covers the pr
 ### 2.2.1 Methodology
 
 <!-- 100 words maximum -->
+
+SAST analysis involves examining the source code of the ASP.NET C# project to identify any potential security issues without actually having to execute the application. The SAST tool operates based on OWASP's Source Code Review Guide [@owasp2017]. The tool also leverages techniques such as data flow analysis, taint analysis, pattern matching with injection flaw issues, insecure deserialisation, and faulty access control mechanisms [@snyk2024]. The results were then reviewed, and the relevant information will be documented below.
 
 ### 2.2.2 Vulnerabilities identified
 
