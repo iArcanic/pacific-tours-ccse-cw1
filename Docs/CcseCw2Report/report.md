@@ -56,6 +56,21 @@ SAST analysis involves examining the source code of the ASP.NET C# project to id
 
 <!-- 200 words maximum -->
 
+| Vulnerability                                                                 | Affected component                                      | Severity | Priotity score |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------- | -------- | -------------- |
+| NuGet.Packaging – Improper Access Control                                     | Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11 | Critical | 562            |
+| Azure.Identity – Remote Code Execution (RCE)                                  | Microsoft.EntityFrameworkCore.SqlServer@7.0.12          | High     | 440            |
+| Microsoft.Data.SqlClient – Unprotected Storage of Credentials                 | Microsoft.EntityFrameworkCore.SqlServer@7.0.12          | High     | 375            |
+| System.Net.Http – Denail of Service (DoS)                                     | Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11 | High     | 375            |
+| System.Net.Http – Improper Certificate Validation                             | Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11 | High     | 375            |
+| System.Net.Http – Information Exposure                                        | Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11 | High     | 375            |
+| System.Text.RegularExpressions – Regular Expression Denial of Service (ReDoS) | Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11 | High     | 375            |
+| System.Net.Http – Privilege Escalation                                        | Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11 | High     | 365            |
+| Microsoft.IdentityModel.JsonWebTokens – Resource Exhaustion                   | Microsoft.EntityFrameworkCore.SqlServer@7.0.12          | Medium   | 340            |
+| Microsoft.IdentityModel.Tokens.Jwt – Resource Exhaustion                      | Microsoft.EntityFrameworkCore.SqlServer@7.0.12          | Medium   | 340            |
+| Azure.Identity – Information Exposure Through an Error Message                | Microsoft.EntityFrameworkCore.SqlServer@7.0.12          | Medium   | 275            |
+| System.Net.Http – Authentication Bypass                                       | Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11 | Medium   | 265            |
+
 ### 2.2.3 Remediation
 
 <!-- 100 words maximum -->
