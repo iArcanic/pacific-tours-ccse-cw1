@@ -58,22 +58,75 @@ SAST analysis involves examining the source code of the ASP.NET C# project to id
 
 | Vulnerability                                                                 | Affected component                                      | Severity | Priotity score |
 | ----------------------------------------------------------------------------- | ------------------------------------------------------- | -------- | -------------- |
-| NuGet.Packaging – Improper Access Control                                     | Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11 | Critical | 562            |
+| NuGet.Packaging – Improper access control                                     | Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11 | Critical | 562            |
+| Anti-forgery token validation disabled                                        | ErrorModel class                                        | Low      | 450            |
 | Azure.Identity – Remote Code Execution (RCE)                                  | Microsoft.EntityFrameworkCore.SqlServer@7.0.12          | High     | 440            |
-| Microsoft.Data.SqlClient – Unprotected Storage of Credentials                 | Microsoft.EntityFrameworkCore.SqlServer@7.0.12          | High     | 375            |
+| Microsoft.Data.SqlClient – Unprotected storage of credentials                 | Microsoft.EntityFrameworkCore.SqlServer@7.0.12          | High     | 375            |
 | System.Net.Http – Denail of Service (DoS)                                     | Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11 | High     | 375            |
-| System.Net.Http – Improper Certificate Validation                             | Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11 | High     | 375            |
-| System.Net.Http – Information Exposure                                        | Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11 | High     | 375            |
+| System.Net.Http – Improper certificate validation                             | Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11 | High     | 375            |
+| System.Net.Http – Information exposure                                        | Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11 | High     | 375            |
 | System.Text.RegularExpressions – Regular Expression Denial of Service (ReDoS) | Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11 | High     | 375            |
-| System.Net.Http – Privilege Escalation                                        | Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11 | High     | 365            |
-| Microsoft.IdentityModel.JsonWebTokens – Resource Exhaustion                   | Microsoft.EntityFrameworkCore.SqlServer@7.0.12          | Medium   | 340            |
-| Microsoft.IdentityModel.Tokens.Jwt – Resource Exhaustion                      | Microsoft.EntityFrameworkCore.SqlServer@7.0.12          | Medium   | 340            |
-| Azure.Identity – Information Exposure Through an Error Message                | Microsoft.EntityFrameworkCore.SqlServer@7.0.12          | Medium   | 275            |
-| System.Net.Http – Authentication Bypass                                       | Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11 | Medium   | 265            |
+| System.Net.Http – Privilege escalation                                        | Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11 | High     | 365            |
+| Microsoft.IdentityModel.JsonWebTokens – Resource exhaustion                   | Microsoft.EntityFrameworkCore.SqlServer@7.0.12          | Medium   | 340            |
+| Microsoft.IdentityModel.Tokens.Jwt – Resource exhaustion                      | Microsoft.EntityFrameworkCore.SqlServer@7.0.12          | Medium   | 340            |
+| Azure.Identity – Information exposure through an error message                | Microsoft.EntityFrameworkCore.SqlServer@7.0.12          | Medium   | 275            |
+| System.Net.Http – Authentication bypass                                       | Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11 | Medium   | 265            |
+
+#### 2.2.2.1 NuGet.Packaging – Improper access control
+
+#### 2.2.2.2 Anti-forgery token validation disabled
+
+#### 2.2.2.3 Azure.Identity – Remote Code Execution (RCE)
+
+#### 2.2.2.4 Microsoft.Data.SqlClient – Unprotected storage of credentials
+
+#### 2.2.2.5 System.Net.Http – Denail of Service (DoS)
+
+#### 2.2.2.6 System.Net.Http – Improper certificate validation
+
+#### 2.2.2.7 System.Net.Http – Information exposure
+
+#### 2.2.2.8 System.Text.RegularExpressions – Regular Expression Denial of Service (ReDoS)
+
+#### 2.2.2.9 System.Net.Http – Privilege escalation
+
+#### 2.2.2.10 Microsoft.IdentityModel.JsonWebTokens – Resource exhaustion
+
+#### 2.2.2.11 System.IdentityModel.Tokens.Jwt – Resource exhaustion
+
+#### 2.2.2.12 Azure.Identity – Information exposure through an error message
+
+#### 2.2.2.13 System.Net.Http – Authentication bypass
 
 ### 2.2.3 Remediation
 
 <!-- 100 words maximum -->
+
+#### 2.2.3.1 NuGet.Packaging – Improper access control
+
+#### 2.2.3.2 Anti-forgery token validation disabled
+
+#### 2.2.3.3 Azure.Identity – Remote Code Execution (RCE)
+
+#### 2.2.3.4 Microsoft.Data.SqlClient – Unprotected storage of credentials
+
+#### 2.2.3.5 System.Net.Http – Denail of Service (DoS)
+
+#### 2.2.3.6 System.Net.Http – Improper certificate validation
+
+#### 2.2.3.7 System.Net.Http – Information exposure
+
+#### 2.2.3.8 System.Text.RegularExpressions – Regular Expression Denial of Service (ReDoS)
+
+#### 2.2.3.9 System.Net.Http – Privilege escalation
+
+#### 2.2.3.10 Microsoft.IdentityModel.JsonWebTokens – Resource exhaustion
+
+#### 2.2.3.11 System.IdentityModel.Tokens.Jwt – Resource exhaustion
+
+#### 2.2.3.12 Azure.Identity – Information exposure through an error message
+
+#### 2.2.3.13 System.Net.Http – Authentication bypass
 
 ## 2.3 Dynamic Application Security Testing (DAST)
 
