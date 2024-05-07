@@ -84,7 +84,7 @@ jobs:
     - name: Get Connection String
       id: get-connection-string
       run: |
-        CONNECTION_STRING=$(az containerapp env-vars show --name ${{ env.CONTAINER_APP_NAME }} --resource-group ${{ env.RESOURCE_GROUP }} --env ${{ env.CONTAINER_APP_ENVIRONMENT_NAME }} --query properties.environmentVariables.ConnectionStrings__DefaultConnection.value -o tsv)
+        CONNECTION_STRING=$(az webapp config appsettings list --name ${{ env.CONTAINER_APP_NAME }} --resource-group ${{ env.RESOURCE_GROUP }} --query "[?name=='ConnectionStrings__DefaultConnection'].value" -o tsv)
         echo "::set-output name=connection-string::$CONNECTION_STRING"
 
     - name: Run Database Migrations
