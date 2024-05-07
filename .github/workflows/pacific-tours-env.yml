@@ -34,9 +34,10 @@ jobs:
         args: --sarif-file-output=snyk.sarif
 
     - name: Upload result to GitHub code scanning
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: snyk.sarif
+        category: snyk-sast-analysis
 
   BuildAndDeployPacificToursContainerApp:
     runs-on: ubuntu-latest
@@ -50,9 +51,9 @@ jobs:
         dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
 
     - name: Azure login
-      uses: azure/login@v1
+      uses: azure/login@v2
       with:
-        creds: ${{ secrets.pacific_tours_env_SPN }}
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
 
     - name: Container App deploy
       uses: azure/container-apps-deploy-action@v1
