@@ -81,6 +81,11 @@ jobs:
       with:
         dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
 
+    - name: Azure login
+      uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
     - name: Get Connection String
       id: get-connection-string
       run: |
