@@ -94,6 +94,7 @@ jobs:
   
   DynamicApplicationSecurityTesting:
     runs-on: ubuntu-latest
+    needs: [BuildAndDeployPacificToursContainerApp, DatabaseMigration]
     steps:
     - name: Checkout source code
       uses: actions/checkout@v4
@@ -105,7 +106,7 @@ jobs:
         echo "::set-output name=app-url::$APP_URL"
 
     - name: Run OWASP ZAP Baseline Scan
-      uses: zaproxy/full-scan@v0.10.0
+      uses: zaproxy/actions-full-scan@v0.10.0
       with:
         target: "https://${{ steps.get-app-url.outputs.app-url }}"
 
