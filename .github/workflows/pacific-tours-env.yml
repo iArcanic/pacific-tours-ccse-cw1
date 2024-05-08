@@ -8,7 +8,7 @@ env:
   CONTAINER_APP_NAME: pacific-tours-container-app
   CONTAINER_APP_ENVIRONMENT_NAME: pacific-tours-env
   RESOURCE_GROUP: pacific-tours-env-resource-group
-  CONTAINER_REGISTRY_NAME: pacifictoursregistry
+  CONTAINER_REGISTRY_NAME: PacificToursRegistry
   CONTAINER_REGISTRY_LOGIN_SERVER: pacifictoursregistry.azurecr.io
   SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
@@ -81,10 +81,8 @@ jobs:
       with:
         dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
 
-    - name: Azure login
-      uses: azure/login@v2
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: Install EF Core tools
+      run: dotnet tool install --global dotnet-ef
 
     - name: Run Database Migrations
       run: |
