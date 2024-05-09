@@ -75,7 +75,7 @@ jobs:
           sarif_file: snyk.sarif
           category: snyk-sast-analysis
 
-  build:
+  docker-build-and-push-to-acr:
     runs-on: ubuntu-latest
     needs: sast # Add unit-tests job dependency
 
@@ -83,27 +83,10 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      - name: Cache Docker layers
-        uses: actions/cache@v2
-        with:
-          path: /var/lib/docker
-          key: ${{ runner.os }}-docker-${{ hashFiles('**/Dockerfile') }}
-
       - name: Build Docker Image
         run: |
           echo "Building Docker image..."
           docker build -t ${{ env.ACR_LOGIN_SERVER }}/${{ env.ACR_NAME }}:${{ env.CONTAINER_IMAGE_NAME }}-${{ github.sha }} .
-
-  # integration-tests-1:
-  #   needs: build
-
-  push-to-acr:
-    runs-on: ubuntu-latest
-    needs: build # Add integration-tests job dependency
-
-    steps:
-      - name: Checkout source code
-        uses: actions/checkout@v4
 
       - name: Azure login
         uses: azure/login@v2
@@ -129,7 +112,7 @@ jobs:
 
   deploy-to-staging:
     runs-on: ubuntu-latest
-    needs: [build, push-to-acr]
+    needs: [docker-build-and-push-to-acr, push-to-acr]
 
     steps:
       - name: Checkout source code
