@@ -1,0 +1,333 @@
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  # Snyk token for SAST
+  SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+  # Project variables
+  SOLUTION_NAME: asp-net-core-web-app-authentication-authorisation.sln
+  DOTNET_CORE_VERSION: 7.0.x
+
+  # Azure variables
+  AZURE_CREDS: ${{ secrets.AZURE_CREDENTIALS }}
+  AZURE_WEB_APP_NAME: ${{ secrets.AZURE_WEB_APP_NAME }}
+  CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME }}
+  AZURE_RG: ${{ secrets.AZURE_RESOURCE_GROUP }}
+  ACR_NAME: pacifictoursregistry
+  ACR_LOGIN_SERVER: ${{ PACIFICTOURSREGISTRY_LOGIN_SERVER }}
+  ACR_USERNAME: ${{ secrets.PACIFICTOURSREGISTRY_USERNAME_4718 }}
+  ACR_PASSWORD: ${{ secrets.PACIFICTOURSREGISTRY_PASSWORD_4718 }}
+
+  # SQL database variables
+  SQL_DB: ${{ secrets.SQL_DATABASE }}
+  SQL_SERVER: ${{ secrets.SQL_SERVER }}
+  CONNECTION_STRING: ${{ SQL_DATABASE_CONNECTION_STRING }}
+
+jobs:
+  # unit-tests:
+  #   runs-on: windows-latest
+
+  #   steps:
+  #     - name: Checkout source code
+  #       uses: actions/checkout@v4
+
+  #     - name: Setup .NET SDK
+  #       uses: actions/setup-dotnet@v4
+  #       with:
+  #         dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
+
+  #     - name: Restore project dependencies
+  #       run: dotnet restore ${{ env.SOLUTION_NAME }}
+
+  #     - name: Test project
+  #       run: dotnet test --no-build --logger trx --collect "Code coverage"
+
+  sast:
+    runs-on: windows-latest
+    # needs: unit-tests
+    permissions: write-all
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
+
+      - name: Restore project dependencies
+        run: dotnet restore ${{ env.SOLUTION_NAME }}
+
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/dotnet@master
+        continue-on-error: true
+        with:
+          args: --sarif-file-output=snyk.sarif
+
+      - name: Upload result to GitHub code scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: snyk.sarif
+          category: snyk-sast-analysis
+
+  build:
+    runs-on: ubuntu-latest
+    needs: sast # Add unit-tests job dependency
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Build Docker Image
+        run: |
+          echo "Building Docker image..."
+          docker build -t ${{ env.CONTAINER_IMAGE_NAME }}:ci
+
+  # integration-tests-1:
+  #   needs: build
+
+  push-to-acr:
+    runs-on: ubuntu-latest
+    needs: build # Add integration-tests job dependency
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Login to ACR
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ env.ACR_LOGIN_SERVER }}
+          username: ${{ env.ACR_USERNAME }}
+          password: ${{ env.ACR_PASSWORD }}
+
+      - name: Tag Docker image for ACR
+        run: |
+          echo "Tagging Docker image for ACR..."
+          docker tag ${{ env.CONTAINER_IMAGE_NAME }}:ci ${{ env.ACR_LOGIN_SERVER }}/${{ env.CONTAINER_IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Push Docker image to ACR
+        run: |
+          echo "Pushing Docker image to ACR..."
+          docker push ${{ env.ACR_LOGIN_SERVER }}/${{ env.CONTAINER_IMAGE_NAME }}:${{ github.sha }}
+
+      - name: List all repositories in ACR
+        run: |
+          echo "List the repositories in the ACR"
+          az acr repository list -n ${{ env.ACR_LOGIN_SERVER }}
+
+  deploy-to-staging:
+    runs-on: ubuntu-latest
+    needs: [build, push-to-acr]
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set version date
+        run: |
+          echo "APP_VERSION_DATE=$(date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_ENV
+
+      - name: Set Azure Web App Settings
+        uses: Azure/appservice-settings@v1
+        with:
+          app-name: ${{ env.AZURE_WEB_APP_NAME }}
+          slot-name: staging
+          app-settings-json: |
+            [
+              {
+                "name": "WEBSITES_ENABLE_APP_SERVICE_STORAGE",
+                "value": "false",
+                "slotSetting": false
+              },
+              {
+                "name": "DOCKER_REGISTRY_SERVER_URL",
+                "value": "${{ env.ACR_LOGIN_SERVER }}",
+                "slotSetting": false
+              },
+              {
+                "name": "DOCKER_REGISTRY_SERVER_USERNAME",
+                "value": "${{ env.ACR_USERNAME  }}",
+                "slotSetting": false
+              },
+              {
+                "name": "DOCKER_REGISTRY_SERVER_PASSWORD",
+                "value": "${{ env.ACR_PASSWORD }}",
+                "slotSetting": false
+              },
+              {
+                "name": "VersionInfo__Number",
+                "value": "1.0.${{ github.run_number }}",
+                "slotSetting": false
+              },
+              {
+                "name": "VersionInfo__Date",
+                "value": "${{ env.APP_VERSION_DATE }}",
+                "slotSetting": false
+              }
+            ]
+          connection-strings-json: |
+            [
+              {
+                "name": "PacificToursDbConnection",
+                "value": "${{ env.SQL_CONNECTION_STRING }}",
+                "type": "SQLAzure",
+                "slotSetting": false
+              }
+            ]
+
+      - name: Deploy Azure WebApp to Staging
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEB_APP_NAME }}
+          images: ${{ env.ACR_LOGIN_SERVER }}/${{ env.CONTAINER_IMAGE_NAME }}:${{ github.sha }}
+          slot-name: staging
+
+  dast:
+    runs-on: ubuntu-latest
+    needs: deploy-to-staging
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Run OWASP ZAP scan
+        uses: zaproxy/action-full-scan@v0.10.0
+        with:
+          target: "https://${{ env.AZURE_WEB_APP_NAME }}.azurewebsites.net"
+
+  database-migration:
+    runs-on: windows-latest
+    needs: deploy-to-staging
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
+
+      - name: Install Dotnet Entity Framework CLI tool
+        run: |
+          dotnet tool install --global dotnet-ef
+          dotnet tool restore
+
+      - name: Update Database
+        run: |
+          dotnet ef database update
+        env:
+          ASPNETCORE_ENVIRONMENT: Development
+          ConnectionStrings__PacificToursDbConnection: ${{ env.CONNECTION_STRING }}
+
+      - name: Install SQL Server command-line utilities
+        run: |
+          echo "Install SQL Server command-line utilities..."
+          choco install sqlserver-cmdlineutils -y
+
+      - name: Execute custom SQL scripts
+        working-directory: Scripts/SQL
+        run: |
+          for script in *.sql; do
+            echo "Executing script: $script"
+            sqlcmd -S ${{ env.SQL_SERVER }} -U <username> -P <password> -d ${{ env.SQL_DB }} -i $script
+          done
+
+  # integration-tests-2:
+  #   needs: [deploy-to-staging, database-migration]
+
+  deploy-to-production:
+    runs-on: ubuntu-latest
+    needs: [deploy-to-staging, database-migration] # Add dast and integration-tests-2 job dependency
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set version date
+        run: |
+          echo "APP_VERSION_DATE=$(date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_ENV
+
+      - name: Set Azure Web App Settings
+        uses: Azure/appservice-settings@v1
+        with:
+          app-name: ${{ env.AZURE_WEB_APP_NAME }}
+          slot-name: staging
+          app-settings-json: |
+            [
+              {
+                "name": "WEBSITES_ENABLE_APP_SERVICE_STORAGE",
+                "value": "false",
+                "slotSetting": false
+              },
+              {
+                "name": "DOCKER_REGISTRY_SERVER_URL",
+                "value": "${{ env.ACR_LOGIN_SERVER }}",
+                "slotSetting": false
+              },
+              {
+                "name": "DOCKER_REGISTRY_SERVER_USERNAME",
+                "value": "${{ env.ACR_USERNAME  }}",
+                "slotSetting": false
+              },
+              {
+                "name": "DOCKER_REGISTRY_SERVER_PASSWORD",
+                "value": "${{ env.ACR_PASSWORD }}",
+                "slotSetting": false
+              },
+              {
+                "name": "VersionInfo__Number",
+                "value": "1.0.${{ github.run_number }}",
+                "slotSetting": false
+              },
+              {
+                "name": "VersionInfo__Date",
+                "value": "${{ env.APP_VERSION_DATE }}",
+                "slotSetting": false
+              }
+            ]
+          connection-strings-json: |
+            [
+              {
+                "name": "PacificToursDbConnection",
+                "value": "${{ env.SQL_CONNECTION_STRING }}",
+                "type": "SQLAzure",
+                "slotSetting": false
+              }
+            ]
+
+      - name: Deploy Azure WebApp to Production
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEB_APP_NAME }}
+          images: ${{ env.ACR_LOGIN_SERVER }}/${{ env.CONTAINER_IMAGE_NAME }}:${{ github.sha }}
+          slot-name: Production
+
+      - name: Swap to production slot
+        run: |
+          az webapp deployment slot swap --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --name ${{ env.WEB_APP_NAME }} --slot staging --target-slot production
+          echo "Swap finished. WebApp accessible at https://$(az webapp show --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --name ${{ env.WEB_APP_NAME }} --query hostNames[0] -o tsv)"
+
+  # monitoring:
+  #   needs: deploy-to-production
