@@ -86,7 +86,7 @@ jobs:
       - name: Build Docker Image
         run: |
           echo "Building Docker image..."
-          docker buildx build -t ${{ env.CONTAINER_IMAGE_NAME }}:ci
+          docker buildx build -t ${{ env.ACR_LOGIN_SERVER }}/${{ env.ACR_NAME }}:${{ env.CONTAINER_IMAGE_NAME }}-${{ github.sha }} .
 
   # integration-tests-1:
   #   needs: build
@@ -111,15 +111,10 @@ jobs:
           username: ${{ env.ACR_USERNAME }}
           password: ${{ env.ACR_PASSWORD }}
 
-      - name: Tag Docker image for ACR
-        run: |
-          echo "Tagging Docker image for ACR..."
-          docker tag ${{ env.CONTAINER_IMAGE_NAME }}:ci ${{ env.ACR_LOGIN_SERVER }}/${{ env.CONTAINER_IMAGE_NAME }}:${{ github.sha }}
-
       - name: Push Docker image to ACR
         run: |
           echo "Pushing Docker image to ACR..."
-          docker push ${{ env.ACR_LOGIN_SERVER }}/${{ env.CONTAINER_IMAGE_NAME }}:${{ github.sha }}
+          docker push ${{ env.ACR_LOGIN_SERVER }}/${{ env.ACR_NAME }}:${{ env.CONTAINER_IMAGE_NAME }}-${{ github.sha }}
 
       - name: List all repositories in ACR
         run: |
