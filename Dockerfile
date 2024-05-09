@@ -1,9 +1,6 @@
 # Base Microsoft ASP.NET Core SDK version 7.0 image
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 
-# Set the working directory
-WORKDIR /app
-
 # Copy .csproj and restore as distinct layers
 COPY *.sln .
 COPY *.csproj ./PacificToursAspDotnetCoreWebApp/
