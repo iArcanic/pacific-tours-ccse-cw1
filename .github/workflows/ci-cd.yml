@@ -110,7 +110,7 @@ jobs:
           echo "List the repositories in the ACR"
           az acr repository list -n ${{ env.ACR_LOGIN_SERVER }}
 
-  deploy-to-staging:
+  deploy:
     runs-on: ubuntu-latest
     needs: docker-build-and-push-to-acr
 
@@ -131,7 +131,6 @@ jobs:
         uses: Azure/appservice-settings@v1
         with:
           app-name: ${{ env.AZURE_WEB_APP_NAME }}
-          slot-name: staging
           app-settings-json: |
             [
               {
@@ -175,29 +174,15 @@ jobs:
               }
             ]
 
-      - name: Deploy Azure WebApp to Staging
+      - name: Deploy Azure WebApp
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEB_APP_NAME }}
           images: ${{ env.ACR_LOGIN_SERVER }}/${{ env.CONTAINER_IMAGE_NAME }}:${{ github.sha }}
-          slot-name: staging
-
-  dast:
-    runs-on: ubuntu-latest
-    needs: deploy-to-staging
-
-    steps:
-      - name: Checkout source code
-        uses: actions/checkout@v4
-
-      - name: Run OWASP ZAP scan
-        uses: zaproxy/action-full-scan@v0.10.0
-        with:
-          target: "https://${{ env.AZURE_WEB_APP_NAME }}.azurewebsites.net"
 
   database-migration:
     runs-on: windows-latest
-    needs: deploy-to-staging
+    needs: deploy
 
     steps:
       - name: Checkout source code
@@ -233,85 +218,15 @@ jobs:
             sqlcmd -S ${{ env.SQL_SERVER }} -U <username> -P <password> -d ${{ env.SQL_DB }} -i $script
           done
 
-  # integration-tests-2:
-  #   needs: [deploy-to-staging, database-migration]
-
-  deploy-to-production:
+  dast:
     runs-on: ubuntu-latest
-    needs: [deploy-to-staging, database-migration] # Add dast and integration-tests-2 job dependency
+    needs: deploy
 
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      - name: Azure login
-        uses: azure/login@v2
+      - name: Run OWASP ZAP scan
+        uses: zaproxy/action-full-scan@v0.10.0
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Set version date
-        run: |
-          echo "APP_VERSION_DATE=$(date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_ENV
-
-      - name: Set Azure Web App Settings
-        uses: Azure/appservice-settings@v1
-        with:
-          app-name: ${{ env.AZURE_WEB_APP_NAME }}
-          slot-name: staging
-          app-settings-json: |
-            [
-              {
-                "name": "WEBSITES_ENABLE_APP_SERVICE_STORAGE",
-                "value": "false",
-                "slotSetting": false
-              },
-              {
-                "name": "DOCKER_REGISTRY_SERVER_URL",
-                "value": "${{ env.ACR_LOGIN_SERVER }}",
-                "slotSetting": false
-              },
-              {
-                "name": "DOCKER_REGISTRY_SERVER_USERNAME",
-                "value": "${{ env.ACR_USERNAME  }}",
-                "slotSetting": false
-              },
-              {
-                "name": "DOCKER_REGISTRY_SERVER_PASSWORD",
-                "value": "${{ env.ACR_PASSWORD }}",
-                "slotSetting": false
-              },
-              {
-                "name": "VersionInfo__Number",
-                "value": "1.0.${{ github.run_number }}",
-                "slotSetting": false
-              },
-              {
-                "name": "VersionInfo__Date",
-                "value": "${{ env.APP_VERSION_DATE }}",
-                "slotSetting": false
-              }
-            ]
-          connection-strings-json: |
-            [
-              {
-                "name": "PacificToursDbConnection",
-                "value": "${{ env.SQL_CONNECTION_STRING }}",
-                "type": "SQLAzure",
-                "slotSetting": false
-              }
-            ]
-
-      - name: Deploy Azure WebApp to Production
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: ${{ env.AZURE_WEB_APP_NAME }}
-          images: ${{ env.ACR_LOGIN_SERVER }}/${{ env.CONTAINER_IMAGE_NAME }}:${{ github.sha }}
-          slot-name: Production
-
-      - name: Swap to production slot
-        run: |
-          az webapp deployment slot swap --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --name ${{ env.WEB_APP_NAME }} --slot staging --target-slot production
-          echo "Swap finished. WebApp accessible at https://$(az webapp show --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --name ${{ env.WEB_APP_NAME }} --query hostNames[0] -o tsv)"
-
-  # monitoring:
-  #   needs: deploy-to-production
+          target: "https://${{ env.AZURE_WEB_APP_NAME }}.azurewebsites.net"
