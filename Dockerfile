@@ -1,35 +1,26 @@
-# Base Microsoft ASP.NET Core SDK version 7.0 image for the build stage
+# https://hub.docker.com/_/microsoft-dotnet
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 
-# Set the working directory to a new directory named 'app'
-WORKDIR /app
+# Set Config argument to toggle
+ARG Config=Debug
 
-# Set environment variable to disable NuGet package signature verification
-# ENV DOTNET_NUGET_SIGNATURE_VERIFICATION=false
+# Set working directory to a new directory named 'source'
+WORKDIR /source
 
-# Copy the entire project into the 'app' directory
-COPY . .
-
-# Copy .csproj and .sln and restore as distinct layers
+# Copy .csproj, .sln, and restore as distinct layers
 COPY *.sln .
-COPY *.csproj ./
+COPY *.csproj ./aspnetapp/
 RUN dotnet restore
+
+# Copy entire project and build app
+COPY aspnetapp/. ./aspnetapp/
+WORKDIR /source/aspnetapp
+
+# Publish app with the 'debug' build configuration
+RUN dotnet publish -c ${Config} -o /app --no-restore
 
 # Final stage/image
-FROM mcr.microsoft.com/dotnet/aspnet:7.0 as runtime
-
-# Set working directory to 'app'
+FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS runtime
 WORKDIR /app
-
-# Copy necessary files from the build stage
-COPY --from=build /app/asp-net-core-web-app-authentication-authorisation.csproj ./
-COPY --from=build /app/*.sln ./
-
-# Restore packages
-RUN dotnet restore
-
-# Copy the rest of the application code
-COPY . ./
-
-# Run the application
+COPY --from=build /app ./
 ENTRYPOINT ["dotnet", "asp-net-core-web-app-authentication-authorisation.dll"]
