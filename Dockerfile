@@ -10,8 +10,10 @@ WORKDIR /app
 # Copy the entire project into the 'app' directory
 COPY . .
 
-# estore as distinct layers
-RUN dotnet restore asp-net-core-web-app-authentication-authorisation.sln
+# Copy .csproj and .sln and restore as distinct layers
+COPY *.sln .
+COPY *.csproj ./
+RUN dotnet restore
 
 # Final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:7.0 as runtime
