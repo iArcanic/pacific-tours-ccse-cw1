@@ -25,7 +25,7 @@ env:
   # SQL database variables
   SQL_DB: ${{ secrets.SQL_DATABASE }}
   SQL_SERVER: ${{ secrets.SQL_SERVER }}
-  CONNECTION_STRING: ${{ SQL_DATABASE_CONNECTION_STRING }}
+  CONNECTION_STRING: ${{ secrets.SQL_DATABASE_CONNECTION_STRING }}
 
 jobs:
   # unit-tests:
