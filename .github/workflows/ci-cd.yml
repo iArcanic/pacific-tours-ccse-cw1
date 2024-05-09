@@ -127,10 +127,11 @@ jobs:
         run: |
           echo "APP_VERSION_DATE=$(date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_ENV
 
-      - name: Set Azure Web App Settings
-        uses: Azure/appservice-settings@v1
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEB_APP_NAME }}
+          images: "${{ env.ACR_LOGIN_SERVER }}/${{ env.ACR_NAME }}:${{ env.CONTAINER_IMAGE_NAME }}-${{ github.sha }}"
           app-settings-json: |
             [
               {
@@ -173,12 +174,6 @@ jobs:
                 "slotSetting": false
               }
             ]
-
-      - name: Deploy Azure WebApp
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: ${{ env.AZURE_WEB_APP_NAME }}
-          images: ${{ env.ACR_LOGIN_SERVER }}/${{ env.CONTAINER_IMAGE_NAME }}:${{ github.sha }}
 
   database-migration:
     runs-on: windows-latest
