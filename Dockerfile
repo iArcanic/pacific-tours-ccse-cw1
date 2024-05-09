@@ -4,7 +4,7 @@ FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 # Copy .csproj and restore as distinct layers
 COPY *.sln .
 COPY *.csproj ./
-RUN dotnet restore
+RUN dotnet restore --parallel
 
 # Copy the rest of the application code
 COPY . ./
