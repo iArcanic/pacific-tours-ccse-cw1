@@ -6,6 +6,9 @@ COPY *.sln .
 COPY *.csproj ./
 RUN dotnet restore
 
+# Copy the rest of the application code
+COPY . ./
+
 # final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:7.0
 COPY --from=build . ./
