@@ -8,13 +8,12 @@ ARG Config=Debug
 WORKDIR /source
 
 # Copy .csproj, .sln, and restore as distinct layers
-COPY *.sln .
-COPY *.csproj ./aspnetapp/
+COPY asp-net-core-web-app-authentication-authorisation.sln .
+COPY asp-net-core-web-app-authentication-authorisation.csproj .
 RUN dotnet restore
 
-# Copy entire project and build app
-COPY . ./aspnetapp/
-WORKDIR /source/aspnetapp
+# Copy entire project
+COPY . .
 
 # Publish app with the 'debug' build configuration
 RUN dotnet publish -c ${Config} -o /app --no-restore
