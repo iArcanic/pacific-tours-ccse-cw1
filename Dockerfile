@@ -13,7 +13,7 @@ COPY *.csproj ./aspnetapp/
 RUN dotnet restore
 
 # Copy entire project and build app
-COPY aspnetapp/. ./aspnetapp/
+COPY . ./aspnetapp/
 WORKDIR /source/aspnetapp
 
 # Publish app with the 'debug' build configuration
