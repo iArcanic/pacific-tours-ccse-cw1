@@ -112,7 +112,7 @@ jobs:
 
   deploy-to-staging:
     runs-on: ubuntu-latest
-    needs: [docker-build-and-push-to-acr, push-to-acr]
+    needs: [docker-build-and-push-to-acr]
 
     steps:
       - name: Checkout source code
