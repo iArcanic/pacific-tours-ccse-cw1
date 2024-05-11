@@ -140,7 +140,7 @@ jobs:
             --min-instances=0 \
             --max-instances=2 \
             --concurrency=80 \
-            --add-cloudsql-instances ${{ env.GCP_CLOUD_SQL_INSTANCE }} \
+            --add-cloudsql-instances=${{ env.GCP_CLOUD_SQL_INSTANCE }} \
             --update-env-vars ASPNETCORE_ENVIRONMENT=Production,ConnectionStrings__PacificToursDbConnection=${{ env.CONNECTION_STRING }} \
             --platform=managed \
             --region=${{ secrets.GCP_REGION }} \
