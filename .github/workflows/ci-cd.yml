@@ -18,6 +18,7 @@ env:
   GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
   GCP_REGION: ${{ secrets.GCP_REGION }}
   GCP_GAR_REPO: ${{ secrets.GCP_GAR_REPO }}
+  GCP_CLOUD_RUN_SERVICE: ${{ secrets.GCP_CLOUD_RUN_SERVICE }}
 
   CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME }}
 
@@ -106,79 +107,89 @@ jobs:
           gcloud auth configure-docker --quiet
           gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev --quiet
 
-      - name: Push Docker image to GAR
+      - name: Push Docker image to Google Artifact Registry
         run: |
-          echo "Pushing Docker image to GAR..."
+          echo "Pushing Docker image to Google Artifact Registry..."
           docker push ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GCP_GAR_REPO }}/${{ env.CONTAINER_IMAGE_NAME }}:${{ github.sha }}
 
-  # deploy:
-  #   runs-on: ubuntu-latest
-  #   needs: docker-build-and-push-to-gcr
+  deploy:
+    runs-on: ubuntu-latest
+    needs: docker-build-and-push-to-gar
 
-  #   steps:
-  #     - name: Checkout source code
-  #       uses: actions/checkout@v4
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
 
-  #     - name: Google authentication
-  #       uses: google-github-actions/auth@v1
-  #       with:
-  #         service_account: ${{ env.GCP_SA_EMAIL }}
+      - name: Google authentication
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ env.GCP_SA_KEY }}
 
-  #     - name: Setup Google Cloud SDK
-  #       uses: google-github-actions/setup-gcloud@v1
-  #       with:
-  #         version: "latest"
-  #         project_id: ${{ env.GCP_PROJECT_ID }}
-  #         service_account_email: ${{ env.GCP_SA_EMAIL }}
-  #         service_account_key: ${{ env.GCP_SA_KEY }}
+      - name: Setup Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          version: "latest"
+          project_id: ${{ env.GCP_PROJECT_ID }}
 
-  #     - name: Deploy to Google Cloud Run
-  #       run: |
-  #         gcloud run deploy ${{ env.GCP_SERVICE_NAME }} \
-  #           --image=${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.CONTAINER_IMAGE_NAME }}/${{ env.GCP_GCR_REPO }}:${{ github.sha }} \
-  #           --add-cloudsql-instances ${{ env.GCP_CLOUD_SQL_INSTANCE }} \
-  #           --update-env-vars ASPNETCORE_ENVIRONMENT=Production,ConnectionStrings__PacificToursDbConnection=${{ env.CONNECTION_STRING }} \
-  #           --platform=managed \
-  #           --region=${{ secrets.GCP_REGION }} \
-  #           --allow-unauthenticated
+      - name: Deploy to Google Cloud Run
+        run: |
+          gcloud run deploy ${{ env.GCP_CLOUD_RUN_SERVICE }} \
+            --image=${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GCP_GAR_REPO }}/${{ env.CONTAINER_IMAGE_NAME }}:${{ github.sha }} \
+            --memory=1Gi \
+            --cpu=1 \
+            --min-instances=0 \
+            --max-instances=2 \
+            --concurrency=80 \
+            --add-cloudsql-instances ${{ env.GCP_CLOUD_SQL_INSTANCE }} \
+            --update-env-vars ASPNETCORE_ENVIRONMENT=Production,ConnectionStrings__PacificToursDbConnection=${{ env.CONNECTION_STRING }} \
+            --platform=managed \
+            --region=${{ secrets.GCP_REGION }} \
+            --allow-unauthenticated
 
-  # database-migration:
-  #   runs-on: windows-latest
-  #   needs: deploy
+  database-migration:
+    runs-on: ubuntu-latest
+    needs: deploy
 
-  #   steps:
-  #     - name: Checkout source code
-  #       uses: actions/checkout@v4
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
 
-  #     - name: Setup .NET SDK
-  #       uses: actions/setup-dotnet@v4
-  #       with:
-  #         dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
 
-  #     - name: Install Dotnet Entity Framework CLI tool
-  #       run: |
-  #         dotnet tool install --global dotnet-ef
-  #         dotnet tool restore
+      - name: Install Dotnet Entity Framework CLI tool
+        run: |
+          dotnet tool install --global dotnet-ef
+          dotnet tool restore
 
-  #     - name: Update Database
-  #       run: |
-  #         dotnet ef database update
-  #       env:
-  #         ASPNETCORE_ENVIRONMENT: Production
-  #         ConnectionStrings__PacificToursDbConnection: ${{ env.CONNECTION_STRING }}
+      - name: Run database migrations
+        run: |
+          dotnet ef database update
+        env:
+          ASPNETCORE_ENVIRONMENT: Production
+          ConnectionStrings__PacificToursDbConnection: ${{ env.CONNECTION_STRING }}
 
-  #     - name: Install SQL Server command-line utilities
-  #       run: |
-  #         echo "Install SQL Server command-line utilities..."
-  #         choco install sqlserver-cmdlineutils -y
+      - name: Google authentication
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ env.GCP_SA_KEY }}
 
-  #     - name: Execute custom SQL scripts
-  #       working-directory: Scripts/SQL
-  #       run: |
-  #         for script in *.sql; do
-  #           echo "Executing script: $script"
-  #           sqlcmd -S ${{ env.SQL_SERVER }} -U ${{ env.SQL_DB_USERNAME }} -P ${{ env.SQL_DB_PASSWORD }} -d ${{ env.SQL_DB }} -i $script
-  #         done
+      - name: Setup Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          version: "latest"
+          project_id: ${{ env.GCP_PROJECT_ID }}
+
+      - name: Run Custom SQL Scripts
+        run: |
+          for script in Scripts/SQL/*.sql; do
+            echo "Executing script: $script"
+            gcloud sql connect ${{ env.GCP_CLOUD_SQL_INSTANCE }} --user=${{ env.SQL_DB_USERNAME }} --database=${{ env.SQL_DB }} --query-file="$script"
+          done
+        env:
+          PGPASSWORD: ${{ env.SQL_DB_PASSWORD }}
 
   # dast:
   #   runs-on: ubuntu-latest
