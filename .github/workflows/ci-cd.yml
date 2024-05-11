@@ -12,19 +12,22 @@ env:
   SOLUTION_NAME: asp-net-core-web-app-authentication-authorisation.sln
   DOTNET_CORE_VERSION: 7.0.x
 
-  # Azure variables
-  AZURE_CREDS: ${{ secrets.AZURE_CREDENTIALS }}
-  AZURE_WEB_APP_NAME: ${{ secrets.AZURE_WEB_APP_NAME }}
+  # Google Cloud Platform variables
+  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GCP_SA_EMAIL: ${{ secrets.GCP_SA_EMAIL }}
+  GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+  GCP_REGION: ${{ secrets.GCP_REGION }}
+  GCP_GCR_REPO: ${{ secrets.GCP_GCR_REPO }}
+  GCP_SERVICE_NAME: ${{ secrets.GCP_SERVICE_NAME }}
+
   CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME }}
-  AZURE_RG: ${{ secrets.AZURE_RESOURCE_GROUP }}
-  ACR_NAME: pacifictoursregistry
-  ACR_LOGIN_SERVER: ${{ secrets.PACIFICTOURSREGISTRY_LOGIN_SERVER }}
-  ACR_USERNAME: ${{ secrets.PACIFICTOURSREGISTRY_USERNAME_4718 }}
-  ACR_PASSWORD: ${{ secrets.PACIFICTOURSREGISTRY_PASSWORD_4718 }}
 
   # SQL database variables
-  SQL_DB: ${{ secrets.SQL_DATABASE }}
+  SQL_DB: ${{ secrets.SQL_DB }}
   SQL_SERVER: ${{ secrets.SQL_SERVER }}
+  SQL_DB_USERNAME: ${{ secrets.SQL_DB_USERNAME }}
+  SQL_DB_PASSWORD: ${{ secrets.SQL_DB_PASSWORD }}
+  GCP_CLOUD_SQL_INSTANCE: ${{ GCP_secrets.CLOUD_SQL_INSTANCE }}
   CONNECTION_STRING: ${{ secrets.SQL_DATABASE_CONNECTION_STRING }}
 
 jobs:
@@ -75,7 +78,7 @@ jobs:
           sarif_file: snyk.sarif
           category: snyk-sast-analysis
 
-  docker-build-and-push-to-acr:
+  docker-build-and-push-to-gcr:
     runs-on: ubuntu-latest
     needs: sast # Add unit-tests job dependency
 
@@ -83,145 +86,107 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
+      - name: Setup Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          version: "latest"
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          service_account_email: ${{ env.GCP_SA_EMAIL }}
+          service_account_key: ${{ env.GCP_SA_KEY }}
+
       - name: Build Docker Image
         run: |
           echo "Building Docker image..."
-          docker build -t ${{ env.ACR_LOGIN_SERVER }}/${{ env.ACR_NAME }}:${{ env.CONTAINER_IMAGE_NAME }}-${{ github.sha }} .
+          docker build -t ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.CONTAINER_IMAGE_NAME }}/${{ env.GCP_GCR_REPO }}:${{ github.sha }} .
 
-      - name: Azure login
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Login to ACR
-        uses: azure/docker-login@v1
-        with:
-          login-server: ${{ env.ACR_LOGIN_SERVER }}
-          username: ${{ env.ACR_USERNAME }}
-          password: ${{ env.ACR_PASSWORD }}
-
-      - name: Push Docker image to ACR
+      - name: Configure Docker client
         run: |
-          echo "Pushing Docker image to ACR..."
-          docker push ${{ env.ACR_LOGIN_SERVER }}/${{ env.ACR_NAME }}:${{ env.CONTAINER_IMAGE_NAME }}-${{ github.sha }}
+          gcloud auth configure-docker --quiet
+          gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev --quiet
 
-      - name: List all repositories in ACR
+      - name: Push Docker image to GCR
         run: |
-          echo "List the repositories in the ACR"
-          az acr repository list -n ${{ env.ACR_LOGIN_SERVER }}
+          echo "Pushing Docker image to GCR..."
+          docker push ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.CONTAINER_IMAGE_NAME }}/${{ env.GCP_GCR_REPO }}:${{ github.sha }}
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: docker-build-and-push-to-acr
+  # deploy:
+  #   runs-on: ubuntu-latest
+  #   needs: docker-build-and-push-to-gcr
 
-    steps:
-      - name: Checkout source code
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout source code
+  #       uses: actions/checkout@v4
 
-      - name: Azure login
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+  #     - name: Google authentication
+  #       uses: google-github-actions/auth@v1
+  #       with:
+  #         service_account: ${{ env.GCP_SA_EMAIL }}
 
-      - name: Set version date
-        run: |
-          echo "APP_VERSION_DATE=$(date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_ENV
+  #     - name: Setup Google Cloud SDK
+  #       uses: google-github-actions/setup-gcloud@v1
+  #       with:
+  #         version: "latest"
+  #         project_id: ${{ env.GCP_PROJECT_ID }}
+  #         service_account_email: ${{ env.GCP_SA_EMAIL }}
+  #         service_account_key: ${{ env.GCP_SA_KEY }}
 
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: ${{ env.AZURE_WEB_APP_NAME }}
-          images: "${{ env.ACR_LOGIN_SERVER }}/${{ env.ACR_NAME }}:${{ env.CONTAINER_IMAGE_NAME }}-${{ github.sha }}"
-          app-settings-json: |
-            [
-              {
-                "name": "WEBSITES_ENABLE_APP_SERVICE_STORAGE",
-                "value": "false",
-                "slotSetting": false
-              },
-              {
-                "name": "DOCKER_REGISTRY_SERVER_URL",
-                "value": "${{ env.ACR_LOGIN_SERVER }}",
-                "slotSetting": false
-              },
-              {
-                "name": "DOCKER_REGISTRY_SERVER_USERNAME",
-                "value": "${{ env.ACR_USERNAME  }}",
-                "slotSetting": false
-              },
-              {
-                "name": "DOCKER_REGISTRY_SERVER_PASSWORD",
-                "value": "${{ env.ACR_PASSWORD }}",
-                "slotSetting": false
-              },
-              {
-                "name": "VersionInfo__Number",
-                "value": "1.0.${{ github.run_number }}",
-                "slotSetting": false
-              },
-              {
-                "name": "VersionInfo__Date",
-                "value": "${{ env.APP_VERSION_DATE }}",
-                "slotSetting": false
-              }
-            ]
-          connection-strings-json: |
-            [
-              {
-                "name": "PacificToursDbConnection",
-                "value": "${{ env.SQL_CONNECTION_STRING }}",
-                "type": "SQLAzure",
-                "slotSetting": false
-              }
-            ]
+  #     - name: Deploy to Google Cloud Run
+  #       run: |
+  #         gcloud run deploy ${{ env.GCP_SERVICE_NAME }} \
+  #           --image=${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.CONTAINER_IMAGE_NAME }}/${{ env.GCP_GCR_REPO }}:${{ github.sha }} \
+  #           --add-cloudsql-instances ${{ env.GCP_CLOUD_SQL_INSTANCE }} \
+  #           --update-env-vars ASPNETCORE_ENVIRONMENT=Production,ConnectionStrings__PacificToursDbConnection=${{ env.CONNECTION_STRING }} \
+  #           --platform=managed \
+  #           --region=${{ secrets.GCP_REGION }} \
+  #           --allow-unauthenticated
 
-  database-migration:
-    runs-on: windows-latest
-    needs: deploy
+  # database-migration:
+  #   runs-on: windows-latest
+  #   needs: deploy
 
-    steps:
-      - name: Checkout source code
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout source code
+  #       uses: actions/checkout@v4
 
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
+  #     - name: Setup .NET SDK
+  #       uses: actions/setup-dotnet@v4
+  #       with:
+  #         dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
 
-      - name: Install Dotnet Entity Framework CLI tool
-        run: |
-          dotnet tool install --global dotnet-ef
-          dotnet tool restore
+  #     - name: Install Dotnet Entity Framework CLI tool
+  #       run: |
+  #         dotnet tool install --global dotnet-ef
+  #         dotnet tool restore
 
-      - name: Update Database
-        run: |
-          dotnet ef database update
-        env:
-          ASPNETCORE_ENVIRONMENT: Development
-          ConnectionStrings__PacificToursDbConnection: ${{ env.CONNECTION_STRING }}
+  #     - name: Update Database
+  #       run: |
+  #         dotnet ef database update
+  #       env:
+  #         ASPNETCORE_ENVIRONMENT: Production
+  #         ConnectionStrings__PacificToursDbConnection: ${{ env.CONNECTION_STRING }}
 
-      - name: Install SQL Server command-line utilities
-        run: |
-          echo "Install SQL Server command-line utilities..."
-          choco install sqlserver-cmdlineutils -y
+  #     - name: Install SQL Server command-line utilities
+  #       run: |
+  #         echo "Install SQL Server command-line utilities..."
+  #         choco install sqlserver-cmdlineutils -y
 
-      - name: Execute custom SQL scripts
-        working-directory: Scripts/SQL
-        run: |
-          for script in *.sql; do
-            echo "Executing script: $script"
-            sqlcmd -S ${{ env.SQL_SERVER }} -U <username> -P <password> -d ${{ env.SQL_DB }} -i $script
-          done
+  #     - name: Execute custom SQL scripts
+  #       working-directory: Scripts/SQL
+  #       run: |
+  #         for script in *.sql; do
+  #           echo "Executing script: $script"
+  #           sqlcmd -S ${{ env.SQL_SERVER }} -U ${{ env.SQL_DB_USERNAME }} -P ${{ env.SQL_DB_PASSWORD }} -d ${{ env.SQL_DB }} -i $script
+  #         done
 
-  dast:
-    runs-on: ubuntu-latest
-    needs: deploy
+  # dast:
+  #   runs-on: ubuntu-latest
+  #   needs: deploy
 
-    steps:
-      - name: Checkout source code
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout source code
+  #       uses: actions/checkout@v4
 
-      - name: Run OWASP ZAP scan
-        uses: zaproxy/action-full-scan@v0.10.0
-        with:
-          target: "https://${{ env.AZURE_WEB_APP_NAME }}.azurewebsites.net"
+  #     - name: Run OWASP ZAP scan
+  #       uses: zaproxy/action-full-scan@v0.10.0
+  #       with:
+  #         target: ""
