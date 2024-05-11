@@ -18,7 +18,7 @@ env:
   GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
   GCP_REGION: ${{ secrets.GCP_REGION }}
   GCP_GCR_REPO: ${{ secrets.GCP_GCR_REPO }}
-  GCP_SERVICE_NAME: ${{ secrets.GCP_SERVICE_NAME }}
+  # GCP_SERVICE_NAME: ${{ secrets.GCP_SERVICE_NAME }}
 
   CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME }}
 
