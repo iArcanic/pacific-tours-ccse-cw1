@@ -131,7 +131,7 @@ jobs:
           version: "latest"
           project_id: ${{ env.GCP_PROJECT_ID }}
 
-      - name: Install Beta Components
+      - name: Install Google Beta Components
         run: |
           gcloud components install beta --quiet
 
