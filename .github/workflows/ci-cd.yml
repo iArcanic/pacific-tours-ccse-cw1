@@ -134,6 +134,7 @@ jobs:
       - name: Add IAM Policy Binding
         run: |
           gcloud beta run services add-iam-policy-binding \
+            --quiet \
             --region=${{ env.GCP_REGION }} \
             --member=allUsers \
             --role=roles/run.invoker \
