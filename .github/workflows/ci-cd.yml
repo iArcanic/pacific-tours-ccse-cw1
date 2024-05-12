@@ -131,14 +131,18 @@ jobs:
           version: "latest"
           project_id: ${{ env.GCP_PROJECT_ID }}
 
+      - name: Install Beta Components
+        run: |
+          gcloud components install beta --quiet
+
       - name: Add IAM Policy Binding
         run: |
           gcloud beta run services add-iam-policy-binding \
-            --quiet \
             --region=${{ env.GCP_REGION }} \
             --member=allUsers \
             --role=roles/run.invoker \
-            ${{ env.GCP_CLOUD_RUN_SERVICE }}
+            ${{ env.GCP_CLOUD_RUN_SERVICE }} \
+            --quiet
 
       - name: Deploy to Google Cloud Run
         run: |
