@@ -144,8 +144,7 @@ jobs:
             --update-env-vars ASPNETCORE_ENVIRONMENT=Development,ConnectionStrings__PacificToursDbConnection=${{ env.CONNECTION_STRING }} \
             --platform=managed \
             --region=${{ secrets.GCP_REGION }} \
-            --allow-unauthenticated \
-            --force
+            --allow-unauthenticated
 
   database-migration:
     runs-on: ubuntu-latest
