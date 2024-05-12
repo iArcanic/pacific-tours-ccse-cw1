@@ -131,20 +131,6 @@ jobs:
           version: "latest"
           project_id: ${{ env.GCP_PROJECT_ID }}
 
-      # - name: Install Google Beta Components
-      #   run: |
-      #     gcloud components install beta --quiet
-
-      # - name: Add IAM Policy Binding
-      #   run: |
-      #     gcloud beta run services add-iam-policy-binding \
-      #       --region=${{ env.GCP_REGION }} \
-      #       --member=allUsers \
-      #       --role=roles/run.invoker \
-      #       --project=${{ env.GCP_PROJECT_ID }}
-      #       ${{ env.GCP_CLOUD_RUN_SERVICE }} \
-      #       --quiet
-
       - name: Deploy to Google Cloud Run
         run: |
           gcloud run deploy ${{ env.GCP_CLOUD_RUN_SERVICE }} \
@@ -158,7 +144,8 @@ jobs:
             --update-env-vars ASPNETCORE_ENVIRONMENT=Development,ConnectionStrings__PacificToursDbConnection=${{ env.CONNECTION_STRING }} \
             --platform=managed \
             --region=${{ secrets.GCP_REGION }} \
-            --allow-unauthenticated
+            --allow-unauthenticated \
+            --force
 
   database-migration:
     runs-on: ubuntu-latest
@@ -227,7 +214,7 @@ jobs:
       - name: Get Cloud Run Service URL
         id: get-url
         run: |
-          URL=$(gcloud run services describe ${{ env.GCP_CLOUD_RUN_SERVICE }} --format 'value(status.url)')
+          URL=$(gcloud run services describe ${{ env.GCP_CLOUD_RUN_SERVICE }} --region=${{ env.GCP_REGION }} --format 'value(status.url)')
           echo "::set-output name=url::$URL"
 
       - name: Run OWASP ZAP scan
