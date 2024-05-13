@@ -141,7 +141,7 @@ jobs:
             --max-instances=2 \
             --concurrency=80 \
             --add-cloudsql-instances=${{ env.GCP_CLOUD_SQL_INSTANCE }} \
-            --update-env-vars ASPNETCORE_ENVIRONMENT=Development,ConnectionStrings__PacificToursDbConnection=${{ env.CONNECTION_STRING }} \
+            --update-env-vars ASPNETCORE_ENVIRONMENT=Development,ConnectionStrings__DefaultConnection=${{ env.CONNECTION_STRING }} \
             --platform=managed \
             --region=${{ secrets.GCP_REGION }} \
             --allow-unauthenticated
@@ -169,7 +169,7 @@ jobs:
           dotnet ef database update
         env:
           ASPNETCORE_ENVIRONMENT: Development
-          ConnectionStrings__PacificToursDbConnection: ${{ env.CONNECTION_STRING }}
+          ConnectionStrings__DefaultConnection: ${{ env.CONNECTION_STRING }}
 
       - name: Google authentication
         uses: google-github-actions/auth@v2
