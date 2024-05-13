@@ -135,7 +135,7 @@ jobs:
         run: |
           gcloud run deploy ${{ env.GCP_CLOUD_RUN_SERVICE }} \
             --image=${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GCP_GAR_REPO }}/${{ env.CONTAINER_IMAGE_NAME }}:${{ github.sha }} \
-            --region=${{ secrets.GCP_REGION }} \
+            --region=${{ env.GCP_REGION }} \
             --allow-unauthenticated \
             --memory=1Gi \
             --cpu=1 \
