@@ -164,13 +164,12 @@ jobs:
           dotnet tool install --global dotnet-ef
           dotnet tool restore
 
-      - name: Download Cloud SQL Proxy
+      - name: Download Cloud SQL Auth Proxy
         run: |
-          mkdir -p cloud_sql_proxy
-          curl -o cloud_sql_proxy/cloud_sql_proxy.linux.amd64 https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64
+          curl -o cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.11.0/cloud-sql-proxy.linux.amd64
 
-      - name: Make cloud_sql_proxy executable
-        run: chmod +x ./cloud_sql_proxy/cloud_sql_proxy.linux.amd64
+      - name: Make the Cloud SQL Auth Proxy executable
+        run: chmod +x cloud-sql-proxy
 
       - name: Google authentication
         uses: google-github-actions/auth@v2
@@ -185,9 +184,7 @@ jobs:
 
       - name: Start Cloud SQL Proxy
         run: |
-          ./cloud_sql_proxy/cloud_sql_proxy.linux.amd64 -instances=${{ env.GCP_CLOUD_SQL_INSTANCE }}=tcp:1433 &
-        env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ env.GCP_SA_KEY }}
+          ./cloud-sql-proxy ${{ env.GCP_CLOUD_SQL_INSTANCE }}=tcp:1433 &
 
       - name: Run database migrations
         run: |
