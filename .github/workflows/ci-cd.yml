@@ -145,9 +145,8 @@ jobs:
             --max-instances=2 \
             --concurrency=80 \
             --add-cloudsql-instances=${{ env.GCP_CLOUD_SQL_INSTANCE }} \
-            --update-env-vars ASPNETCORE_ENVIRONMENT=Development \
+            --update-env-vars ASPNETCORE_ENVIRONMENT=Development,INSTANCE_IP=${{ env.GCP_CLOUD_RUN_SERVICE_IP }} \
             --platform=managed \
-            --set-traffic=${{ env.GCP_CLOUD_RUN_SERVICE_IP }}=100
 
   database-migration:
     runs-on: ubuntu-latest
