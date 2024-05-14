@@ -19,7 +19,6 @@ env:
   GCP_REGION: ${{ secrets.GCP_REGION }}
   GCP_GAR_REPO: ${{ secrets.GCP_GAR_REPO }}
   GCP_CLOUD_RUN_SERVICE: ${{ secrets.GCP_CLOUD_RUN_SERVICE }}
-  GCP_CLOUD_RUN_SERVICE_IP: ${{ secrets.GCP_CLOUD_RUN_SERVICE_IP }}
 
   CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME }}
 
@@ -145,8 +144,8 @@ jobs:
             --max-instances=2 \
             --concurrency=80 \
             --add-cloudsql-instances=${{ env.GCP_CLOUD_SQL_INSTANCE }} \
-            --update-env-vars ASPNETCORE_ENVIRONMENT=Development,INSTANCE_IP=${{ env.GCP_CLOUD_RUN_SERVICE_IP }} \
-            --platform=managed \
+            --update-env-vars ASPNETCORE_ENVIRONMENT=Development \
+            --platform=managed
 
   database-migration:
     runs-on: ubuntu-latest
