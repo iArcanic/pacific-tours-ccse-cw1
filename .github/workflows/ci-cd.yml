@@ -29,6 +29,7 @@ env:
   SQL_DB_PASSWORD: ${{ secrets.SQL_DB_PASSWORD }}
   GCP_CLOUD_SQL_INSTANCE: ${{ secrets.GCP_CLOUD_SQL_INSTANCE }}
   CONNECTION_STRING: ${{ secrets.CONNECTION_STRING }}
+  CONNECTION_STRING_GITHUB_ACTIONS: ${{ secrets.CONNECTION_STRING_GITHUB_ACTIONS }}
 
 jobs:
   # unit-tests:
@@ -191,7 +192,7 @@ jobs:
           dotnet ef database update
         env:
           ASPNETCORE_ENVIRONMENT: Development
-          ConnectionStrings__DefaultConnection: ${{ env.CONNECTION_STRING }}
+          ConnectionStrings__DefaultConnection: ${{ env.CONNECTION_STRING_GITHUB_ACTIONS }}
 
       - name: Run Custom SQL Scripts
         run: |
