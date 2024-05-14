@@ -182,9 +182,9 @@ jobs:
           version: "latest"
           project_id: ${{ env.GCP_PROJECT_ID }}
 
-      - name: Start Cloud SQL Proxy
+      - name: Start Cloud SQL Auth Proxy
         run: |
-          ./cloud-sql-proxy ${{ env.GCP_CLOUD_SQL_INSTANCE }}=tcp:1433 &
+          ./cloud-sql-proxy ${{ env.GCP_CLOUD_SQL_INSTANCE }} &
 
       - name: Run database migrations
         run: |
