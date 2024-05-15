@@ -155,16 +155,22 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
+
+      - name: Install Dotnet Entity Framework CLI tool
+        run: |
+          dotnet tool install --global dotnet-ef
+          dotnet tool restore
+
       - name: Download Cloud SQL Auth Proxy
         run: |
           curl -o cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.11.0/cloud-sql-proxy.linux.amd64
 
       - name: Make the Cloud SQL Auth Proxy executable
         run: chmod +x cloud-sql-proxy
-
-      - name: Start Cloud SQL Auth Proxy
-        run: |
-          ./cloud-sql-proxy ${{ env.GCP_CLOUD_SQL_INSTANCE }} &
 
       - name: Google authentication
         uses: google-github-actions/auth@v2
@@ -177,15 +183,9 @@ jobs:
           version: "latest"
           project_id: ${{ env.GCP_PROJECT_ID }}
 
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
-
-      - name: Install Dotnet Entity Framework CLI tool
+      - name: Start Cloud SQL Auth Proxy
         run: |
-          dotnet tool install --global dotnet-ef
-          dotnet tool restore
+          ./cloud-sql-proxy ${{ env.GCP_CLOUD_SQL_INSTANCE }} &
 
       - name: Run database migrations
         run: |
