@@ -165,6 +165,11 @@ jobs:
           dotnet tool install --global dotnet-ef
           dotnet tool restore
 
+      - name: Install SQL Server command-line tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mssql-tools unixodbc-dev
+
       - name: Download Cloud SQL Auth Proxy
         run: |
           curl -o cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.11.0/cloud-sql-proxy.linux.amd64
@@ -194,10 +199,10 @@ jobs:
       #     ASPNETCORE_ENVIRONMENT: Development
       #     ConnectionStrings__DefaultConnection: ${{ env.CONNECTION_STRING_GITHUB_ACTIONS }}
 
-      - name: Execute custom SQL scripts
+      - name: Execute SQL scripts
         run: |
           for file in $(find Scripts/SQL -name '*.sql'); do
-            gcloud sql import sql ${{ env.SQL_SERVER }} $file --user=${{ env.SQL_DB_USERNAME }} --password=${{ env.SQL_DB_PASSWORD }} --database=${{ env.SQL_DB }} --quiet --project=${{ env.GCP_PROJECT_ID }}
+            /opt/mssql-tools/bin/sqlcmd -S 127.0.0.1 -U $SQL_DB_USERNAME -P $SQL_DB_PASSWORD -d $SQL_DB -i $file
           done
 
       - name: Stop Cloud SQL Proxy
