@@ -194,14 +194,11 @@ jobs:
       #     ASPNETCORE_ENVIRONMENT: Development
       #     ConnectionStrings__DefaultConnection: ${{ env.CONNECTION_STRING_GITHUB_ACTIONS }}
 
-      - name: Run Custom SQL Scripts
+      - name: Execute custom SQL scripts
         run: |
-          for script in Scripts/SQL/*.sql; do
-            echo "Executing script: $script"
-            gcloud beta sql connect ${{ env.SQL_SERVER }} --quiet --project=${{ env.GCP_PROJECT_ID }} --user=${{ env.SQL_DB_USERNAME }} --database=${{ env.SQL_DB }} < "$script"
+          for file in $(find Scripts/SQL -name '*.sql'); do
+            gcloud sql connect ${{ env.SQL_SERVER }} --user=${{ env.SQL_DB_USERNAME }} --password=${{ env.SQL_DB_PASSWORD }} --database=${{ env.SQL_DB }} --quiet --project=${{ env.GCP_PROJECT_ID }} --execute="SOURCE $file"
           done
-        env:
-          PGPASSWORD: ${{ env.SQL_DB_PASSWORD }}
 
       - name: Stop Cloud SQL Proxy
         run: killall cloud_sql_proxy
