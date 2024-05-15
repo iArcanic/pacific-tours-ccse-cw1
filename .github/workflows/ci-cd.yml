@@ -197,7 +197,7 @@ jobs:
       - name: Execute custom SQL scripts
         run: |
           for file in $(find Scripts/SQL -name '*.sql'); do
-            gcloud sql connect ${{ env.SQL_SERVER }} --user=${{ env.SQL_DB_USERNAME }} --password=${{ env.SQL_DB_PASSWORD }} --database=${{ env.SQL_DB }} --quiet --project=${{ env.GCP_PROJECT_ID }} --execute="SOURCE $file"
+            gcloud sql import sql ${{ env.SQL_SERVER }} $file --user=${{ env.SQL_DB_USERNAME }} --password=${{ env.SQL_DB_PASSWORD }} --database=${{ env.SQL_DB }} --quiet --project=${{ env.GCP_PROJECT_ID }}
           done
 
       - name: Stop Cloud SQL Proxy
