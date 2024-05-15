@@ -187,18 +187,18 @@ jobs:
         run: |
           ./cloud-sql-proxy ${{ env.GCP_CLOUD_SQL_INSTANCE }} &
 
-      - name: Run database migrations
-        run: |
-          dotnet ef database update
-        env:
-          ASPNETCORE_ENVIRONMENT: Development
-          ConnectionStrings__DefaultConnection: ${{ env.CONNECTION_STRING_GITHUB_ACTIONS }}
+      # - name: Run database migrations
+      #   run: |
+      #     dotnet ef database update
+      #   env:
+      #     ASPNETCORE_ENVIRONMENT: Development
+      #     ConnectionStrings__DefaultConnection: ${{ env.CONNECTION_STRING_GITHUB_ACTIONS }}
 
       - name: Run Custom SQL Scripts
         run: |
           for script in Scripts/SQL/*.sql; do
             echo "Executing script: $script"
-            gcloud beta sql connect ${{ env.SQL_SERVER }} --project=${{ env.GCP_PROJECT_ID }} --user=${{ env.SQL_DB_USERNAME }} --database=${{ env.SQL_DB }} --quiet < "$script"
+            gcloud beta sql connect ${{ env.SQL_SERVER }} --quiet --project=${{ env.GCP_PROJECT_ID }} --user=${{ env.SQL_DB_USERNAME }} --database=${{ env.SQL_DB }} < "$script"
           done
         env:
           PGPASSWORD: ${{ env.SQL_DB_PASSWORD }}
