@@ -198,7 +198,7 @@ jobs:
         run: |
           for script in Scripts/SQL/*.sql; do
             echo "Executing script: $script"
-            gcloud sql connect ${{ env.GCP_CLOUD_SQL_INSTANCE }} --user=${{ env.SQL_DB_USERNAME }} --database=${{ env.SQL_DB }} --quiet < "$script"
+            gcloud sql connect ${{ env.GCP_CLOUD_SQL_INSTANCE }} --project=${{ env.GCP_PROJECT_ID }} --user=${{ env.SQL_DB_USERNAME }} --database=${{ env.SQL_DB }} --quiet < "$script"
           done
         env:
           PGPASSWORD: ${{ env.SQL_DB_PASSWORD }}
