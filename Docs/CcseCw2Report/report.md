@@ -24,7 +24,7 @@ The second section, [Section B](#3-section-b-software-automation), covers the pr
 
 # 2 Section A: Software security vulnerabilities
 
-<!-- 1200 words maximum -->
+<!-- 1450 words maximum -->
 
 ## 2.1 Introduction
 
@@ -54,83 +54,119 @@ SAST analysis involves examining the source code of the ASP.NET C# project to id
 
 ### 2.2.2 Vulnerabilities identified
 
-<!-- 200 words maximum -->
-
-| Vulnerability                                                                 | Affected component                                      | Severity | Priotity score |
-| ----------------------------------------------------------------------------- | ------------------------------------------------------- | -------- | -------------- |
-| NuGet.Packaging – Improper access control                                     | Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11 | Critical | 562            |
-| Anti-forgery token validation disabled                                        | ErrorModel class                                        | Low      | 450            |
-| Azure.Identity – Remote Code Execution (RCE)                                  | Microsoft.EntityFrameworkCore.SqlServer@7.0.12          | High     | 440            |
-| Microsoft.Data.SqlClient – Unprotected storage of credentials                 | Microsoft.EntityFrameworkCore.SqlServer@7.0.12          | High     | 375            |
-| System.Net.Http – Denail of Service (DoS)                                     | Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11 | High     | 375            |
-| System.Net.Http – Improper certificate validation                             | Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11 | High     | 375            |
-| System.Net.Http – Information exposure                                        | Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11 | High     | 375            |
-| System.Text.RegularExpressions – Regular Expression Denial of Service (ReDoS) | Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11 | High     | 375            |
-| System.Net.Http – Privilege escalation                                        | Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11 | High     | 365            |
-| Microsoft.IdentityModel.JsonWebTokens – Resource exhaustion                   | Microsoft.EntityFrameworkCore.SqlServer@7.0.12          | Medium   | 340            |
-| Microsoft.IdentityModel.Tokens.Jwt – Resource exhaustion                      | Microsoft.EntityFrameworkCore.SqlServer@7.0.12          | Medium   | 340            |
-| Azure.Identity – Information exposure through an error message                | Microsoft.EntityFrameworkCore.SqlServer@7.0.12          | Medium   | 275            |
-| System.Net.Http – Authentication bypass                                       | Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11 | Medium   | 265            |
+<!-- 500 words maximum -->
 
 #### 2.2.2.1 NuGet.Packaging – Improper access control
 
+<!-- 50 words maximum -->
+
 #### 2.2.2.2 Anti-forgery token validation disabled
+
+<!-- 50 words maximum -->
 
 #### 2.2.2.3 Azure.Identity – Remote Code Execution (RCE)
 
+<!-- 50 words maximum -->
+
 #### 2.2.2.4 Microsoft.Data.SqlClient – Unprotected storage of credentials
+
+<!-- 50 words maximum -->
 
 #### 2.2.2.5 System.Net.Http – Denail of Service (DoS)
 
+<!-- 50 words maximum -->
+
 #### 2.2.2.6 System.Net.Http – Improper certificate validation
+
+<!-- 50 words maximum -->
 
 #### 2.2.2.7 System.Net.Http – Information exposure
 
+<!-- 50 words maximum -->
+
 #### 2.2.2.8 System.Text.RegularExpressions – Regular Expression Denial of Service (ReDoS)
+
+<!-- 50 words maximum -->
 
 #### 2.2.2.9 System.Net.Http – Privilege escalation
 
+<!-- 50 words maximum -->
+
 #### 2.2.2.10 Microsoft.IdentityModel.JsonWebTokens – Resource exhaustion
+
+<!-- 50 words maximum -->
 
 #### 2.2.2.11 System.IdentityModel.Tokens.Jwt – Resource exhaustion
 
+<!-- 50 words maximum -->
+
 #### 2.2.2.12 Azure.Identity – Information exposure through an error message
+
+<!-- 50 words maximum -->
 
 #### 2.2.2.13 System.Net.Http – Authentication bypass
 
+<!-- 50 words maximum -->
+
 ### 2.2.3 Remediation
 
-<!-- 100 words maximum -->
+<!-- 250 words maximum -->
 
 #### 2.2.3.1 NuGet.Packaging – Improper access control
 
+<!-- 20 words maximum -->
+
 #### 2.2.3.2 Anti-forgery token validation disabled
+
+<!-- 20 words maximum -->
 
 #### 2.2.3.3 Azure.Identity – Remote Code Execution (RCE)
 
+<!-- 20 words maximum -->
+
 #### 2.2.3.4 Microsoft.Data.SqlClient – Unprotected storage of credentials
+
+<!-- 20 words maximum -->
 
 #### 2.2.3.5 System.Net.Http – Denail of Service (DoS)
 
+<!-- 20 words maximum -->
+
 #### 2.2.3.6 System.Net.Http – Improper certificate validation
+
+<!-- 20 words maximum -->
 
 #### 2.2.3.7 System.Net.Http – Information exposure
 
+<!-- 20 words maximum -->
+
 #### 2.2.3.8 System.Text.RegularExpressions – Regular Expression Denial of Service (ReDoS)
+
+<!-- 20 words maximum -->
 
 #### 2.2.3.9 System.Net.Http – Privilege escalation
 
+<!-- 20 words maximum -->
+
 #### 2.2.3.10 Microsoft.IdentityModel.JsonWebTokens – Resource exhaustion
+
+<!-- 20 words maximum -->
 
 #### 2.2.3.11 System.IdentityModel.Tokens.Jwt – Resource exhaustion
 
+<!-- 20 words maximum -->
+
 #### 2.2.3.12 Azure.Identity – Information exposure through an error message
+
+<!-- 20 words maximum -->
 
 #### 2.2.3.13 System.Net.Http – Authentication bypass
 
+<!-- 20 words maximum -->
+
 ## 2.3 Dynamic Application Security Testing (DAST)
 
-<!-- 400 words maximum -->
+<!-- 500 words maximum -->
 
 ### 2.3.1 Methodology
 
@@ -138,27 +174,11 @@ SAST analysis involves examining the source code of the ASP.NET C# project to id
 
 ### 2.3.2 Vulnerabilities identified
 
-<!-- 200 words maximum -->
-
 ### 2.3.3 Remediation
-
-<!-- 100 words maximum -->
-
-## 2.4 Potential vulnerabilities
-
-<!-- 300 words maximum -->
-
-### 2.4.1 Vulnerability description
-
-<!-- 200 words maximum -->
-
-### 2.4.2 Remediation
-
-<!-- 100 words maximum -->
 
 # 3 Section B: Software automation
 
-<!-- 1250 words maximum -->
+<!-- 950 words maximum -->
 
 ## 3.1 Introduction
 
@@ -174,30 +194,31 @@ SAST analysis involves examining the source code of the ASP.NET C# project to id
 
 ## 3.2 CI/CD pipeline implementation
 
-<!-- 500 words maximum -->
+<!-- 850 words maximum -->
 
-### 3.2.1 Pipeline overview
+### 3.2.1 `unit-tests`
 
-<!-- 100 words -->
+<!-- 140 words maximum -->
 
-<!-- Add headings for pipeline stages here -->
-<!-- 100 words maximum for each pipeline stage -->
+### 3.2.2 `sast`
 
-## 3.3 Security testing in CI/CD pipeline
+<!-- 140 words maximum -->
 
-<!-- 500 words maximum -->
+### 3.2.3 `docker-build-and-push-to-gar`
 
-### 3.3.1 Methodology
+<!-- 140 words maximum -->
 
-<!-- 150 words maximum -->
+### 3.2.4 `deploy`
 
-### 3.3.2 Results and findings
+<!-- 140 words maximum -->
 
-<!-- 250 words maximum -->
+### 3.2.5 `database-migration`
 
-### 3.3.3 Comparison with [Section A](#2-section-a-software-security-vulnerabilities)
+<!-- 140 words maximum -->
 
-<!-- 100 words maximum -->
+### 3.2.6 `dast`
+
+<!-- 140 words maximum -->
 
 # 4 Appendices
 
