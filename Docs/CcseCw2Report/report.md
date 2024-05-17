@@ -174,7 +174,39 @@ SAST analysis involves examining the source code of the ASP.NET C# project to id
 
 ### 2.3.2 Vulnerabilities identified
 
+#### 2.3.2.1 Content Security Policy (CSP) header not set
+
+#### 2.3.2.2 Proxy disclosure
+
+#### 2.3.2.3 Application error disclosure
+
+#### 2.3.2.4 Permissions policy header not set
+
+#### 2.3.2.5 Strict-transport-security header not set
+
+#### 2.3.2.6 Non-storable content
+
+#### 2.3.2.7 Storable and cachable content
+
+#### 2.3.2.8 User-agent fuzzer
+
 ### 2.3.3 Remediation
+
+#### 2.3.3.1 Content Security Policy (CSP) header not set
+
+#### 2.3.3.2 Proxy disclosure
+
+#### 2.3.3.3 Application error disclosure
+
+#### 2.3.3.4 Permissions policy header not set
+
+#### 2.3.3.5 Strict-transport-security header not set
+
+#### 2.3.3.6 Non-storable content
+
+#### 2.3.3.7 Storable and cachable content
+
+#### 2.3.3.8 User-agent fuzzer
 
 # 3 Section B: Software automation
 
