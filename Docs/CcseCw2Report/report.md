@@ -20,7 +20,7 @@ The report is split into two sections.
 
 The first section, [Section A](#2-section-a-software-security-vulnerabilities), showcases the results of Static Application Security Testing (SAST) using Synk [@snyk2024] and Dynamic Application Security Testing (DAST) using OWASP ZAP [@owaspzap2024]. The identified vulnerabilities are described in this report along with the steps recommended to remediate them. If a lack of vulnerabilities is found, then potential vulnerabilities with their mitigations are explored and mapped to OWASP guidelines [@owasptop102021].
 
-The second section, [Section B](#3-section-b-software-automation), covers the practical implementation of the CI/CD pipeline using GitHub's CI/CD platform, GitHub actions [@github2024] as a way to automate the build, testing, and deployment process. The pipeline will also include the aforementioned SAST and DAST tools used in [Section A](#2-section-a-software-security-vulnerabilities) in alignment with DevSecOps practices [@paloalto2024]. Stages such as Docker build, image creation, and deployment to a cloud platform are also detailed.
+The second section, [Section B](#3-section-b-software-automation), covers the practical implementation of the CI/CD pipeline using GitHub's CI/CD platform, GitHub actions [@github2024] as a way to automate the build, testing, and deployment process. The pipeline will also include the aforementioned SAST and DAST tools used in [Section A](#2-section-a-software-security-vulnerabilities) in alignment with DevSecOps practices [@paloalto2024]. Stages such as Docker build, image creation, and deployment to a cloud platform are also detailed. Furthermore, it also compares and contrasts any additional vulnerabilities
 
 # 2 Section A: Software security vulnerabilities
 
@@ -192,21 +192,21 @@ SAST analysis involves examining the source code of the ASP.NET C# project to id
 
 ### 2.3.3 Remediation
 
-#### 2.3.3.1 Content Security Policy (CSP) header not set
+#### 2.3.2.1 Content Security Policy (CSP) header not set
 
-#### 2.3.3.2 Proxy disclosure
+#### 2.3.2.2 Proxy disclosure
 
-#### 2.3.3.3 Application error disclosure
+#### 2.3.2.3 Application error disclosure
 
-#### 2.3.3.4 Permissions policy header not set
+#### 2.3.2.4 Permissions policy header not set
 
-#### 2.3.3.5 Strict-transport-security header not set
+#### 2.3.2.5 Strict-transport-security header not set
 
-#### 2.3.3.6 Non-storable content
+#### 2.3.2.6 Non-storable content
 
-#### 2.3.3.7 Storable and cachable content
+#### 2.3.2.7 Storable and cachable content
 
-#### 2.3.3.8 User-agent fuzzer
+#### 2.3.2.8 User-agent fuzzer
 
 # 3 Section B: Software automation
 
@@ -226,31 +226,75 @@ SAST analysis involves examining the source code of the ASP.NET C# project to id
 
 ## 3.2 CI/CD pipeline implementation
 
-<!-- 850 words maximum -->
+### 3.2.1 `test`
 
-### 3.2.1 `unit-tests`
+### 3.2.2 `docker-build-and-push-to-gar`
 
-<!-- 140 words maximum -->
+### 3.2.3 `deploy`
 
-### 3.2.2 `sast`
+### 3.2.4 `database-migration`
 
-<!-- 140 words maximum -->
+## 3.3 Security testing in CI/CD pipeline
 
-### 3.2.3 `docker-build-and-push-to-gar`
+### 3.3.1 `sast`
 
-<!-- 140 words maximum -->
+### 3.3.2 `dast`
 
-### 3.2.4 `deploy`
+## 3.4 Comparison with [Section A](#2-section-a-software-security-vulnerabilities)
 
-<!-- 140 words maximum -->
+### 3.4.1 Static Application Security Testing (SAST)
 
-### 3.2.5 `database-migration`
+No additional vulnerabilities (other than those documented in [Section A, 2.2.2](#222-vulnerabilities-identified)) were detected during the CI/CD pipeline `sast` job.
 
-<!-- 140 words maximum -->
+### 3.4.2 Dynamic Application Security Testing (DAST)
 
-### 3.2.6 `dast`
+#### 3.4.2.2 Additional vulnerabilities identified
 
-<!-- 140 words maximum -->
+##### 3.4.2.1.1 Missing anti-clickjacking header
+
+##### 3.4.2.1.2 Vulnerable JavaScript library
+
+##### 3.4.2.1.3 Cookie without secure flag
+
+##### 3.4.2.1.4 Dangerous JavaScript functions
+
+##### 3.4.2.1.5 X-content-type-options header missing
+
+##### 3.4.2.1.6 Authentication request identified
+
+##### 3.4.2.1.7 Cookie slack detector
+
+##### 3.4.2.1.8 Information disclosure – suspicious comments
+
+##### 3.4.2.1.9 Re-examine cache-control directives
+
+##### 3.4.2.1.10 Session management response identified
+
+##### 3.4.2.1.11 User controllable HTML element attribute (potential XSS)
+
+#### 3.4.2.3 Remediation
+
+##### 3.4.2.1.1 Missing anti-clickjacking header
+
+##### 3.4.2.1.2 Vulnerable JavaScript library
+
+##### 3.4.2.1.3 Cookie without secure flag
+
+##### 3.4.2.1.4 Dangerous JavaScript functions
+
+##### 3.4.2.1.5 X-content-type-options header missing
+
+##### 3.4.2.1.6 Authentication request identified
+
+##### 3.4.2.1.7 Cookie slack detector
+
+##### 3.4.2.1.8 Information disclosure – suspicious comments
+
+##### 3.4.2.1.9 Re-examine cache-control directives
+
+##### 3.4.2.1.10 Session management response identified
+
+##### 3.4.2.1.11 User controllable HTML element attribute (potential XSS)
 
 # 4 Appendices
 
