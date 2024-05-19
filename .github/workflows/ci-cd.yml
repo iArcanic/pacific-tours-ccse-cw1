@@ -2,7 +2,6 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 env:
   # Snyk token for SAST
