@@ -57,12 +57,12 @@ SAST analysis involves examining the source code of the ASP.NET C# project to id
 
 ### 2.2.2 Vulnerabilities identified
 
-<!-- 500 words maximum -->
-
 #### 2.2.2.1 NuGet.Packaging – Improper access control
 
-<!-- 50 words maximum -->
-
+> CVE-2024-0057: NET, .NET Framework, and Visual Studio Security Feature Bypass Vulnerability [@cve2024]
+>
+> CWE-284: Improper Access Control [@cwe2024]
+>
 > Introduced through:
 >
 > - `Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11`
@@ -84,8 +84,8 @@ This vulnerability can be resolved simply by updating or changing the NuGet.Pack
 
 #### 2.2.2.2 Anti-forgery token validation disabled
 
-<!-- 50 words maximum -->
-
+> CWE-352: Cross-Site Request Forgery (CSRF) [@cwe2023]
+>
 > Introduced through:
 >
 > - `ErrorModel` class
@@ -110,8 +110,10 @@ This vulnerability can be prevented in ASP.NET Model View Controllers (MVCs) by 
 
 #### 2.2.2.3 `Azure.Identity` – Remote Code Execution (RCE)
 
-<!-- 50 words maximum -->
-
+> CVE-2023-36414: Azure Identity SDK Remote Code Execution Vulnerability [@cve2023]
+>
+> CWE-94: Improper Control of Generation of Code ('Code Injection') [@2cwe2023]
+>
 > Introduced through:
 >
 > - `Microsoft.EntityFrameworkCore.SqlServer@7.0.12`
@@ -130,8 +132,10 @@ The vulnerability can be mitigated by simply updating the `Azure.Identity` packa
 
 #### 2.2.2.4 `Microsoft.Data.SqlClient` – Unprotected storage of credentials
 
-<!-- 50 words maximum -->
-
+> CVE-2024-0056: Microsoft.Data.SqlClient and System.Data.SqlClient SQL Data Provider Security Feature Bypass Vulnerability [@2cve2024]
+>
+> CWE-420: Unprotected Alternate Channel [@2cwe2024]
+>
 > Introduced through:
 >
 > - `Microsoft.EntityFrameworkCore.SqlServer@7.0.12`
@@ -149,8 +153,10 @@ To fix this, the `Microsoft.Data.SqlClient` can be updated or changed to the fol
 
 #### 2.2.2.5 `System.Net.Http` – Denial of Service (DoS)
 
-<!-- 50 words maximum -->
-
+> CVE-2017-0247 [@cve2017]
+>
+> CWE-245: 7PK - Security Features [@3cwe2023]
+>
 > Introduced through:
 >
 > - `Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11`
@@ -173,8 +179,10 @@ The vulnerability can be remdiated by updating or changing the `System.Net.Http`
 
 #### 2.2.2.6 `System.Net.Http` – Improper certificate validation
 
-<!-- 50 words maximum -->
-
+> CVE-2017-0248 [@2cve2017]
+>
+> CWE-287: Improper Authentication [@3cwe2024]
+>
 > Introduced through:
 >
 > - `Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11`
@@ -195,8 +203,10 @@ The vulnerability can be avoided by updating or changing the `System.Net.Http` p
 
 #### 2.2.2.7 `System.Net.Http` – Information exposure
 
-<!-- 50 words maximum -->
-
+> CVE-2018-8292 [@cve2018]
+>
+> CWE-200: Exposure of Sensitive Information to an Unauthorized Actor [@4cwe2023]
+>
 > Introduced through:
 >
 > - `Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11`
@@ -216,8 +226,6 @@ The `System.Net.Http` package is vulnerable to inforamaiton exposure, specifical
 This vulnerability can be mitigated by updating or changing the `System.Net.Http` package to the following versions: `2.0.20710`, `4.0.1-beta-23225` (although `beta` packages are not reccomended – serves as a temporary fix), `4.1.4`, and `4.3.4`.
 
 #### 2.2.2.8 `System.Text.RegularExpressions` – Regular Expression Denial of Service (ReDoS)
-
-<!-- 50 words maximum -->
 
 > Introduced through:
 >
@@ -242,8 +250,10 @@ The vulnerability for this package is addressed through its subsequent version u
 
 #### 2.2.2.9 `System.Net.Http` – Privilege escalation
 
-<!-- 50 words maximum -->
-
+> CVE-2017-0249 [@3cve2017]
+>
+> CWE-269: Improper Privilege Management [@5cwe2023]
+>
 > Introduced through:
 >
 > - `Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11`
@@ -264,8 +274,6 @@ The versions `4.1.2` and `4.3.2` of the `System.Net.Http` properly resolve this 
 
 #### 2.2.2.10 `Microsoft.IdentityModel.JsonWebTokens` and `System.IdentityModel.Tokens` – Resource exhaustion
 
-<!-- 50 words maximum -->
-
 > Introduced through:
 >
 > - `Microsoft.EntityFrameworkCore.SqlServer@7.0.12`
@@ -282,8 +290,10 @@ The updated versions for both the packages, i.e. `5.7.0`, `6.34.0`, and `7.1.2`,
 
 #### 2.2.2.11 System.Net.Http – Authentication bypass
 
-<!-- 50 words maximum -->
-
+> CVE-2017-0256 [@4cve2017]
+>
+> CWE-20: Improper Input Validation [@6cwe2023]
+>
 > Introduced through:
 >
 > - `Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11`
@@ -309,6 +319,8 @@ The vulnerability is addressed in the versions `4.1.2` and `4.3.2` of the `Syste
 ### 2.3.1 Methodology
 
 <!-- 100 words maximum -->
+
+Dynamic application
 
 ### 2.3.2 Vulnerabilities identified
 
@@ -567,7 +579,7 @@ dast:
         target: ${{ steps.get-url.outputs.url }}
 ```
 
-## 3.4 Comparison with [Section A](#2-section-a-software-security-vulnerabilities)
+## 3.4 Vulnerability comparison with [Section A](#2-section-a-software-security-vulnerabilities)
 
 ### 3.4.1 Static Application Security Testing (SAST)
 
@@ -575,29 +587,29 @@ No additional vulnerabilities (other than those documented in [Section A, 2.2.2]
 
 ### 3.4.2 Dynamic Application Security Testing (DAST)
 
-#### 3.4.2.2 Additional vulnerabilities identified
+A few additional vulnerabilities, aside from the ones in [Section A, 2.2.2](#222-vulnerabilities-identified), were appended to the OWASP ZAP scan report.
 
-##### 3.4.2.1.1 Missing anti-clickjacking header
+#### 3.4.2.1 Missing anti-clickjacking header
 
-##### 3.4.2.1.2 Vulnerable JavaScript library
+#### 3.4.2.2 Vulnerable JavaScript library
 
-##### 3.4.2.1.3 Cookie without secure flag
+#### 3.4.2.3 Cookie without secure flag
 
-##### 3.4.2.1.4 Dangerous JavaScript functions
+#### 3.4.2.4 Dangerous JavaScript functions
 
-##### 3.4.2.1.5 X-content-type-options header missing
+#### 3.4.2.5 X-content-type-options header missing
 
-##### 3.4.2.1.6 Authentication request identified
+#### 3.4.2.6 Authentication request identified
 
-##### 3.4.2.1.7 Cookie slack detector
+#### 3.4.2.7 Cookie slack detector
 
-##### 3.4.2.1.8 Information disclosure – suspicious comments
+#### 3.4.2.8 Information disclosure – suspicious comments
 
-##### 3.4.2.1.9 Re-examine cache-control directives
+#### 3.4.2.9 Re-examine cache-control directives
 
-##### 3.4.2.1.10 Session management response identified
+#### 3.4.2.1.10 Session management response identified
 
-##### 3.4.2.1.11 User controllable HTML element attribute (potential XSS)
+#### 3.4.2.1.11 User controllable HTML element attribute (potential XSS)
 
 # 4 Appendices
 
