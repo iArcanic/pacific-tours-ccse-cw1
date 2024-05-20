@@ -5,6 +5,7 @@ bibliography: Docs/CcseCw2Report/references.bib
 toc: true
 toc-title: Table of Contents
 toc-depth: 6
+geometry: "left=1.25cm, right=1.25cm, top=1.25cm, bottom=1.25cm"
 csl: Docs/Shared/harvard-imperial-college-london.csl
 ---
 
@@ -77,7 +78,9 @@ SAST analysis involves examining the source code of the ASP.NET C# project to id
 
 NuGet.Packaging [@nuget2024] is an implementation by Nuget, specifically for reading `nupkg` and `nuspec` package specification files.
 
-The version of NuGet.Packaging being used, `6.6.1`, is vulnerable to Improper Access Control when using `X.509` chain building APIs. However, due to a logic flaw, the `X.509` certificate cannot be completely validated. An attacker could exploit this by using an untrusted certificate with corrupted signatures, triggering the bug in the framework. The framework will therefore correctly report that the `X.509` chain building failed as expected but will return an incorrect error message for this failure. Any application that relies on this error checking logic may accidentally treat this situation as a successful build. To extend this, an attacker could use this to bypass an application's typical authentication and authorisation logic.
+The version of NuGet.Packaging being used, `6.6.1`, is vulnerable to Improper Access Control when using `X.509` chain building APIs. However, due to a logic flaw, the `X.509` certificate cannot be completely validated. An attacker could exploit this by using an untrusted certificate with corrupted signatures, triggering the bug in the framework. The framework will therefore correctly report that the `X.509` chain building failed as expected but will return an incorrect error message for this failure. Any application that relies on this error-checking logic may accidentally treat this situation as a successful build. To extend this, an attacker could use this to bypass an application's typical authentication and authorisation logic.
+
+This vulnerability can be resolved simply by updating or changing the NuGet.Packaging version to the following versions: `5.11.6`, `6.0.6`, `6.3.4`, `6.4.3`, `6.6.2`, `6.7.1`, and `6.8.1`.
 
 #### 2.2.2.2 Anti-forgery token validation disabled
 
@@ -91,7 +94,21 @@ The version of NuGet.Packaging being used, `6.6.1`, is vulnerable to Improper Ac
 >
 > Priority score: 450
 
-#### 2.2.2.3 Azure.Identity – Remote Code Execution (RCE)
+Specifically, the `ErrorModel` class below has the `[IgnoreAntiForgeryToken]` annotation set meaning that cross-site request forgeries are more likely to occur.
+
+```csharp
+namespace asp_net_core_web_app_authentication_authorisation.Pages
+{
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    [IgnoreAntiforgeryToken]
+    public class ErrorModel : PageModel
+```
+
+A cross-site request forgery is an attack where a threat actor attempts to take advantage of a user's authorised credentials (via a browser cookie or a relevant token) to impersonate a trusted user and perform unathorised access under a valid guise. In this case, the application's server cannot differentiate between a legitimate or malicious request. This type of attack usually takes place through social engineering, i.e. a link or popup that a user clicks causing an unauthorised request to be sent to the web server.
+
+This vulnerability can be prevented in ASP.NET Model View Controllers (MVCs) by using the `[ValidateAntiForgeryToken]` attribute to a class to change the state of the server.
+
+#### 2.2.2.3 `Azure.Identity` – Remote Code Execution (RCE)
 
 <!-- 50 words maximum -->
 
@@ -105,7 +122,13 @@ The version of NuGet.Packaging being used, `6.6.1`, is vulnerable to Improper Ac
 >
 > Priority score: 440
 
-#### 2.2.2.4 Microsoft.Data.SqlClient – Unprotected storage of credentials
+The `Azure.Identity` library provides token authentication support (via Microsoft Entra ID) for access to the Azure Software Development Kit (SDK). Through a set of provided `TokenCredential` implementations, Azure SDK clients can be built that complement Microsoft Entra token authentication [@microsoftlearn2024].
+
+Any affected versions of the `Azure.Identity` packages are vulnerable to Remote Code Execution (RCE) attacks, more specifically, when a carefully crafted operating system level command is passed to a certain ASP.NET SDK property. This command can then be passed to the underlying Command-Line Interface (CLI).
+
+The vulnerability can be mitigated by simply updating the `Azure.Identity` package to `1.10.2`.
+
+#### 2.2.2.4 `Microsoft.Data.SqlClient` – Unprotected storage of credentials
 
 <!-- 50 words maximum -->
 
@@ -118,7 +141,13 @@ The version of NuGet.Packaging being used, `6.6.1`, is vulnerable to Improper Ac
 >
 > Priority score: 375
 
-#### 2.2.2.5 System.Net.Http – Denail of Service (DoS)
+The `Microsoft.EntityFrameworkCore.SqlServer` is a package that serves as a database provider for Entity Framework Core to bs used with a Microsoft SQL Server and Azure SQL (through database migrations) [@2microsoftlearn2024]. Entity Framework (EF) Core is a lightweight, extensible, open-source, and cross-platform of the popular Entity Framework technology, allowing .NET developers to dynamically work with databases using C# objects without the need for manual SQL queries that typically need to be written [@3microsoftlearn2024].
+
+This package, and its affected versions, are vulnerable to unprotected credential stroage. In practicality, this means that an attacker can steal authentication credentials required for the database server through man-in-the-middle attacks between the SQL client and the SQL server. It can even occur if a secure connection is established over an encrypted channel such as TLS.
+
+To fix this, the `Microsoft.Data.SqlClient` can be updated or changed to the following versions: `2.1.7`, `3.1.5`, `4.0.5`, and `5.1.3`.
+
+#### 2.2.2.5 `System.Net.Http` – Denial of Service (DoS)
 
 <!-- 50 words maximum -->
 
@@ -136,7 +165,13 @@ The version of NuGet.Packaging being used, `6.6.1`, is vulnerable to Improper Ac
 >
 > Priority score: 375
 
-#### 2.2.2.6 System.Net.Http – Improper certificate validation
+The `System.Net.Http` NuGet package serves as a programming interface for modern HTTP applications, including all the necessary HTTP components required to consume web services over HTTP [@2nuget2024]. It allows HTTP components to be used by both clients and servers for understanding HTTP headers.
+
+Versions of this package that are affected are vulnerable to Denial of Service (DoS) attacks meaning that ASP.NET Core will fail to properly validate web requests. Attackers can use the `TestEncoder.EncodeCore` function in the `System.Text.Encodings.Web` package as part of `System.Net.Http` to trigger a denial of service attack by utilising a failure in code logic that incorrectly calculates the length of 4-byte charactes in Unicode.
+
+The vulnerability can be remdiated by updating or changing the `System.Net.Http` package to either version `4.1.2` or `4.3.2`.
+
+#### 2.2.2.6 `System.Net.Http` – Improper certificate validation
 
 <!-- 50 words maximum -->
 
@@ -154,7 +189,11 @@ The version of NuGet.Packaging being used, `6.6.1`, is vulnerable to Improper Ac
 >
 > Priority score: 375
 
-#### 2.2.2.7 System.Net.Http – Information exposure
+Affected versions of the `System.Net.Http` are vulnerable to improper certificate validation. Attackers can therefore bypass taggings such as "Enhanced Security Usage" when an invalid certificate is presented for a specific use.
+
+The vulnerability can be avoided by updating or changing the `System.Net.Http` package to either version `4.1.2` or `4.3.2`.
+
+#### 2.2.2.7 `System.Net.Http` – Information exposure
 
 <!-- 50 words maximum -->
 
@@ -172,7 +211,11 @@ The version of NuGet.Packaging being used, `6.6.1`, is vulnerable to Improper Ac
 >
 > Priority score: 375
 
-#### 2.2.2.8 System.Text.RegularExpressions – Regular Expression Denial of Service (ReDoS)
+The `System.Net.Http` package is vulnerable to inforamaiton exposure, specifically HTTP authentication information from outbound requests that enounters a HTTP redirect. An attacker who manages to exploit this vulnerability can compromise the application further through the leaked information.
+
+This vulnerability can be mitigated by updating or changing the `System.Net.Http` package to the following versions: `2.0.20710`, `4.0.1-beta-23225` (although `beta` packages are not reccomended – serves as a temporary fix), `4.1.4`, and `4.3.4`.
+
+#### 2.2.2.8 `System.Text.RegularExpressions` – Regular Expression Denial of Service (ReDoS)
 
 <!-- 50 words maximum -->
 
@@ -191,7 +234,13 @@ The version of NuGet.Packaging being used, `6.6.1`, is vulnerable to Improper Ac
 >
 > Priority score: 375
 
-#### 2.2.2.9 System.Net.Http – Privilege escalation
+`System.Text.RegularExpressions` is an implementation of a regular expressions (RegEx) engine [@3nuget2024], which is an engine that takes a sequence of characters and returns an according matching pattern text.
+
+RegEx engines, such as this one, are commonly vulnerable to Regular Expression Denial of Service (ReDoS) attacks due to the improper processing of RegEx strings. It means that an attacker relies on the fact that a large majority of ReGex engine omplementations may reach rare but extreme cases that cause them to function very slowly, at an exponential rate [@2owasp2024]. An attacker can therefore use a program or tool to manipulate RegEx engines to enter such states, causing them to hang for a very long time.
+
+The vulnerability for this package is addressed through its subsequent version update of `4.3.1`.
+
+#### 2.2.2.9 `System.Net.Http` – Privilege escalation
 
 <!-- 50 words maximum -->
 
@@ -209,7 +258,11 @@ The version of NuGet.Packaging being used, `6.6.1`, is vulnerable to Improper Ac
 >
 > Priority score: 365
 
-#### 2.2.2.10 Microsoft.IdentityModel.JsonWebTokens – Resource exhaustion
+This affected versions of the `System.Net.Http` package leave it vulerable to privilege escalation due to the improper sanitisation of any and all web requests. Priviledge escalation a type of attack in which an attacker can gain access elevated resource access that are normally restricted to the average application user.
+
+The versions `4.1.2` and `4.3.2` of the `System.Net.Http` properly resolve this vulnerability.
+
+#### 2.2.2.10 `Microsoft.IdentityModel.JsonWebTokens` and `System.IdentityModel.Tokens` – Resource exhaustion
 
 <!-- 50 words maximum -->
 
@@ -217,42 +270,17 @@ The version of NuGet.Packaging being used, `6.6.1`, is vulnerable to Improper Ac
 >
 > - `Microsoft.EntityFrameworkCore.SqlServer@7.0.12`
 > - `Microsoft.Data.SqlClient@5.1.1`
-> - `Microsoft.IdentityModel.JsonWebTokens@6.24.0`
+> - `Microsoft.IdentityModel.JsonWebTokens@6.24.0` and `System.IdentityModel.Tokens.Jwt@6.24.0`
 >
 > Severity: MEDIUM
 >
 > Priority score: 340
 
-#### 2.2.2.11 System.IdentityModel.Tokens.Jwt – Resource exhaustion
+Both packages which have versions that are affected are vulnerable to resource extensions when processing JSON Web Encryption (JWE) tokens that have a high compression ratio. An attacker than therefore utilise this to cause excessive memory location and processing time during the decompression phase leading to an eventual denial-of-service. However, this is only a possible exploit if the attacker has access to the Microsoft Entra ID's (IDP) registered public encrypt key.
 
-<!-- 50 words maximum -->
+The updated versions for both the packages, i.e. `5.7.0`, `6.34.0`, and `7.1.2`, patch this vulnerability.
 
-> Introduced through:
->
-> - `Microsoft.EntityFrameworkCore.SqlServer@7.0.12`
-> - `Microsoft.Data.SqlClient@5.1.1`
-> - `Microsoft.IdentityModel.Protocols.OpenIdConnect@6.24.0`
-> - `System.IdentityModel.Tokens.Jwt@6.24.0`
->
-> Severity: MEDIUM
->
-> Priority score: 340
-
-#### 2.2.2.12 Azure.Identity – Information exposure through an error message
-
-<!-- 50 words maximum -->
-
-> Introduced through:
->
-> - `Microsoft.EntityFrameworkCore.SqlServer@7.0.12`
-> - `Microsoft.Data.SqlClient@5.1.1`
-> - `Azure.Identity@1.7.0`
->
-> Severity: MEDIUM
->
-> Priority score: 275
-
-#### 2.2.2.13 System.Net.Http – Authentication bypass
+#### 2.2.2.11 System.Net.Http – Authentication bypass
 
 <!-- 50 words maximum -->
 
@@ -269,6 +297,10 @@ The version of NuGet.Packaging being used, `6.6.1`, is vulnerable to Improper Ac
 > Severity: MEDIUM
 >
 > Priority score: 265
+
+The ASP.NET Core HTTP framework, through the `System.Net.Http` NuGet package, does not properly sanitise the "Web Request Handler" component. This means that attackers are able to spoof and mimic legitimate HTTP web requests and therefore use this to bypass the application's authentication framework.
+
+The vulnerability is addressed in the versions `4.1.2` and `4.3.2` of the `System.Net.Http` library.
 
 ## 2.3 Dynamic Application Security Testing (DAST)
 
