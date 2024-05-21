@@ -4,7 +4,7 @@ author: "2242090"
 bibliography: Docs/CcseCw2Report/references.bib
 toc: true
 toc-title: Table of Contents
-toc-depth: 6
+toc-depth: 4
 geometry: "left=1.25cm, right=1.25cm, top=1.25cm, bottom=1.25cm"
 csl: Docs/Shared/harvard-imperial-college-london.csl
 ---
@@ -147,7 +147,7 @@ The vulnerability can be mitigated by simply updating the `Azure.Identity` packa
 
 The `Microsoft.EntityFrameworkCore.SqlServer` is a package that serves as a database provider for Entity Framework Core to bs used with a Microsoft SQL Server and Azure SQL (through database migrations) [@2microsoftlearn2024]. Entity Framework (EF) Core is a lightweight, extensible, open-source, and cross-platform of the popular Entity Framework technology, allowing .NET developers to dynamically work with databases using C# objects without the need for manual SQL queries that typically need to be written [@3microsoftlearn2024].
 
-This package, and its affected versions, are vulnerable to unprotected credential stroage. In practicality, this means that an attacker can steal authentication credentials required for the database server through man-in-the-middle attacks between the SQL client and the SQL server. It can even occur if a secure connection is established over an encrypted channel such as TLS.
+This package, and its affected versions, are vulnerable to unprotected credential storage. In practicality, this means that an attacker can steal authentication credentials required for the database server through man-in-the-middle attacks between the SQL client and the SQL server. It can even occur if a secure connection is established over an encrypted channel such as TLS.
 
 To fix this, the `Microsoft.Data.SqlClient` can be updated or changed to the following versions: `2.1.7`, `3.1.5`, `4.0.5`, and `5.1.3`.
 
@@ -173,9 +173,9 @@ To fix this, the `Microsoft.Data.SqlClient` can be updated or changed to the fol
 
 The `System.Net.Http` NuGet package serves as a programming interface for modern HTTP applications, including all the necessary HTTP components required to consume web services over HTTP [@2nuget2024]. It allows HTTP components to be used by both clients and servers for understanding HTTP headers.
 
-Versions of this package that are affected are vulnerable to Denial of Service (DoS) attacks meaning that ASP.NET Core will fail to properly validate web requests. Attackers can use the `TestEncoder.EncodeCore` function in the `System.Text.Encodings.Web` package as part of `System.Net.Http` to trigger a denial of service attack by utilising a failure in code logic that incorrectly calculates the length of 4-byte charactes in Unicode.
+Versions of this package that are affected are vulnerable to Denial of Service (DoS) attacks meaning that ASP.NET Core will fail to properly validate web requests. Attackers can use the `TestEncoder.EncodeCore` function in the `System.Text.Encodings.Web` package as part of `System.Net.Http` to trigger a denial of service attack by utilising a failure in code logic that incorrectly calculates the length of 4-byte characters in Unicode.
 
-The vulnerability can be remdiated by updating or changing the `System.Net.Http` package to either version `4.1.2` or `4.3.2`.
+The vulnerability can be remediated by updating or changing the `System.Net.Http` package to either version `4.1.2` or `4.3.2`.
 
 #### 2.2.2.6 `System.Net.Http` – Improper certificate validation
 
@@ -221,9 +221,9 @@ The vulnerability can be avoided by updating or changing the `System.Net.Http` p
 >
 > Priority score: 375
 
-The `System.Net.Http` package is vulnerable to inforamaiton exposure, specifically HTTP authentication information from outbound requests that enounters a HTTP redirect. An attacker who manages to exploit this vulnerability can compromise the application further through the leaked information.
+The `System.Net.Http` package is vulnerable to information exposure, specifically HTTP authentication information from outbound requests that encounter an HTTP redirect. An attacker who manages to exploit this vulnerability can compromise the application further through the leaked information.
 
-This vulnerability can be mitigated by updating or changing the `System.Net.Http` package to the following versions: `2.0.20710`, `4.0.1-beta-23225` (although `beta` packages are not reccomended – serves as a temporary fix), `4.1.4`, and `4.3.4`.
+This vulnerability can be mitigated by updating or changing the `System.Net.Http` package to the following versions: `2.0.20710`, `4.0.1-beta-23225` (although `beta` packages are not recommended – serves as a temporary fix), `4.1.4`, and `4.3.4`.
 
 #### 2.2.2.8 `System.Text.RegularExpressions` – Regular Expression Denial of Service (ReDoS)
 
@@ -242,9 +242,9 @@ This vulnerability can be mitigated by updating or changing the `System.Net.Http
 >
 > Priority score: 375
 
-`System.Text.RegularExpressions` is an implementation of a regular expressions (RegEx) engine [@3nuget2024], which is an engine that takes a sequence of characters and returns an according matching pattern text.
+`System.Text.RegularExpressions` is an implementation of a regular expressions (RegEx) engine [@3nuget2024], which is an engine that takes a sequence of characters and returns a matching pattern text.
 
-RegEx engines, such as this one, are commonly vulnerable to Regular Expression Denial of Service (ReDoS) attacks due to the improper processing of RegEx strings. It means that an attacker relies on the fact that a large majority of ReGex engine omplementations may reach rare but extreme cases that cause them to function very slowly, at an exponential rate [@2owasp2024]. An attacker can therefore use a program or tool to manipulate RegEx engines to enter such states, causing them to hang for a very long time.
+RegEx engines, such as this one, are commonly vulnerable to Regular Expression Denial of Service (ReDoS) attacks due to the improper processing of RegEx strings. It means that an attacker relies on the fact that a large majority of ReGex engine implementations may reach rare but extreme cases that cause them to function very slowly, at an exponential rate [@2owasp2024]. An attacker can therefore use a program or tool to manipulate RegEx engines to enter such states, causing them to hang for a very long time.
 
 The vulnerability for this package is addressed through its subsequent version update of `4.3.1`.
 
@@ -268,7 +268,7 @@ The vulnerability for this package is addressed through its subsequent version u
 >
 > Priority score: 365
 
-This affected versions of the `System.Net.Http` package leave it vulerable to privilege escalation due to the improper sanitisation of any and all web requests. Priviledge escalation a type of attack in which an attacker can gain access elevated resource access that are normally restricted to the average application user.
+This affected versions of the `System.Net.Http` package leave it vulnerable to privilege escalation due to the improper sanitisation of any web requests. Privilege escalation is a type of attack in which an attacker can gain access elevated resource access that is normally restricted to the average application user.
 
 The versions `4.1.2` and `4.3.2` of the `System.Net.Http` properly resolve this vulnerability.
 
@@ -284,9 +284,9 @@ The versions `4.1.2` and `4.3.2` of the `System.Net.Http` properly resolve this 
 >
 > Priority score: 340
 
-Both packages which have versions that are affected are vulnerable to resource extensions when processing JSON Web Encryption (JWE) tokens that have a high compression ratio. An attacker than therefore utilise this to cause excessive memory location and processing time during the decompression phase leading to an eventual denial-of-service. However, this is only a possible exploit if the attacker has access to the Microsoft Entra ID's (IDP) registered public encrypt key.
+Both packages which have versions that are affected are vulnerable to resource extensions when processing JSON Web Encryption (JWE) tokens that have a high compression ratio. An attacker then therefore utilise this to cause excessive memory location and processing time during the decompression phase leading to an eventual denial-of-service. However, this is only a possible exploit if the attacker has access to the Microsoft Entra ID's (IDP) registered public encrypt key.
 
-The updated versions for both the packages, i.e. `5.7.0`, `6.34.0`, and `7.1.2`, patch this vulnerability.
+The updated versions for both packages, i.e. `5.7.0`, `6.34.0`, and `7.1.2`, patch this vulnerability.
 
 #### 2.2.2.11 System.Net.Http – Authentication bypass
 
@@ -320,29 +320,83 @@ The vulnerability is addressed in the versions `4.1.2` and `4.3.2` of the `Syste
 
 <!-- 100 words maximum -->
 
-Dynamic application
+DAST involves testing and running the application after it has been deployed to a staged environment and identifying potential security vulnerabilities through simulating real-world attacks. Using the OWASP Zed Attack Proxy (ZAP) tool [@owaspzap2024], the DAST scan was performed on the ASP.NET Core C# application. The ZAP tool acts as a type of proxy that intercepts and inspects the application's HTTP requests. This is to detect vulnerabilities, such as flaky authentication frameworks, flawed code injections, data exposure points, and security misconfigurations [@owasptop102021].
 
 ### 2.3.2 Vulnerabilities identified
 
 #### 2.3.2.1 Content Security Policy (CSP) header not set
 
+> CWE-693: Protection Mechanism Failure [@7cwe2023]
+>
+> Risk level: MEDIUM
+>
+> Number of instances: 2
+
+The Content Security Policy (CSP) header is an added layer of security (defense-in-depth) that aids in the detection and mitigation of specific attacks, those being mainly Cross-Site Scripting (XSS) and data injection attempts [@w3c2024]. The primary goal of this attack could range from data theft to site defacement or even malware distribution. A CSP provides a set of standard HTTP headers that website owners can use to declare approved content sources that browsers should allow to load on that page [@foundeo2023]. This includes content types such as JavaScript, CSS, HTML frames, fonts, images, and embedded objects (video and audio files, Java applets, ActiveX).
+
+A simple solution for this would be to add a CSP header to the application web server, but more specific solutions include:
+
+- Restricting inline scripts, to prevent injection attacks [@owaspcheatsheetseries2024].
+- Restricting remote script execution, by preventing the page from executing scripts from other suspicious web servers for injection attacks [@owaspcheatsheetseries2024].
+- Restricting any unsafe JavaScript logic that the attacker can exploit [@owaspcheatsheetseries2024].
+- Restricting HTML form submissions and instead, use a more secure form framework [@owaspcheatsheetsseries2024].
+- Restricting HTML objects to prevent attackers from injecting their own malicious executables, such as deprecated or legacy executables i.e. Java/Flash player [@owaspcheatsheetsseries2024].
+
 #### 2.3.2.2 Proxy disclosure
+
+> CWE-200: Exposure of Sensitive Information to an Unauthorized Actor [@4cwe2023]
+>
+> Risk level: MEDIUM
+>
+> Number of instances: 4
+
+Any proxy servers that the application is running were detected and fingerprinted by the ZAP tool. It occurs when `TRACE` and/or `TRACK` methods are enabled on both the proxy and origin web servers [@stackhawk2024]. If these methods are enabled, an attacker can gain access to sensitive information about the software and services running on the server to get information for further attacks, by sending specific requests [@stackhawk2024].
+
+This information helps the attacker to determine the following information:
+
+- A list of targets to construct an attack against the application.
+- The presence or absence of any other proxy-based components that may cause attacks against the application can be detected, prevented, or mitigated.
+- Any vulnerabilities on the proxy server that also compromise the application.
+
+A straightforward solution to this would be to disable the `OPTIONS` method on the proxy server used by the application, as well as both the `TRACK` and `TRACE` methods [@zaproxy2024]. Furthermore, web and application servers should implement custom error pages to prevent fingerprinting, so server error information is not leaked to the attacker for profiling purposes [@zaproxy2024].
 
 #### 2.3.2.3 Application error disclosure
 
-#### 2.3.2.4 Permissions policy header not set
+> CWE-200: Exposure of Sensitive Information to an Unauthorized Actor [@4cwe2023]
+>
+> Risk level: LOW
+>
+> Number of instances: 2
 
-#### 2.3.2.5 Strict-transport-security header not set
+Any pages that contain too verbose of an error message may potentially contain information such as file location or server software information that the attacker could use to profile the application resources with [@2zaproxy2024]. However, it is important to note that this vulnerability can also be a false positive – if the error message is found inside a documentation page for example. Such information such as API key credentials, resource location, internal web server configurations, or user data is at risk [@scanrepeat2024].
 
-#### 2.3.2.6 Non-storable content
+Like in [Section A, 2.3.2.2 Proxy disclosure](#2322-proxy-disclosure), implementing generic, custom error pages minimises the information available for the attacker on the client side, but verbose error logging on the server side for the developer [@scanrepeat2024]. This allows error references to still be available, without exposing any sensitive information.
 
-#### 2.3.2.7 Storable and cachable content
+#### 2.3.2.4 Permissions Policy Header not set
 
-#### 2.3.2.8 User-agent fuzzer
+> CWE-693: Protection Mechanism Failure [@7cwe2023]
+>
+> Risk level: LOW
+>
+> Number of instances: 2
+
+The Permissions Policy Header, similar to the Content Security Policy Header from [Section A, 2.3.2.1](#2321-content-security-policy-csp-header-not-set), is another added layer of security that governs the restriction from unauthorised access or usage of browser and client features, such as camera, microphone, full screen, and location [@3zapproxy2024]. The policy header details user privacy by limiting the set of client device features that web resources can use via a standard set of HTTP headers that website owners can use to limit access [@3zapproxy2024].
+
+To fix this, the internet-facing components (web server, application server, load balancer, etc.) should have a Permissions Policy Header configured with secure settings. The `directive` setting governs what client feature is enabled, and the `allowlist` setting either permits or denies access [@mdn2024].
+
+#### 2.3.2.5 Strict-Transport-Security Header not set
+
+> CWE-319: Cleartext Transmission of Sensitive Information [@4cwe2024]
+>
+> Risk level: LOW
+>
+> Number of instances: 4
+
+Another security header similar to the previous two ([2.3.2.1 Content Security Policy (CSP) Header](#2321-content-security-policy-csp-header-not-set) and [2.3.2.4 Permissions Policy Header](#2324-permissions-policy-header-not-set)) is a security layer that informs browsers (and complying user agents) that HTTPS site access should be reinforced, and any future HTTP connection attempts are to be converted to HTTPS [@2mdn2024]. However, if this is not set, any visitors to the website can initially communicate with the unencrypted HTTP version before redirection to HTTP occurs. This creates a small window of opportunity for man-in-the-middle attacks whereby users could potentially be redirected to a malicious replica of the website instead of the secure original version [@2mdn2024].
+
+The application's web server and the load balancer will need to be configured to enforce a Strict-Transport-Security Header in any HTTP responses they make.
 
 # 3 Section B: Software automation
-
-<!-- 950 words maximum -->
 
 ## 3.1 Introduction
 
@@ -350,11 +404,21 @@ Dynamic application
 
 ### 3.1.1 Purpose
 
-<!-- 50 words maximum -->
+This section's purpose is to demonstrate the implementation of the CI/CD (Continuous Integration/Continuous Deployment) pipeline for the ASP.NET Core C# web application, Pacific Tours. The automation covers the full software development life cycle, ensuring that builds are consistently tested and deployed – all while aligning with DevSecOps principles [@paloalto2024].
 
 ### 3.1.2 Tools and technologies used
 
-<!-- 50 words maximum -->
+#### 3.1.2.1 GitHub Actions
+
+![](Docs/CcseCw2Report/Images/github-actions-logo.png)
+
+#### 3.1.2.2 Docker
+
+![](Docs/CcseCw2Report/Images/docker-logo.png)
+
+#### 3.1.2.3 Google Cloud Platform
+
+![](Docs/CcseCw2Report/Images/google-cloud-platform-logo.png)
 
 ## 3.2 CI/CD pipeline implementation
 
@@ -583,7 +647,7 @@ dast:
 
 ### 3.4.1 Static Application Security Testing (SAST)
 
-No additional vulnerabilities (other than those documented in [Section A, 2.2.2](#222-vulnerabilities-identified)) were detected during the CI/CD pipeline `sast` job.
+No additional vulnerabilities (other than those documented in [Section A, 2.3.2](#232-vulnerabilities-identified)) were detected during the CI/CD pipeline `sast` job.
 
 ### 3.4.2 Dynamic Application Security Testing (DAST)
 
@@ -591,25 +655,43 @@ A few additional vulnerabilities, aside from the ones in [Section A, 2.2.2](#222
 
 #### 3.4.2.1 Missing anti-clickjacking header
 
+> CWE-1021: Improper Restriction of Rendered UI Layers or Frames [@9cwe2023]
+>
+> Risk level: MEDIUM
+>
+> Number of instances: 6
+
 #### 3.4.2.2 Vulnerable JavaScript library
+
+> CWE-829: CWE-829: Inclusion of Functionality from Untrusted Control Sphere [@10cwe2023]
+>
+> Risk level: MEDIUM
+>
+> Number of instances: 1
 
 #### 3.4.2.3 Cookie without secure flag
 
+> CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute [@11cwe2023]
+>
+> Risk level: LOW
+>
+> Number of instances: 2
+
 #### 3.4.2.4 Dangerous JavaScript functions
+
+> CWE-749: Exposed Dangerous Method or Function [@12cwe2023]
+>
+> Risk level: LOW
+>
+> Number of instances: 1
 
 #### 3.4.2.5 X-content-type-options header missing
 
-#### 3.4.2.6 Authentication request identified
-
-#### 3.4.2.7 Cookie slack detector
-
-#### 3.4.2.8 Information disclosure – suspicious comments
-
-#### 3.4.2.9 Re-examine cache-control directives
-
-#### 3.4.2.1.10 Session management response identified
-
-#### 3.4.2.1.11 User controllable HTML element attribute (potential XSS)
+> CWE-693: Protection Mechanism Failure [@7cwe2023]
+>
+> Risk level: LOW
+>
+> Number of instances: 11
 
 # 4 Appendices
 
