@@ -11,11 +11,11 @@ csl: Docs/Shared/harvard-imperial-college-london.csl
 
 ---
 
-> GitHub repository: [https://github.com/iArcanic/pacific-tours-ccse-cw1](https://github.com/iArcanic/pacific-tours-ccse-cw1)
+# GitHub repository
+
+> [https://github.com/iArcanic/pacific-tours-ccse-cw1](https://github.com/iArcanic/pacific-tours-ccse-cw1)
 
 # 1 Executive summary
-
-<!-- 150 words maximum -->
 
 This report presents the results from the security vulnerability testing as well as the implementation of a CI/CD pipeline for the ASP.NET C# application developed for the Pacific Tours hotel company.
 
@@ -27,31 +27,19 @@ The second section, [Section B](#3-section-b-software-automation), covers the pr
 
 # 2 Section A: Software security vulnerabilities
 
-<!-- 1450 words maximum -->
-
 ## 2.1 Introduction
 
-<!-- 100 words maximum -->
-
 ### 2.1.1 Purpose
-
-<!-- 50 words maximum -->
 
 The purpose of this section is to identify any security vulnerabilities in the codebase of the ASP.NET C# project through both static and dynamic analysis. Through this, secure development practices as recommended by OWASP [@owasp2024] are considered. This can help in mitigating potential security risks in the codebase.
 
 ### 2.1.2 Tools used
 
-<!-- 50 words maximum -->
-
 The SAST scanning was performed using Synk [@snyk2024] and the DAST analysis was carried out by OWASP ZAP [@owaspzap2024]. These industry-grade tools allow for detailed vulnerability auditing whilst adhering to security practices defined by the National Institute of Standards and Technology (NIST) [@nist2024].
 
 ## 2.2 Static Application Security Testing (SAST)
 
-<!-- 400 words maximum -->
-
 ### 2.2.1 Methodology
-
-<!-- 100 words maximum -->
 
 SAST analysis involves examining the source code of the ASP.NET C# project to identify any potential security issues without actually having to execute the application. The SAST tool operates based on OWASP's Source Code Review Guide [@owasp2017]. The tool also leverages techniques such as data flow analysis, taint analysis, pattern matching with injection flaw issues, insecure deserialisation, and faulty access control mechanisms [@snyk2024]. The results were then reviewed, and the relevant information will be documented below.
 
@@ -308,17 +296,13 @@ The updated versions for both packages, i.e. `5.7.0`, `6.34.0`, and `7.1.2`, pat
 >
 > Priority score: 265
 
-The ASP.NET Core HTTP framework, through the `System.Net.Http` NuGet package, does not properly sanitise the "Web Request Handler" component. This means that attackers are able to spoof and mimic legitimate HTTP web requests and therefore use this to bypass the application's authentication framework.
+The ASP.NET Core HTTP framework, through the `System.Net.Http` NuGet package, does not properly sanitise the "Web Request Handler" component. This means that attackers can spoof and mimic legitimate HTTP web requests and therefore use this to bypass the application's authentication framework.
 
-The vulnerability is addressed in the versions `4.1.2` and `4.3.2` of the `System.Net.Http` library.
+The vulnerability is addressed in versions `4.1.2` and `4.3.2` of the `System.Net.Http` library.
 
 ## 2.3 Dynamic Application Security Testing (DAST)
 
-<!-- 500 words maximum -->
-
 ### 2.3.1 Methodology
-
-<!-- 100 words maximum -->
 
 DAST involves testing and running the application after it has been deployed to a staged environment and identifying potential security vulnerabilities through simulating real-world attacks. Using the OWASP Zed Attack Proxy (ZAP) tool [@owaspzap2024], the DAST scan was performed on the ASP.NET Core C# application. The ZAP tool acts as a type of proxy that intercepts and inspects the application's HTTP requests. This is to detect vulnerabilities, such as flaky authentication frameworks, flawed code injections, data exposure points, and security misconfigurations [@owasptop102021].
 
@@ -400,8 +384,6 @@ The application's web server and the load balancer will need to be configured to
 
 ## 3.1 Introduction
 
-<!-- 100 words maximum -->
-
 ### 3.1.1 Purpose
 
 This section's purpose is to demonstrate the implementation of the CI/CD (Continuous Integration/Continuous Deployment) pipeline for the ASP.NET Core C# web application, Pacific Tours. The automation covers the full software development life cycle, ensuring that builds are consistently tested and deployed – all while aligning with DevSecOps principles [@paloalto2024].
@@ -410,15 +392,36 @@ This section's purpose is to demonstrate the implementation of the CI/CD (Contin
 
 #### 3.1.2.1 GitHub Actions
 
-![](Docs/CcseCw2Report/Images/github-actions-logo.png)
+GitHub Actions is a continuous integration/continuous deployment (CI/CD) pipeline technology that utilises the code in a GitHub repository to automate the processes of building, testing, and deploying [@2github2024]. It uses the idea of "workflows" that trigger the automated processes upon different repository events [@2github2024], such as upon creating a pull request, pushing commits, creating a new branch, and so on.
+
+The reasons as to why GitHub Actions was used is as follows:
+
+- **Seamless integration**: this ASP.NET Core C# web application is hosted on a GitHub repository, so it makes logical sense to use the platform's very own CI/CD automation technology as it is seamlessly integrated with the code infrastructure.
+- **Customisability**: it is also highly customisable, being able to run the pipeline on a variety of different architectures through their virtual machines [@2github2024].
+- **Cost**: the cost of using GitHub Actions is little to none, having a very generous free tier [@3github2024] that covers most usage requirements.
+- **Pre-built actions**: they have a wide variety of already built-in functions via the "GitHub Marketplace" that most typical code bases need [@benvengu2023].
+- **Security**: support encryption and masking of sensitive information such as API credentials, keys, and so on through GitHub Actions Secrets.
+- **Developer support**: GitHub Actions has a very large and active community, meaning that any errors are likely to be reported and fixed quickly, as well as the ability to share and use pre-build actions [@benvengu2023].
 
 #### 3.1.2.2 Docker
 
-![](Docs/CcseCw2Report/Images/docker-logo.png)
+Docker is a platform that allows for the consistent development, shipping, and running of applications [@docker2024]. It helps to separate the applications from the resources they require, allowing developers to only focus on what is essential to the development process. The Docker concepts and methodologies offer a variety of features that are beneficial for the building and deployment of this ASP.NET Core C# web application:
 
-#### 3.1.2.3 Google Cloud Platform
+- **Containers**: Docker uses the concept of containers, which allows each service to be individually managed, meaning that resources can be efficiently allocated as needed [@preeth2015].
+- **Container isolation**: each Docker container is isolated, helping to maintain the overall security of the system as the application is confined to its execution environment [@bui2015].
+- **Architecture variety**: similar to [3.1.2.1 GitHub Actions](#3121-github-actions), Docker containers are capable of running a variety of different architectures such as Linux, Windows, MacOS, and more.
+- **Pipeline integrtation**: containers can easily integrate with the CI/CD workflow, allowing code to be fixed of bugs, containerised, and redeployed to the test environment, then pushed to production [@docker2024].
+- **Cost**: Docker has a very generous free tier which has near to unlimited usage on any device.
 
-![](Docs/CcseCw2Report/Images/google-cloud-platform-logo.png)
+#### 3.1.2.3 Google Cloud Platform (GCP)
+
+Google Cloud Platform (GCP) is a set of various physical assets, those being computers, virtual resources, servers, hard disk drives all being serves in the form of virtual machines (VMs) rhat are held in various data centers across different regional locations [@google2024]. GCP is therefore essentially a public cloud vendor that offers a suite of computing services that are globally accessible [@knox2023].
+
+The following cloud resources that GCP offers make it suitable for this ASP.NET Core C# web application's components:
+
+- **Google Artifact Registry (GAR)**: a collection of repositories suitable for the storage of Docker container images, preparing them for containers to be deployed to the web [@2google2024].
+- **Google Cloud SQL**: a fully managed relational database compatabile with database software such as MySQL, PostgreSQL, and SQL server for a deployed web application[@3google2024].
+- **Google Cloud Run** a managed compute platform that uses the Docker containers from GAR and run them to be publically accessible on the internet using Google's scalable infrastructure [@4google2024].
 
 ## 3.2 CI/CD pipeline implementation
 
