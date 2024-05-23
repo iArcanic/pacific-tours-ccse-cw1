@@ -415,236 +415,447 @@ Docker is a platform that allows for the consistent development, shipping, and r
 
 #### 3.1.2.3 Google Cloud Platform (GCP)
 
-Google Cloud Platform (GCP) is a set of various physical assets, those being computers, virtual resources, servers, hard disk drives all being serves in the form of virtual machines (VMs) rhat are held in various data centers across different regional locations [@google2024]. GCP is therefore essentially a public cloud vendor that offers a suite of computing services that are globally accessible [@knox2023].
+Google Cloud Platform (GCP) is a set of various physical assets, those being computers, virtual resources, servers, and hard disk drives all being serves in the form of virtual machines (VMs) rhat are held in various data centers across different regional locations [@google2024]. GCP is therefore essentially a public cloud vendor that offers a suite of computing services that are globally accessible [@knox2023].
 
 The following cloud resources that GCP offers make it suitable for this ASP.NET Core C# web application's components:
 
 - **Google Artifact Registry (GAR)**: a collection of repositories suitable for the storage of Docker container images, preparing them for containers to be deployed to the web [@2google2024].
-- **Google Cloud SQL**: a fully managed relational database compatabile with database software such as MySQL, PostgreSQL, and SQL server for a deployed web application[@3google2024].
-- **Google Cloud Run** a managed compute platform that uses the Docker containers from GAR and run them to be publically accessible on the internet using Google's scalable infrastructure [@4google2024].
+- **Google Cloud SQL**: a fully managed relational database compatible with database software such as MySQL, PostgreSQL, and SQL server for a deployed web application[@3google2024].
+- **Google Cloud Run** a managed compute platform that uses the Docker containers from GAR and runs them to be publically accessible on the internet using Google's scalable infrastructure [@4google2024].
 
 ## 3.2 CI/CD pipeline implementation
 
+The CI/CD pipeline for the ASP.NET Core C# web application is implemented using a GitHub Actions workflow consisting of several jobs described in a YAML Ain't Markup Language (YAML) file. The below jobs explain automated pipeline processes such as building, testing, deploying, and so on. Proof from the GitHub Actions and Google Cloud Platform consoles (if necessary) will be provided to demonstrate that each job functions as expected and passes, fulfilling the CI/CD of the application.
+
+The specific security testing pipeline jobs (i.e. `sast` and `dast`) are explained under [Section B: 3.3 Security Testing in CI/CD Pipeline](#33-security-testing-in-cicd-pipeline).
+
+The complete contents of this file can be found at [`pacific-tours-ccse-cw1/.github/workflows/ci-cd.yml`](https://github.com/iArcanic/pacific-tours-ccse-cw1/blob/main/.github/workflows/ci-cd.yml).
+
 ### 3.2.1 `test`
+
+The `test` job is the first job in the pipeline that is responsible for checking out the source code, setting up the relevant .NET SDK version, restoring any project dependencies, and then running all available unit tests for their ASP.NET Core C# web application. Since this is the first job, it ensures that the application works as intended without breaking, before moving on to the subsequent pipeline jobs.
 
 ```yaml
 test:
   runs-on: windows-latest
-
-  steps:
-    - name: Checkout source code
-      uses: actions/checkout@v4
-
-    - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
-
-    - name: Restore project dependencies
-      run: dotnet restore ${{ env.SOLUTION_NAME }}
-
-    - name: Test project
-      run: dotnet test --no-restore --verbosity normal
 ```
+
+It is important to set the GitHub runner OS to the latest Windows runner, as the native OS for an ASP.NET C# application is designed for the Windows environment.
+
+```yaml
+- name: Checkout source code
+  uses: actions/checkout@v4
+```
+
+The source code from the repository is checked out making it available for the next set of steps.
+
+```yaml
+- name: Setup .NET SDK
+  uses: actions/setup-dotnet@v4
+  with:
+    dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
+```
+
+The next step sets up the .NET SDK necessary for building and testing the application. It uses the relevant .NET version specified by the `DOTNET_CORE_VERSION` environment variable. This must match the same .NET version that the actual ASP.NET Core C# web application is running, which in this case, is the `7.0.x` series.
+
+```yaml
+- name: Restore project dependencies
+  run: dotnet restore ${{ env.SOLUTION_NAME }}
+```
+
+Using the installed .NET SDK commands from the previous step, the `dotnet restore` command can be used to restore the project dependencies, NuGet package references, and other project-specific tools mentioned in the `.sln` or solution file (via the `SOLUTION_NAME` environment variable).
+
+```yaml
+- name: Test project
+  run: dotnet test --no-restore --verbosity normal
+```
+
+Finally, via `dotnet test`, the unit tests are executed. The `--no-restore` argument prevents `dotnet restore` from having to run again since the dependencies have already been restored in the previous step, and the `--verbosity normal` argument ensures that sufficient detail is provided in the log to the developer for the debugging process if this step fails.
+
+![`test` job success](Docs/CcseCw2Report/Images/test-job-success.png)
 
 ### 3.2.2 `docker-build-and-push-to-gar`
 
+The `docker-build-and-push-to-gar` is a combination of locally building the Docker image for the ASP.NET Core C# web application first on the GitHub Actions runner machine and then pushing it to the Google Artifact Registry (GAR).
+
 ```yaml
-docker-build-and-push-to-gar:
-  runs-on: ubuntu-latest
-  needs: [sast, test]
-
-  steps:
-    - name: Checkout source code
-      uses: actions/checkout@v4
-
-    - name: Google authentication
-      uses: google-github-actions/auth@v2
-      with:
-        credentials_json: ${{ env.GCP_SA_KEY }}
-
-    - name: Setup Google Cloud SDK
-      uses: google-github-actions/setup-gcloud@v1
-      with:
-        version: "latest"
-        project_id: ${{ env.GCP_PROJECT_ID }}
-
-    - name: Build Docker Image
-      run: |
-        echo "Building Docker image..."
-        docker build -t ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GCP_GAR_REPO }}/${{ env.CONTAINER_IMAGE_NAME }}:${{ github.sha }} .
-
-    - name: Configure Docker client
-      run: |
-        gcloud auth configure-docker --quiet
-        gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev --quiet
-
-    - name: Push Docker image to Google Artifact Registry
-      run: |
-        echo "Pushing Docker image to Google Artifact Registry..."
-        docker push ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GCP_GAR_REPO }}/${{ env.CONTAINER_IMAGE_NAME }}:${{ github.sha }}
+runs-on: ubuntu-latest
 ```
+
+As this job will be using the Docker CLI and those respective commands, they have the best compatibility on Linux machines, so `ubuntu-latest` was a logical choice.
+
+```yaml
+needs: [sast, test]
+```
+
+The `needs` keyword states that the stated set of jobs will need to be successful for this job to run [@4github2024], in this case, the `sast` (see [3.3 Security Testing in CI/CD Pipeline](#33-security-testing-in-cicd-pipeline)) and `test` (see [3.2.1 `test`](#321-test)). Since the Docker image relies upon the source code to be scanned for vulnerabilities and tested, it makes sure that the application has passed those, to prevent any broken or insecure code from being executed.
+
+```yaml
+- name: Checkout source code
+  uses: actions/checkout@v4
+```
+
+The source code from the repository is checked out making it available for the subsequent set of steps.
+
+```yaml
+- name: Google authentication
+  uses: google-github-actions/auth@v2
+  with:
+    credentials_json: ${{ env.GCP_SA_KEY }}
+```
+
+Since the built Docker image will be pushed to the GAR, a Google Cloud service, GCP needs to verify the identity and authenticity of the client attempting to connect to it, which in this case, is the GitHub Actions runner machine. To do this, the `GCP_SA_KEY` environment variable is a repository secret containing the credentials (in the format of a JSON file) for the Google Service Account (SA) used to interact with the GCP resources [@6google2024].
+
+```yaml
+- name: Setup Google Cloud SDK
+  uses: google-github-actions/setup-gcloud@v1
+  with:
+    version: "latest"
+    project_id: ${{ env.GCP_PROJECT_ID }}
+```
+
+The next step sets up the Google Cloud SDK on the GitHub Actions runner machine to install the necessary CLI tools for interacting with the required GCP services. The `project_id` parameter is the GCP project ID – a project being the collection for the set of GCP resources that will be used [@5google2024].
+
+```yaml
+- name: Build Docker Image
+    run: |
+      echo "Building Docker image..."
+      docker build -t \
+        ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GCP_GAR_REPO }}/${{ env.CONTAINER_IMAGE_NAME }}:${{ github.sha }} .
+```
+
+This step concerns itself with building the actual image itself using the build instructions from the `Dockerfile` provided in the repository's root (see [`pacific-tours-ccse-cw1/Dockerfile`](https://github.com/iArcanic/pacific-tours-ccse-cw1/blob/main/Dockerfile)). In the `run` block, the `echo "Building Docker image..."` provides an informative message to the developer in the GitHub Actions console. Following on, the `docker build` command builds an image of the application and tags it through the argument `-t` with a value of `${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GCP_GAR_REPO }}/${{ env.CONTAINER_IMAGE_NAME }}:${{ github.sha }}`. The tag includes the GAR URL (`GCP_REGION`, `GCP_PROJECT_ID`, and `GCP_GAR_REPO`), the container image name (`CONTAINER_IMAGE_NAME`), and the current GitHub commit SHA value (`github.sha`).
+
+```yaml
+- name: Configure Docker client
+  run: |
+    gcloud auth configure-docker --quiet
+    gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev --quiet
+```
+
+Before pushing the Docker image to GAR, this step configures the Docker CLI client to be authenticated with the GAR so that it can interact with it securely. The `--quiet` flag ensures that any user input that is required by these commands is defaulted to the standard values.
+
+```yaml
+- name: Push Docker image to Google Artifact Registry
+  run: |
+    echo "Pushing Docker image to Google Artifact Registry..."
+    docker push \
+        ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GCP_GAR_REPO }}/${{ env.CONTAINER_IMAGE_NAME }}:${{ github.sha }}
+```
+
+Finally, the Docker image is then pushed to the GAR via the `docker push` command, using the same image tag from the previous Docker build step.
+
+![`docker-build-and-push-to-gar` job success](Docs/CcseCw2Report/Images/docker-build-and-push-to-gar-job-success.png)
+
+![Docker image in GAR repository](Docs/CcseCw2Report/Images/gar-docker-image.png)
 
 ### 3.2.3 `deploy`
 
+The `deploy` pipeline job is responsible for deploying the Docker image from the GAR (pushed from the previous step, [3.2.2 `docker-build-and-push-to-gar`](#322-docker-build-and-push-to-gar)) to Google Cloud Run to be publically available via a URL.
+
 ```yaml
-deploy:
-  runs-on: ubuntu-latest
-  needs: docker-build-and-push-to-gar
-
-  steps:
-    - name: Checkout source code
-      uses: actions/checkout@v4
-
-    - name: Google authentication
-      uses: google-github-actions/auth@v2
-      with:
-        credentials_json: ${{ env.GCP_SA_KEY }}
-
-    - name: Setup Google Cloud SDK
-      uses: google-github-actions/setup-gcloud@v1
-      with:
-        version: "latest"
-        project_id: ${{ env.GCP_PROJECT_ID }}
-
-    - name: Deploy to Google Cloud Run
-      run: |
-        gcloud run deploy ${{ env.GCP_CLOUD_RUN_SERVICE }} \
-          --image=${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GCP_GAR_REPO }}/${{ env.CONTAINER_IMAGE_NAME }}:${{ github.sha }} \
-          --region=${{ env.GCP_REGION }} \
-          --allow-unauthenticated \
-          --memory=1Gi \
-          --cpu=1 \
-          --min-instances=0 \
-          --max-instances=2 \
-          --concurrency=80 \
-          --add-cloudsql-instances=${{ env.GCP_CLOUD_SQL_INSTANCE }} \
-          --update-env-vars ASPNETCORE_ENVIRONMENT=Development \
-          --platform=managed
+runs-on: ubuntu-latest
 ```
+
+This job will run on GitHub Action's latest Ubuntu runner since the commands for this job are generic and do not require any specific architecture.
+
+```yaml
+needs: docker-build-and-push-to-gar
+```
+
+This job depends on the successful completion of the `docker-build-and-push-to-gar` before it can run, meaning in practicality, it ensures that the Docker image is first built and pushed to the GAR before attempting to deploy it. It also means that the correct and most recent up-to-date version of the Docker image is referenced during deployment.
+
+```yaml
+- name: Checkout source code
+  uses: actions/checkout@v4
+```
+
+As always, the source code from the repository is checked out making it available for the next set of steps.
+
+```yaml
+- name: Google authentication
+  uses: google-github-actions/auth@v2
+  with:
+    credentials_json: ${{ env.GCP_SA_KEY }}
+```
+
+To use the Google Cloud Platform services, this step authenticates the GitHub Actions runner machine via the `GCP_SA_KEY` JSON credentials file through a Service Account like before.
+
+```yaml
+- name: Setup Google Cloud SDK
+  uses: google-github-actions/setup-gcloud@v1
+  with:
+    version: "latest"
+    project_id: ${{ env.GCP_PROJECT_ID }}
+```
+
+Since the GitHub Actions runner machine needs access to `gcloud` commands, which is the GCP CLI tool, this step sets up the SDK along with the `project_id` that references the according project where all the GCP resources point towards.
+
+```yaml
+- name: Deploy to Google Cloud Run
+  run: |
+    gcloud run deploy ${{ env.GCP_CLOUD_RUN_SERVICE }} \
+    --image=${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GCP_GAR_REPO }}/${{ env.CONTAINER_IMAGE_NAME }}:${{ github.sha }} \
+    --region=${{ env.GCP_REGION }} \
+    --allow-unauthenticated \
+    --memory=1Gi \
+    --cpu=1 \
+    --min-instances=0 \
+    --max-instances=2 \
+    --concurrency=80 \
+    --add-cloudsql-instances=${{ env.GCP_CLOUD_SQL_INSTANCE }} \
+    --update-env-vars ASPNETCORE_ENVIRONMENT=Development \
+    --platform=managed
+```
+
+Finally, to deploy the Docker image as a container to Google Cloud run, the `gcloud run deploy` command achieves this. This command includes a lot of flags and features:
+
+- **`gcloud run deploy ${{ env.GCP_CLOUD_RUN_SERVICE }}`**: the name of the Google Cloud Run service to be deployed.
+- **`--image`**: a reference to the Docker image being deployed, pulled from the GAR using the image tag from the previous step.
+- **`--region`**: the GCP region where the Cloud Run service is deployed.
+- **`--allow-unauthenticated`**: anyone on the public internet, i.e. those who are not authenticated by whitelisting their IPs, can access the Cloud Run service (only set for testing purposes, this will change when pushed to production).
+- **`--memory`**, **`--cpu`**, **`--min-instances`**, **`--max-instances`**, **`concurrency`**: all of these flags relate to the resources to be allocated (memory, CPU, minimum instances, and maximum instances) to the Cloud Run services (values set to a baseline to be in line with free tier usage).
+- **`--add-cloudsql-instances`**: references an existing Cloud SQL instance (i.e. relational SQL database) to be linked to the Google Cloud Run service.
+- **`--update-env-vars`**: updates the environment variables inside the Google Cloud Run service, which the Docker container also has access to, which in this case, setting the `ASPNETCORE_ENVIRONMENT` to `Development` (for testing purposes, but this will be changed to `Production` when pushed to the production environment).
+- **`--platform`**: states that the service deployment is to be managed by the Google Cloud Run platform.
+
+![`deploy` job success](Docs/CcseCw2Report/Images/deploy-job-success.png)
+
+![Deployed website](Docs/CcseCw2Report/Images/deployed-website.png)
 
 ### 3.2.4 `database-migration`
 
+The `database-migration` job concerns running Entity Framework Core (EF Core) database migrations against a Google Cloud SQL instance. This job ensures that upon each push, migrations are applied and that the database schema is updated with any changes made to models or the database context class defined in the ASP.NET Core C# web application.
+
 ```yaml
-database-migration:
-  runs-on: ubuntu-latest
-  needs: deploy
-
-  steps:
-    - name: Checkout source code
-      uses: actions/checkout@v4
-
-    - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
-
-    - name: Install Dotnet Entity Framework CLI tool
-      run: |
-        dotnet tool install --global dotnet-ef
-        dotnet tool restore
-
-    - name: Download Cloud SQL Auth Proxy
-      run: |
-        curl -o cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.11.0/cloud-sql-proxy.linux.amd64
-
-    - name: Make the Cloud SQL Auth Proxy executable
-      run: chmod +x cloud-sql-proxy
-
-    - name: Google authentication
-      uses: google-github-actions/auth@v2
-      with:
-        credentials_json: ${{ env.GCP_SA_KEY }}
-
-    - name: Setup Google Cloud SDK
-      uses: google-github-actions/setup-gcloud@v1
-      with:
-        version: "latest"
-        project_id: ${{ env.GCP_PROJECT_ID }}
-
-    - name: Start Cloud SQL Auth Proxy
-      run: |
-        ./cloud-sql-proxy ${{ env.GCP_CLOUD_SQL_INSTANCE }} &
-
-    - name: Run database migrations
-      run: |
-        dotnet ef database update
-      env:
-        ASPNETCORE_ENVIRONMENT: Development
-        ConnectionStrings__DefaultConnection: ${{ env.CONNECTION_STRING_GITHUB_ACTIONS }}
-
-    - name: Stop Cloud SQL Proxy
-      run: killall cloud-sql-proxy
+runs-on: ubuntu-latest
 ```
+
+This job will run on GitHub Action's latest Ubuntu runner. Commands in this job do not require a specific architecture.
+
+```yaml
+needs: deploy
+```
+
+This job depends on the website being successfully deployed before the database migrations are run. This means that there is no point in continuing the pipeline or running the database migrations in parallel, and makes logical sense to update the schema only if the website is up and running.
+
+```yaml
+- name: Checkout source code
+  uses: actions/checkout@v4
+```
+
+As always, the source code from the repository is checked out making it available for subsequent steps.
+
+```yaml
+- name: Setup .NET SDK
+  uses: actions/setup-dotnet@v4
+  with:
+    dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
+```
+
+The next step sets up the .NET SDK necessary for building and testing the application. It uses the .NET version specified by the `DOTNET_CORE_VERSION` environment variable, matching the same .NET version of the ASP.NET Core C# web application running, i.e. the `7.0.x` series.
+
+```yaml
+- name: Install Dotnet Entity Framework CLI tool
+  run: |
+    dotnet tool install --global dotnet-ef
+    dotnet tool restore
+```
+
+A specific `dotnet` tool, `dotnet-ef` is required to perform the EF Core database migrations.
+
+```yaml
+- name: Download Cloud SQL Auth Proxy
+  run: |
+    curl -o \
+        cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.11.0/cloud-sql-proxy.linux.amd64
+```
+
+This step downloads the Google Cloud SQL Auth Proxy, which is required to authorise the GitHub Actions runner machine for interaction with the Google Cloud SQL instance, in a secure manner. It uses the `curl` command to get the binary executable from the URL of this package and name it `cloud-sql-proxy`.
+
+```yaml
+- name: Make the Cloud SQL Auth Proxy executable
+  run: chmod +x cloud-sql-proxy
+```
+
+The Google Cloud SQL Auth Proxy package needs to be given the executable permission via the `chmod +x` command, for it to be run.
+
+```yaml
+- name: Google authentication
+  uses: google-github-actions/auth@v2
+  with:
+    credentials_json: ${{ env.GCP_SA_KEY }}
+```
+
+Like in the previous steps, the GitHub Actions runner machine has to be authenticated to interact with the GCP services, and this is through the Service Account's credentials JSON file referenced via the `GCP_SA_KEY` environment variable.
+
+```yaml
+- name: Setup Google Cloud SDK
+  uses: google-github-actions/setup-gcloud@v1
+  with:
+    version: "latest"
+    project_id: ${{ env.GCP_PROJECT_ID }}
+```
+
+All the relevant Google Cloud CLI commands need to be installed, i.e. the `gcloud` commands, as they will be required in the next set of steps. A reference to the GCP project is given via the `project_id` environment variable which is a collection of resources associated with this project.
+
+```yaml
+- name: Start Cloud SQL Auth Proxy
+  run: |
+    ./cloud-sql-proxy ${{ env.GCP_CLOUD_SQL_INSTANCE }} &
+```
+
+Using the previously installed Cloud SQL Auth Proxy, it can now be run to forward and authenticate all outgoing connections from the GitHub Actions runner machine to the Google Cloud SQL instance. The `&` appended at the end of the command is a Linux syntax for pushing the process to the background in another thread, so other commands can run in the foreground [@stackoverflow2012].
+
+```yaml
+- name: Run database migrations
+  run: |
+    dotnet ef database update
+  env:
+    ASPNETCORE_ENVIRONMENT: Development
+    ConnectionStrings__DefaultConnection: ${{ env.CONNECTION_STRING_GITHUB_ACTIONS }}
+```
+
+This step runs the Entity Framework Core database migrations via `dotnet ef database update`. Here, the `ASPNETCORE_ENVIRONMENT` is set to `Development` for testing purposes (this will be changed to `Production` when pushed to a production environment), and the `ConnectionStrings__DefaultConnection` to `CONNECTION_STRING_GITHUB_ACTIONS` – a string that contains the Cloud SQL connection instance with user credentials, database, and the hostname.
+
+```yaml
+- name: Stop Cloud SQL Proxy
+  run: killall cloud-sql-proxy
+```
+
+After the database migrations have successfully run, there are no longer going to be any more outgoing connections to the Cloud SQL instance, so there is also no need to keep the proxy running. The `killall` command stops all services with the name of `cloud-sql-proxy`.
+
+![`database-migration` job success](Docs/CcseCw2Report/Images/database-migration-job-success.png)
+
+![Cloud SQL instance database](Docs/CcseCw2Report/Images/cloud-sql-db.png)
 
 ## 3.3 Security testing in CI/CD pipeline
 
 ### 3.3.1 `sast`
 
+The `sast` job performs Security Application Security Testing (SAST) on the ASP.NET Core C# web application using the Snyk tool. This is to help identify potential security vulnerabilities in the source code before it is built and deployed.
+
 ```yaml
-sast:
-  runs-on: ubuntu-latest
-  needs: test
-  permissions: write-all
-
-  steps:
-    - name: Checkout source code
-      uses: actions/checkout@v4
-
-    - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
-
-    - name: Restore project dependencies
-      run: dotnet restore ${{ env.SOLUTION_NAME }}
-
-    - name: Run Snyk to check for vulnerabilities
-      uses: snyk/actions/dotnet@master
-      continue-on-error: true
-      with:
-        args: --sarif-file-output=snyk.sarif
-
-    - name: Upload result to GitHub code scanning
-      uses: github/codeql-action/upload-sarif@v3
-      with:
-        sarif_file: snyk.sarif
-        category: snyk-sast-analysis
+runs-on: ubuntu-latest
 ```
+
+This job runs on the latest Ubuntu architecture on the GitHub Actions runner machine. More specifically, a Linux-based system is required to run the Snyk CLI commands.
+
+```yaml
+needs: test
+```
+
+The `needs` keyword here ensures that the application code has passed the required unit tests before performing the security analysis on the source code. There would be no reason to perform the SAST scan if the application code is in a broken state.
+
+```yaml
+permissions: write-all
+```
+
+This job is given write permissions to upload the SAST scan security results to GitHub Code Scanning.
+
+```yaml
+- name: Checkout source code
+  uses: actions/checkout@v4
+```
+
+The first step checks out the source code from the repository so that subsequent steps have access to it.
+
+```yaml
+- name: Setup .NET SDK
+  uses: actions/setup-dotnet@v4
+  with:
+    dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
+```
+
+The GitHub Actions runner machine needs to have access to the `dotnet` set of CLI commands, so this step sets up the .NET SDK with the specified `dotnet-version`, matching the same version as the ASP.NET Core C# web application.
+
+```yaml
+- name: Restore project dependencies
+  run: dotnet restore ${{ env.SOLUTION_NAME }}
+```
+
+The project's dependencies, references to specific tools, and any other requirements need to be restored (installed) via the `dotnet restore` command, by passing the solution name i.e. the `.sln` file.
+
+```yaml
+- name: Run Snyk to check for vulnerabilities
+  uses: snyk/actions/dotnet@master
+  continue-on-error: true
+  with:
+    args: --sarif-file-output=snyk.sarif
+```
+
+Using Snyk's specific .NET action (`snyk/actions/dotnet@master`), this step performs the SAST vulnerability detection on the .NET codebase. The `continue-on-error` flag is set to `true` to ensure that the job succeeds and continues even if Snyk encounters errors during the scan process. At the end of the scan, it outputs all vulnerabilities within a SARIF (Static Analysis Results Interchange Format) file, `synk.sarif`, to be suitable for GitHub Code Scanning.
+
+```yaml
+- name: Upload result to GitHub code scanning
+  uses: github/codeql-action/upload-sarif@v3
+  with:
+    sarif_file: snyk.sarif
+    category: snyk-sast-analysis
+```
+
+The SARIF file from the previous step generated by Snyk uploads this to the GitHub code scanning feature using the `github/codeql-action/upload-sarif@v3` action. The `sarif_file` input is where the path to the Synk SARIF file is passed, and the `category` input, `synk-sast-analysis`, provides a label on the UI for developers to identify the security results.
 
 ### 3.3.2 `dast`
 
+The `dast` job performs Dynamic Application Security Testing (DAST) on the final deployed ASP.NET Core C# web application via the OWASP ZAP tool. This is to identify additional vulnerabilities by simulating real-world attacks on the final form of the application.
+
 ```yaml
-dast:
-  runs-on: ubuntu-latest
-  needs: deploy
-
-  steps:
-    - name: Checkout source code
-      uses: actions/checkout@v4
-
-    - name: Google authentication
-      uses: google-github-actions/auth@v2
-      with:
-        credentials_json: ${{ env.GCP_SA_KEY }}
-
-    - name: Setup Google Cloud SDK
-      uses: google-github-actions/setup-gcloud@v1
-      with:
-        version: "latest"
-        project_id: ${{ env.GCP_PROJECT_ID }}
-
-    - name: Get Cloud Run Service URL
-      id: get-url
-      run: |
-        URL=$(gcloud run services describe ${{ env.GCP_CLOUD_RUN_SERVICE }} --region=${{ env.GCP_REGION }} --format 'value(status.url)')
-        echo "::set-output name=url::$URL"
-
-    - name: Run OWASP ZAP scan
-      uses: zaproxy/action-full-scan@v0.10.0
-      with:
-        target: ${{ steps.get-url.outputs.url }}
+runs-on: ubuntu-latest
 ```
+
+The job runs on the latest Ubuntu architecture on the GitHub Actions runner machine. Typically `ubuntu-latest` is the standard choice when system specific commands aren't required.
+
+```yaml
+needs: deploy
+```
+
+The `dast` job needs the ASP.NET C# application to be deployed successfully first via the `deploy` job. This ensures that the application has been deployed to Google Cloud Run before performing the DAST scan.
+
+```yaml
+- name: Checkout source code
+  uses: actions/checkout@v4
+```
+
+As always, the code is first checked out to allow other steps to have access to the source code.
+
+```yaml
+- name: Google authentication
+  uses: google-github-actions/auth@v2
+  with:
+    credentials_json: ${{ env.GCP_SA_KEY }}
+```
+
+Using the Service Account (SA) linked to the GCP project for this application, the GitHub Actions runner machine has to be authenticated to access the necessary resources. The `GCP_SA_KEY` is a JSON file that is stored as a repository secret, containing credentials.
+
+```yaml
+ - name: Setup Google Cloud SDK
+  uses: google-github-actions/setup-gcloud@v1
+  with:
+    version: "latest"
+    project_id: ${{ env.GCP_PROJECT_ID }}
+```
+
+Another step within this job needs access to the Google Cloud CLI i.e. the `gcloud` commands. This step therefore sets up the Google Cloud SDK based on the resources enabled on the project (referenced via `project_id`).
+
+```yaml
+- name: Get Cloud Run Service URL
+  id: get-url
+  run: |
+    URL=$(gcloud run services describe ${{ env.GCP_CLOUD_RUN_SERVICE }} --region=${{ env.GCP_REGION }} --format 'value(status.url)')
+    echo "::set-output name=url::$URL"
+```
+
+Using the installed `gcloud` commands from the previous step, the URL of the deployed website running through Google Cloud Run is retrieved and set as the job's output via `echo "::set-output name=url::$URL"`. This now means that the `URL` variable is accessible by other steps.
+
+```yaml
+- name: Run OWASP ZAP scan
+  uses: zaproxy/action-full-scan@v0.10.0
+  with:
+    target: ${{ steps.get-url.outputs.url }}
+```
+
+This step runs the OWASP ZAP tool to perform the DAST scan on the deployed website. The `zaproxy/action-full-scan@v.0.10.0` action requires a target URL (through the `target` input) to run the simulated attacks against. The URL is retrieved from the output of the previous step.
 
 ## 3.4 Vulnerability comparison with [Section A](#2-section-a-software-security-vulnerabilities)
 
@@ -664,6 +875,14 @@ A few additional vulnerabilities, aside from the ones in [Section A, 2.2.2](#222
 >
 > Number of instances: 6
 
+This vulnerability concerns either the lack of a Content Security Policy (CSP) header (see [Section A, 2.3.2.1 Content Security Policy (CSP) header not set](#2321-content-security-policy-csp-header-not-set)) with a "frame-ancestors" directive or any X-Frame-Options, to protect against "Clickjacking" attacks. A Clickjacking attack is one which fools users into thinking that they are clicking on one website element, when in reality, they are actually clicking on another [@synopsys2024]. Users think that they are interacting with the web page's genuine UI, but there is another underlying UI in control, i.e. the UI has been redressed [@synopsys2024].
+
+The vulnerability can be addressed in the following ways:
+
+- By enforcing the usage of modern web browsers to be used by the user. This is because they support the CSP and X-Frame-Options HTTP headers, and should be set to be returned by all web pages of the application [@4zapproxy2024].
+- Introduce the `frame-ancestors` directive to the CSP header [@2owaspcheatsheetseries2024].
+- Preventing the browser from loading external frames by using the `SAMEORIGIN` value or `DENY` if the application pages do not use framing. These are both part of the `FRAMESET` settings [@4zapproxy2024].
+
 #### 3.4.2.2 Vulnerable JavaScript library
 
 > CWE-829: CWE-829: Inclusion of Functionality from Untrusted Control Sphere [@10cwe2023]
@@ -671,6 +890,10 @@ A few additional vulnerabilities, aside from the ones in [Section A, 2.2.2](#222
 > Risk level: MEDIUM
 >
 > Number of instances: 1
+
+An identified JavaScript library (`jquery-validation`) used by one of the client-side pages is vulnerable. This is a package that is responsible for the form validation logic on the client side before the data is submitted to the server, hence reducing server load times [@javatpoint2021].
+
+A simple solution to this vulnerability would be to upgrade to the latest version of `jquery-validation` [@5zapproxy2024].
 
 #### 3.4.2.3 Cookie without secure flag
 
@@ -680,22 +903,13 @@ A few additional vulnerabilities, aside from the ones in [Section A, 2.2.2](#222
 >
 > Number of instances: 2
 
-#### 3.4.2.4 Dangerous JavaScript functions
+The vulnerability details a cookie being set without a secure flag, meaning that it can be accessed via unencrypted connections [@6zapproxy2024]. It can also potentially mean information exposure as an attacker can eavesdrop on the network traffic leading to session tokens, sensitive data, and user credentials to be leaked [@2stackhawk2024]. It can also be a means for man-in-the-middle attacks, by intercepting the communication between the user and the server since the attacker could modify the contents of the cookie or inject malicious custom code for the user's session [@2stackhawk2024]. Furthermore, impersonation attacks can occur if the user's session is hijacked, allowing the attacker to perform actions as the user [@2stackhawk2024].
 
-> CWE-749: Exposed Dangerous Method or Function [@12cwe2023]
->
-> Risk level: LOW
->
-> Number of instances: 1
+The vulnerability can be addressed in the following ways:
 
-#### 3.4.2.5 X-content-type-options header missing
+- Sending cookies that contain sensitive information through an encrypted channel [@6zapproxy2024].
+- Set the `secure` flag for cookies [@6zapproxy2024].
+- Implement HTTPS connections [@2stackhawk2024].
+- Review or update cookie handling policies [@2stackhawk2024].
 
-> CWE-693: Protection Mechanism Failure [@7cwe2023]
->
-> Risk level: LOW
->
-> Number of instances: 11
-
-# 4 Appendices
-
-# 5 References
+# 4 References
