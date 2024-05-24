@@ -223,27 +223,13 @@ The CI/CD pipeline for the ASP.NET Core C# web application is implemented using 
 
 The specific security testing pipeline jobs (i.e. `sast` and `dast`) are explained under [Section B: 3.3 Security Testing in CI/CD Pipeline](#33-security-testing-in-cicd-pipeline).
 
-The complete contents of this file can be found at [`pacific-tours-ccse-cw1/.github/workflows/ci-cd.yml`](https://github.com/iArcanic/pacific-tours-ccse-cw1/blob/main/.github/workflows/ci-cd.yml).
-
 ![CI-CD Pipeline passing](Docs/CcseCw2Report/Images/pipeline-success.png)
+
+> NOTE: Only the major steps for each pipeline job are explained to be conservative of the word count. The complete contents of this file can be found at [`pacific-tours-ccse-cw1/.github/workflows/ci-cd.yml`](https://github.com/iArcanic/pacific-tours-ccse-cw1/blob/main/.github/workflows/ci-cd.yml).
 
 ### 3.2.1 `test`
 
 The `test` job is the first job in the pipeline that is responsible for checking out the source code, setting up the relevant .NET SDK version, restoring any project dependencies, and then running all available unit tests for their ASP.NET Core C# web application. Since this is the first job, it ensures that the application works as intended without breaking, before moving on to the subsequent pipeline jobs.
-
-```yaml
-test:
-  runs-on: windows-latest
-```
-
-It is important to set the GitHub runner OS to the latest Windows runner, as the native OS for an ASP.NET C# application is designed for the Windows environment.
-
-```yaml
-- name: Checkout source code
-  uses: actions/checkout@v4
-```
-
-The source code from the repository is checked out making it available for the next set of steps.
 
 ```yaml
 - name: Setup .NET SDK
@@ -252,7 +238,7 @@ The source code from the repository is checked out making it available for the n
     dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
 ```
 
-The next step sets up the .NET SDK necessary for building and testing the application. It uses the relevant .NET version specified by the `DOTNET_CORE_VERSION` environment variable. This must match the same .NET version that the actual ASP.NET Core C# web application is running, which in this case, is the `7.0.x` series.
+This step sets up the .NET SDK necessary for building and testing the application. It uses the relevant .NET version specified by the `DOTNET_CORE_VERSION` environment variable. This must match the same .NET version that the actual ASP.NET Core C# web application is running, which in this case, is the `7.0.x` series.
 
 ```yaml
 - name: Restore project dependencies
@@ -275,23 +261,10 @@ Finally, via `dotnet test`, the unit tests are executed. The `--no-restore` argu
 The `docker-build-and-push-to-gar` is a combination of locally building the Docker image for the ASP.NET Core C# web application first on the GitHub Actions runner machine and then pushing it to the Google Artifact Registry (GAR).
 
 ```yaml
-runs-on: ubuntu-latest
-```
-
-As this job will be using the Docker CLI and those respective commands, they have the best compatibility on Linux machines, so `ubuntu-latest` was a logical choice.
-
-```yaml
 needs: [sast, test]
 ```
 
 The `needs` keyword states that the stated set of jobs will need to be successful for this job to run [@4github2024], in this case, the `sast` (see [3.3 Security Testing in CI/CD Pipeline](#33-security-testing-in-cicd-pipeline)) and `test` (see [3.2.1 `test`](#321-test)). Since the Docker image relies upon the source code to be scanned for vulnerabilities and tested, it makes sure that the application has passed those, to prevent any broken or insecure code from being executed.
-
-```yaml
-- name: Checkout source code
-  uses: actions/checkout@v4
-```
-
-The source code from the repository is checked out making it available for the subsequent set of steps.
 
 ```yaml
 - name: Google authentication
@@ -332,6 +305,7 @@ This step concerns itself with building the actual image itself using the build 
 | `${{ env.GCP_PROJECT_ID }}`                         | A reference to the GCP project via its ID.                                               |
 | `${{ env.GCP_GAR_REPO }}`                           | The name of the Docker image repository within the GAR.                                  |
 | `${{ env.CONTAINER_IMAGE_NAME }}:${{ github.sha }}` | A unique identifier for each image, with the container's name and the GitHub commit SHA. |
+| `.`                                                 | Builds using the Dockerfile from the project's root file path                            |
 
 ```yaml
 - name: Configure Docker client
@@ -364,34 +338,17 @@ Finally, the Docker image is then pushed to the GAR via the `docker push` comman
 The `deploy` pipeline job is responsible for deploying the Docker image from the GAR (pushed from the previous step, [3.2.2 `docker-build-and-push-to-gar`](#322-docker-build-and-push-to-gar)) to Google Cloud Run to be publicly available via a URL.
 
 ```yaml
-runs-on: ubuntu-latest
-```
-
-This job will run on GitHub Action's latest Ubuntu runner since the commands for this job are generic and do not require any specific architecture.
-
-```yaml
 needs: docker-build-and-push-to-gar
 ```
 
 This job depends on the successful completion of the `docker-build-and-push-to-gar` before it can run, meaning in practicality, it ensures that the Docker image is first built and pushed to the GAR before attempting to deploy it. It also means that the correct and most recent up-to-date version of the Docker image is referenced during deployment.
 
 ```yaml
-- name: Checkout source code
-  uses: actions/checkout@v4
-```
-
-As always, the source code from the repository is checked out making it available for the next set of steps.
-
-```yaml
 - name: Google authentication
   uses: google-github-actions/auth@v2
   with:
     credentials_json: ${{ env.GCP_SA_KEY }}
-```
 
-To use the Google Cloud Platform services, this step authenticates the GitHub Actions runner machine via the `GCP_SA_KEY` JSON credentials file through a Service Account like before.
-
-```yaml
 - name: Setup Google Cloud SDK
   uses: google-github-actions/setup-gcloud@v1
   with:
@@ -399,7 +356,7 @@ To use the Google Cloud Platform services, this step authenticates the GitHub Ac
     project_id: ${{ env.GCP_PROJECT_ID }}
 ```
 
-Since the GitHub Actions runner machine needs access to `gcloud` commands, which is the GCP CLI tool, this step sets up the SDK along with the `project_id` that references the according project where all the GCP resources point towards.
+The same Google authentication and Google Cloud SDK installation steps from the `docker-build-and-push-to-gar` job are used.
 
 ```yaml
 - name: Deploy to Google Cloud Run
@@ -444,23 +401,10 @@ Finally, to deploy the Docker image as a container to Google Cloud run, the `gcl
 The `database-migration` job concerns running Entity Framework Core (EF Core) database migrations against a Google Cloud SQL instance. This job ensures that upon each push, migrations are applied and that the database schema is updated with any changes made to models or the database context class defined in the ASP.NET Core C# web application.
 
 ```yaml
-runs-on: ubuntu-latest
-```
-
-This job will run on GitHub Action's latest Ubuntu runner. Commands in this job do not require a specific architecture.
-
-```yaml
 needs: deploy
 ```
 
 This job depends on the website being successfully deployed before the database migrations are run. This means that there is no point in continuing the pipeline or running the database migrations in parallel, and makes logical sense to update the schema only if the website is up and running.
-
-```yaml
-- name: Checkout source code
-  uses: actions/checkout@v4
-```
-
-As always, the source code from the repository is checked out making it available for subsequent steps.
 
 ```yaml
 - name: Setup .NET SDK
@@ -469,7 +413,7 @@ As always, the source code from the repository is checked out making it availabl
     dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
 ```
 
-The next step sets up the .NET SDK necessary for building and testing the application. It uses the .NET version specified by the `DOTNET_CORE_VERSION` environment variable, matching the same .NET version of the ASP.NET Core C# web application running, i.e. the `7.0.x` series.
+The next step sets up the .NET SDK necessary for building and testing the application, just like in the `test` job.
 
 ```yaml
 - name: Install Dotnet Entity Framework CLI tool
@@ -501,11 +445,7 @@ The Google Cloud SQL Auth Proxy package needs to be given the executable permiss
   uses: google-github-actions/auth@v2
   with:
     credentials_json: ${{ env.GCP_SA_KEY }}
-```
 
-Like in the previous steps, the GitHub Actions runner machine has to be authenticated to interact with the GCP services, and this is through the Service Account's credentials JSON file referenced via the `GCP_SA_KEY` environment variable.
-
-```yaml
 - name: Setup Google Cloud SDK
   uses: google-github-actions/setup-gcloud@v1
   with:
@@ -513,7 +453,7 @@ Like in the previous steps, the GitHub Actions runner machine has to be authenti
     project_id: ${{ env.GCP_PROJECT_ID }}
 ```
 
-All the relevant Google Cloud CLI commands need to be installed, i.e. the `gcloud` commands, as they will be required in the next set of steps. A reference to the GCP project is given via the `project_id` environment variable which is a collection of resources associated with this project.
+Again, like before, the GitHub Actions runner machine needs to be authenticated by Google as well as have the necessary commands installed.
 
 ```yaml
 - name: Start Cloud SQL Auth Proxy
@@ -552,12 +492,6 @@ After the database migrations have successfully run, there are no longer going t
 The `sast` job performs Security Application Security Testing (SAST) on the ASP.NET Core C# web application using the Snyk tool. This is to help identify potential security vulnerabilities in the source code before it is built and deployed.
 
 ```yaml
-runs-on: ubuntu-latest
-```
-
-This job runs on the latest Ubuntu architecture on the GitHub Actions runner machine. More specifically, a Linux-based system is required to run the Snyk CLI commands.
-
-```yaml
 needs: test
 ```
 
@@ -570,27 +504,16 @@ permissions: write-all
 This job is given write permissions to upload the SAST scan security results to GitHub Code Scanning.
 
 ```yaml
-- name: Checkout source code
-  uses: actions/checkout@v4
-```
-
-The first step checks out the source code from the repository so that subsequent steps have access to it.
-
-```yaml
 - name: Setup .NET SDK
   uses: actions/setup-dotnet@v4
   with:
     dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
-```
 
-The GitHub Actions runner machine needs to have access to the `dotnet` set of CLI commands, so this step sets up the .NET SDK with the specified `dotnet-version`, matching the same version as the ASP.NET Core C# web application.
-
-```yaml
 - name: Restore project dependencies
   run: dotnet restore ${{ env.SOLUTION_NAME }}
 ```
 
-The project's dependencies, references to specific tools, and any other requirements need to be restored (installed) via the `dotnet restore` command, by passing the solution name i.e. the `.sln` file.
+As in the `test` job, the Synk scan requires the .NET SDK to be installed to use the necessary commands as well as install the application's package dependencies.
 
 ```yaml
 - name: Run Snyk to check for vulnerabilities
@@ -619,34 +542,17 @@ The SARIF file from the previous step generated by Snyk uploads this to the GitH
 The `dast` job performs Dynamic Application Security Testing (DAST) on the final deployed ASP.NET Core C# web application via the OWASP ZAP tool. This is to identify additional vulnerabilities by simulating real-world attacks on the final form of the application.
 
 ```yaml
-runs-on: ubuntu-latest
-```
-
-The job runs on the latest Ubuntu architecture on the GitHub Actions runner machine. Typically `ubuntu-latest` is the standard choice when system-specific commands aren't required.
-
-```yaml
 needs: deploy
 ```
 
 The `dast` job needs the ASP.NET C# application to be deployed successfully first via the `deploy` job. This ensures that the application has been deployed to Google Cloud Run before performing the DAST scan.
 
 ```yaml
-- name: Checkout source code
-  uses: actions/checkout@v4
-```
-
-As always, the code is first checked out to allow other steps to have access to the source code.
-
-```yaml
 - name: Google authentication
   uses: google-github-actions/auth@v2
   with:
     credentials_json: ${{ env.GCP_SA_KEY }}
-```
 
-Using the Service Account (SA) linked to the GCP project for this application, the GitHub Actions runner machine has to be authenticated to access the necessary resources. The `GCP_SA_KEY` is a JSON file that is stored as a repository secret, containing credentials.
-
-```yaml
  - name: Setup Google Cloud SDK
   uses: google-github-actions/setup-gcloud@v1
   with:
@@ -654,7 +560,7 @@ Using the Service Account (SA) linked to the GCP project for this application, t
     project_id: ${{ env.GCP_PROJECT_ID }}
 ```
 
-Another step within this job needs access to the Google Cloud CLI i.e. the `gcloud` commands. This step therefore sets up the Google Cloud SDK based on the resources enabled on the project (referenced via `project_id`).
+As always, Google needs to verify the identity of the GitHub Actions runner machine, as well as install the appropriate commands.
 
 ```yaml
 - name: Get Cloud Run Service URL
@@ -680,6 +586,8 @@ Using the installed `gcloud` commands from the previous step, the URL of the dep
 This step runs the OWASP ZAP tool to perform the DAST scan on the deployed website. The `zaproxy/action-full-scan@v.0.10.0` action requires a target URL (through the `target` input) to run the simulated attacks against. The URL is retrieved from the output of the previous step.
 
 ![DAST scan vulnerabilities in `zap_scan` artifact file](Docs/CcseCw2Report/Images/zap-scan-artifact.png)
+
+![DAST scan vulnerabilities uploaded to GitHub Issues](Docs/CcseCw2Report/Images/zap-scan-github-issues.png)
 
 ## 3.4 Vulnerability comparison with [Section A](#2-section-a-software-security-vulnerabilities)
 
