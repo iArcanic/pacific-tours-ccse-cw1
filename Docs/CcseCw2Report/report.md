@@ -587,7 +587,7 @@ This step runs the OWASP ZAP tool to perform the DAST scan on the deployed websi
 
 ![DAST scan vulnerabilities in `zap_scan` artifact file](Docs/CcseCw2Report/Images/zap-scan-artifact.png)
 
-![DAST scan vulnerabilities uploaded to GitHub Issues](Docs/CcseCw2Report/Images/zap-scan-github-issues.png)
+<!-- ![DAST scan vulnerabilities uploaded to GitHub Issues](Docs/CcseCw2Report/Images/zap-scan-github-issues.png) -->
 
 ## 3.4 Vulnerability comparison with [Section A](#2-section-a-software-security-vulnerabilities)
 
