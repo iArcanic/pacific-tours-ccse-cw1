@@ -18,7 +18,7 @@ csl: Docs/Shared/harvard-imperial-college-london.csl
 > PLEASE NOTE THE FOLLOWING:
 >
 > - The [`sast`](#331-sast) pipeline job requires the repository to be public in order to upload the results of the vulnerability scan to GitHub code scanning. If the repository is set to private, this job **WILL FAIL**.
-> - The workflow ([`ci-cd.yml`](https://github.com/iArcanic/pacific-tours-ccse-cw1/blob/main/.github/workflows/ci-cd.yml)) has **failed for a couple of the recent attempts intentionally**. This is because the workflow has been **MANUALLY CANCELLED** by me. I'm also running another workflow ([`report-pipeline.yml`]) repsonsible for building and compiling this documentation upon every push. In order to be conservative of resources and save time, **the `ci-cd.yml` workflow does not need to be run everytime**. Please visit this link for proof that the pipeline has succeeded and works as intended: [https://github.com/iArcanic/pacific-tours-ccse-cw1/actions/runs/9128239031](https://github.com/iArcanic/pacific-tours-ccse-cw1/actions/runs/9128239031).
+> - The workflow ([`ci-cd.yml`](https://github.com/iArcanic/pacific-tours-ccse-cw1/blob/main/.github/workflows/ci-cd.yml)) has **failed for a couple of the recent attempts intentionally**. This is because the workflow has been **MANUALLY CANCELLED** by me. I'm also running another workflow (`report-pipeline.yml`) repsonsible for building and compiling this documentation upon every push. In order to be conservative of resources and save time, **the `ci-cd.yml` workflow does not need to be run everytime**. Please visit this link for proof that the pipeline has succeeded and works as intended: [`https://github.com/iArcanic/pacific-tours-ccse-cw1/actions/runs/9128239031`](https://github.com/iArcanic/pacific-tours-ccse-cw1/actions/runs/9128239031).
 
 # 1 Executive summary
 
@@ -50,12 +50,10 @@ SAST analysis involves examining the source code of the ASP.NET C# project to id
 
 ### 2.2.2 Vulnerabilities identified
 
+For the full complete list of vulnerabilities, please see [https://github.com/iArcanic/pacific-tours-ccse-cw1/security/code-scanning](https://github.com/iArcanic/pacific-tours-ccse-cw1/security/code-scanning)
+
 #### 2.2.2.1 NuGet.Packaging – Improper access control
 
-> CVE-2024-0057: NET, .NET Framework, and Visual Studio Security Feature Bypass Vulnerability [@cve2024]
->
-> CWE-284: Improper Access Control [@cwe2024]
->
 > Introduced through:
 >
 > - `Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11`
@@ -64,10 +62,10 @@ SAST analysis involves examining the source code of the ASP.NET C# project to id
 > - `NuGet.DependencyResolver.Core@6.6.1`
 > - `NuGet.Protocol@6.6.1`
 > - `NuGet.Packaging@6.6.1`
->
-> Severity: CRITICAL
->
-> Priority score: 562
+
+| CVE                      | CWE                | Severity | Priority score |
+| ------------------------ | ------------------ | -------- | -------------- |
+| CVE-2024-0057 [@cve2024] | CWE-284 [@cwe2024] | CRITICAL | 562            |
 
 NuGet.Packaging [@nuget2024] is an implementation by Nuget, specifically for reading `nupkg` and `nuspec` package specification files.
 
@@ -77,15 +75,13 @@ This vulnerability can be resolved simply by updating or changing the NuGet.Pack
 
 #### 2.2.2.2 Anti-forgery token validation disabled
 
-> CWE-352: Cross-Site Request Forgery (CSRF) [@cwe2023]
->
 > Introduced through:
 >
 > - `ErrorModel` class
->
-> Severity: LOW
->
-> Priority score: 450
+
+| CVE | CWE                | Severity | Priority score |
+| --- | ------------------ | -------- | -------------- |
+| N/A | CWE-352 [@cwe2023] | LOW      | 450            |
 
 Specifically, the `ErrorModel` class below has the `[IgnoreAntiForgeryToken]` annotation set meaning that cross-site request forgeries are more likely to occur.
 
@@ -95,6 +91,7 @@ namespace asp_net_core_web_app_authentication_authorisation.Pages
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     [IgnoreAntiforgeryToken]
     public class ErrorModel : PageModel
+}
 ```
 
 A cross-site request forgery is an attack where a threat actor attempts to take advantage of a user's authorised credentials (via a browser cookie or a relevant token) to impersonate a trusted user and perform unathorised access under a valid guise. In this case, the application's server cannot differentiate between a legitimate or malicious request. This type of attack usually takes place through social engineering, i.e. a link or popup that a user clicks causing an unauthorised request to be sent to the web server.
@@ -103,19 +100,15 @@ This vulnerability can be prevented in ASP.NET Model View Controllers (MVCs) by 
 
 #### 2.2.2.3 `Azure.Identity` – Remote Code Execution (RCE)
 
-> CVE-2023-36414: Azure Identity SDK Remote Code Execution Vulnerability [@cve2023]
->
-> CWE-94: Improper Control of Generation of Code ('Code Injection') [@2cwe2023]
->
 > Introduced through:
 >
 > - `Microsoft.EntityFrameworkCore.SqlServer@7.0.12`
 > - `Microsoft.Data.SqlClient@5.1.1`
 > - `Azure.Identity@1.7.0`
->
-> Severity: HIGH
->
-> Priority score: 440
+
+| CVE                       | CWE                | Severity | Priority score |
+| ------------------------- | ------------------ | -------- | -------------- |
+| CVE-2023-36414 [@cve2023] | CWE-94 [@2cwe2023] | HIGH     | 440            |
 
 The `Azure.Identity` library provides token authentication support (via Microsoft Entra ID) for access to the Azure Software Development Kit (SDK). Through a set of provided `TokenCredential` implementations, Azure SDK clients can be built that complement Microsoft Entra token authentication [@microsoftlearn2024].
 
@@ -131,13 +124,13 @@ DAST involves testing and running the application after it has been deployed to 
 
 ### 2.3.2 Vulnerabilities identified
 
+For the full list of vulnerabilities, please see [https://github.com/iArcanic/pacific-tours-ccse-cw1/issues/1](https://github.com/iArcanic/pacific-tours-ccse-cw1/issues/1)
+
 #### 2.3.2.1 Content Security Policy (CSP) header not set
 
-> CWE-693: Protection Mechanism Failure [@7cwe2023]
->
-> Risk level: MEDIUM
->
-> Number of instances: 2
+| CWE                 | Risk level | No. of instances |
+| ------------------- | ---------- | ---------------- |
+| CWE-693 [@7cwe2023] | MEDIUM     | 2                |
 
 The Content Security Policy (CSP) header is an added layer of security (defense-in-depth) that aids in the detection and mitigation of specific attacks, those being mainly Cross-Site Scripting (XSS) and data injection attempts [@w3c2024]. The primary goal of this attack could range from data theft to site defacement or even malware distribution. A CSP provides a set of standard HTTP headers that website owners can use to declare approved content sources that browsers should allow to load on that page [@foundeo2023]. This includes content types such as JavaScript, CSS, HTML frames, fonts, images, and embedded objects (video and audio files, Java applets, ActiveX).
 
@@ -151,11 +144,9 @@ A simple solution for this would be to add a CSP header to the application web s
 
 #### 2.3.2.2 Proxy disclosure
 
-> CWE-200: Exposure of Sensitive Information to an Unauthorized Actor [@4cwe2023]
->
-> Risk level: MEDIUM
->
-> Number of instances: 4
+| CWE                 | Risk level | No. of instances |
+| ------------------- | ---------- | ---------------- |
+| CWE-200 [@4cwe2023] | MEDIUM     | 4                |
 
 Any proxy servers that the application is running were detected and fingerprinted by the ZAP tool. It occurs when `TRACE` and/or `TRACK` methods are enabled on both the proxy and origin web servers [@stackhawk2024]. If these methods are enabled, an attacker can gain access to sensitive information about the software and services running on the server to get information for further attacks, by sending specific requests [@stackhawk2024].
 
@@ -183,22 +174,26 @@ GitHub Actions is a continuous integration/continuous deployment (CI/CD) pipelin
 
 The reasons as to why GitHub Actions was used is as follows:
 
-- **Seamless integration**: this ASP.NET Core C# web application is hosted on a GitHub repository, so it makes logical sense to use the platform's very own CI/CD automation technology as it is seamlessly integrated with the code infrastructure.
-- **Customisability**: it is also highly customisable, being able to run the pipeline on a variety of different architectures through their virtual machines [@2github2024].
-- **Cost**: the cost of using GitHub Actions is little to none, having a very generous free tier [@3github2024] that covers most usage requirements.
-- **Pre-built actions**: they have a wide variety of already built-in functions via the "GitHub Marketplace" that most typical code bases need [@benvengu2023].
-- **Security**: support encryption and masking of sensitive information such as API credentials, keys, and so on through GitHub Actions Secrets.
-- **Developer support**: GitHub Actions has a very large and active community, meaning that any errors are likely to be reported and fixed quickly, as well as the ability to share and use pre-build actions [@benvengu2023].
+| Advantage            | Reason                                                                                                                                                 |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Seamless integration | The application's source code is hosted on a GitHub repository. Makes logical sense to use built-in CI/CD technology.                                  |
+| Customisability      | Highly customisable, being able to run the pipeline on a variety of different architectures through their virtual machines [@2github2024].             |
+| Cost                 | Has a very generous free tier [@3github2024] that covers most usage requirements.                                                                      |
+| Pre-built actions    | Has a wide variety of already built-in functions via the "GitHub Marketplace" that most typical code bases need [@benvengu2023].                       |
+| Security             | Encryption and masking of sensitive information, such as API credentials, keys, and so on through environment secrets.                                 |
+| Developer support    | GitHub Actions has a very large and active community, so errors are likely to be reported and fixed quickly, as well as share actions [@benvengu2023]. |
 
 #### 3.1.2.2 Docker
 
 Docker is a platform that allows for the consistent development, shipping, and running of applications [@docker2024]. It helps to separate the applications from the resources they require, allowing developers to only focus on what is essential to the development process. The Docker concepts and methodologies offer a variety of features that are beneficial for the building and deployment of this ASP.NET Core C# web application:
 
-- **Containers**: Docker uses the concept of containers, which allows each service to be individually managed, meaning that resources can be efficiently allocated as needed [@preeth2015].
-- **Container isolation**: each Docker container is isolated, helping to maintain the overall security of the system as the application is confined to its execution environment [@bui2015].
-- **Architecture variety**: similar to [3.1.2.1 GitHub Actions](#3121-github-actions), Docker containers are capable of running a variety of different architectures such as Linux, Windows, MacOS, and more.
-- **Pipeline integration**: containers can easily integrate with the CI/CD workflow, allowing code to be fixed of bugs, containerised, and redeployed to the test environment, then pushed to production [@docker2024].
-- **Cost**: Docker has a very generous free tier which has near to unlimited usage on any device.
+| Advantage            | Reason                                                                                                                                                                                      |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Containers           | Uses the concept of containers, which allows each service to be individually managed, meaning that resources can be efficiently allocated as needed [@preeth2015].                          |
+| Container isolation  | Each container is helping to maintain the overall security of the system as the application is confined to its execution environment [@bui2015].                                            |
+| Architecture variety | Containers are capable of running a variety of different architectures such as Linux, Windows, MacOS, and more.                                                                             |
+| Pipeline integration | containers can easily integrate with the CI/CD workflow, allowing code to be fixed of bugs, containerised, and redeployed to the test environment, then pushed to production [@docker2024]. |
+| Cost                 | Very generous free tier which has near to unlimited usage.                                                                                                                                  |
 
 #### 3.1.2.3 Google Cloud Platform (GCP)
 
@@ -206,9 +201,11 @@ Google Cloud Platform (GCP) is a set of various physical assets, those being com
 
 The following cloud resources that GCP offers make it suitable for this ASP.NET Core C# web application's components:
 
-- **Google Artifact Registry (GAR)**: a collection of repositories suitable for the storage of Docker container images, preparing them for containers to be deployed to the web [@2google2024].
-- **Google Cloud SQL**: a fully managed relational database compatible with database software such as MySQL, PostgreSQL, and SQL server for a deployed web application [@3google2024].
-- **Google Cloud Run** a managed compute platform that uses the Docker containers from GAR and runs them to be publically accessible on the internet using Google's scalable infrastructure [@4google2024].
+| Resource                       | Explanation                                                                                                                                              |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Google Artifact Registry (GAR) | A collection of repositories suitable for the storage of Docker container images, preparing them as containers to be deployed to the web [@2google2024]. |
+| Google Cloud SQL               | A fully managed relational database compatible with database software such as MySQL, PostgreSQL, and SQL server [@3google2024].                          |
+| Google Cloud Run               | A managed compute platform that uses the Docker containers from GAR and runs them to be publicly accessible on the internet [@4google2024].              |
 
 ## 3.2 CI/CD pipeline implementation
 
@@ -656,11 +653,9 @@ A few additional vulnerabilities, aside from the ones in [Section A, 2.2.2](#222
 
 #### 3.4.2.1 Missing anti-clickjacking header
 
-> CWE-1021: Improper Restriction of Rendered UI Layers or Frames [@9cwe2023]
->
-> Risk level: MEDIUM
->
-> Number of instances: 6
+| CWE                  | Risk level | No. of instances |
+| -------------------- | ---------- | ---------------- |
+| CWE-1021 [@9cwe2023] | MEDIUM     | 6                |
 
 This vulnerability concerns either the lack of a Content Security Policy (CSP) header (see [Section A, 2.3.2.1 Content Security Policy (CSP) header not set](#2321-content-security-policy-csp-header-not-set)) with a "frame-ancestors" directive or any X-Frame-Options, to protect against "Clickjacking" attacks. A Clickjacking attack is one which fools users into thinking that they are clicking on one website element, when in reality, they are actually clicking on another [@synopsys2024]. Users think that they are interacting with the web page's genuine UI, but there is another underlying UI in control, i.e. the UI has been redressed [@synopsys2024].
 
@@ -672,11 +667,9 @@ The vulnerability can be addressed in the following ways:
 
 #### 3.4.2.2 Vulnerable JavaScript library
 
-> CWE-829: CWE-829: Inclusion of Functionality from Untrusted Control Sphere [@10cwe2023]
->
-> Risk level: MEDIUM
->
-> Number of instances: 1
+| CWE                  | Risk level | No. of instances |
+| -------------------- | ---------- | ---------------- |
+| CWE-829 [@10cwe2023] | MEDIUM     | 1                |
 
 An identified JavaScript library (`jquery-validation`) used by one of the client-side pages is vulnerable. This is a package that is responsible for the form validation logic on the client side before the data is submitted to the server, hence reducing server load times [@javatpoint2021].
 
@@ -684,11 +677,9 @@ A simple solution to this vulnerability would be to upgrade to the latest versio
 
 #### 3.4.2.3 Cookie without secure flag
 
-> CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute [@11cwe2023]
->
-> Risk level: LOW
->
-> Number of instances: 2
+| CWE                  | Risk level | No. of instances |
+| -------------------- | ---------- | ---------------- |
+| CWE-614 [@11cwe2023] | LOW        | 2                |
 
 The vulnerability details a cookie being set without a secure flag, meaning that it can be accessed via unencrypted connections [@6zapproxy2024]. It can also potentially mean information exposure as an attacker can eavesdrop on the network traffic leading to session tokens, sensitive data, and user credentials to be leaked [@2stackhawk2024]. It can also be a means for man-in-the-middle attacks, by intercepting the communication between the user and the server since the attacker could modify the contents of the cookie or inject malicious custom code for the user's session [@2stackhawk2024]. Furthermore, impersonation attacks can occur if the user's session is hijacked, allowing the attacker to perform actions as the user [@2stackhawk2024].
 
