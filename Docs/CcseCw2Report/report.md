@@ -50,22 +50,26 @@ SAST analysis involves examining the source code of the ASP.NET C# project to id
 
 ### 2.2.2 Vulnerabilities identified
 
-For the full complete list of vulnerabilities, please see [https://github.com/iArcanic/pacific-tours-ccse-cw1/security/code-scanning](https://github.com/iArcanic/pacific-tours-ccse-cw1/security/code-scanning)
+For the complete list of vulnerabilities, please see [https://github.com/iArcanic/pacific-tours-ccse-cw1/security/code-scanning](https://github.com/iArcanic/pacific-tours-ccse-cw1/security/code-scanning).
 
 #### 2.2.2.1 NuGet.Packaging – Improper access control
 
 > Introduced through:
 >
-> - `Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11`
-> - `Microsoft.DotNet.Scaffolding.Shared@7.0.11`
-> - `NuGet.ProjectModel@6.6.1`
-> - `NuGet.DependencyResolver.Core@6.6.1`
-> - `NuGet.Protocol@6.6.1`
-> - `NuGet.Packaging@6.6.1`
-
-| CVE                      | CWE                | Severity | Priority score |
-| ------------------------ | ------------------ | -------- | -------------- |
-| CVE-2024-0057 [@cve2024] | CWE-284 [@cwe2024] | CRITICAL | 562            |
+> | Package                                            | Version |
+> | -------------------------------------------------- | ------- |
+> | `Microsoft.VisualStudio.Web.CodeGeneration.Design` | 7.0.11  |
+> | `Microsoft.DotNet.Scaffolding.Shared`              | 7.0.11  |
+> | `NuGet.ProjectModel`                               | 6.6.1   |
+> | `NuGet.DependencyResolver.Core`                    | 6.6.1   |
+> | `NuGet.Protocol`                                   | 6.6.1   |
+> | `NuGet.Packaging`                                  | 6.6.1   |
+>
+> Attributes:
+>
+> | CVE                      | CWE                | Severity | Priority score |
+> | ------------------------ | ------------------ | -------- | -------------- |
+> | CVE-2024-0057 [@cve2024] | CWE-284 [@cwe2024] | CRITICAL | 562            |
 
 NuGet.Packaging [@nuget2024] is an implementation by Nuget, specifically for reading `nupkg` and `nuspec` package specification files.
 
@@ -78,10 +82,12 @@ This vulnerability can be resolved simply by updating or changing the NuGet.Pack
 > Introduced through:
 >
 > - `ErrorModel` class
-
-| CVE | CWE                | Severity | Priority score |
-| --- | ------------------ | -------- | -------------- |
-| N/A | CWE-352 [@cwe2023] | LOW      | 450            |
+>
+> Attributes:
+>
+> | CVE | CWE                | Severity | Priority score |
+> | --- | ------------------ | -------- | -------------- |
+> | N/A | CWE-352 [@cwe2023] | LOW      | 450            |
 
 Specifically, the `ErrorModel` class below has the `[IgnoreAntiForgeryToken]` annotation set meaning that cross-site request forgeries are more likely to occur.
 
@@ -102,13 +108,17 @@ This vulnerability can be prevented in ASP.NET Model View Controllers (MVCs) by 
 
 > Introduced through:
 >
-> - `Microsoft.EntityFrameworkCore.SqlServer@7.0.12`
-> - `Microsoft.Data.SqlClient@5.1.1`
-> - `Azure.Identity@1.7.0`
-
-| CVE                       | CWE                | Severity | Priority score |
-| ------------------------- | ------------------ | -------- | -------------- |
-| CVE-2023-36414 [@cve2023] | CWE-94 [@2cwe2023] | HIGH     | 440            |
+> | Package                                   | Version |
+> | ----------------------------------------- | ------- |
+> | `Microsoft.EntityFrameworkCore.SqlServer` | 7.0.12  |
+> | `Microsoft.Data.SqlClient`                | 5.1.1   |
+> | `Azure.Identity`                          | 1.7.0   |
+>
+> Attributes:
+>
+> | CVE                       | CWE                | Severity | Priority score |
+> | ------------------------- | ------------------ | -------- | -------------- |
+> | CVE-2023-36414 [@cve2023] | CWE-94 [@2cwe2023] | HIGH     | 440            |
 
 The `Azure.Identity` library provides token authentication support (via Microsoft Entra ID) for access to the Azure Software Development Kit (SDK). Through a set of provided `TokenCredential` implementations, Azure SDK clients can be built that complement Microsoft Entra token authentication [@microsoftlearn2024].
 
@@ -215,6 +225,8 @@ The specific security testing pipeline jobs (i.e. `sast` and `dast`) are explain
 
 The complete contents of this file can be found at [`pacific-tours-ccse-cw1/.github/workflows/ci-cd.yml`](https://github.com/iArcanic/pacific-tours-ccse-cw1/blob/main/.github/workflows/ci-cd.yml).
 
+![CI-CD Pipeline passing](Docs/CcseCw2Report/Images/pipeline-success.png)
+
 ### 3.2.1 `test`
 
 The `test` job is the first job in the pipeline that is responsible for checking out the source code, setting up the relevant .NET SDK version, restoring any project dependencies, and then running all available unit tests for their ASP.NET Core C# web application. Since this is the first job, it ensures that the application works as intended without breaking, before moving on to the subsequent pipeline jobs.
@@ -305,10 +317,21 @@ The next step sets up the Google Cloud SDK on the GitHub Actions runner machine 
     run: |
       echo "Building Docker image..."
       docker build -t \
-        ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GCP_GAR_REPO }}/${{ env.CONTAINER_IMAGE_NAME }}:${{ github.sha }} .
+        ${{ env.GCP_REGION }}-docker.pkg.dev/
+        ${{ env.GCP_PROJECT_ID }}/
+        ${{ env.GCP_GAR_REPO }}/
+        ${{ env.CONTAINER_IMAGE_NAME }}:${{ github.sha }}
+        .
 ```
 
-This step concerns itself with building the actual image itself using the build instructions from the `Dockerfile` provided in the repository's root (see [`pacific-tours-ccse-cw1/Dockerfile`](https://github.com/iArcanic/pacific-tours-ccse-cw1/blob/main/Dockerfile)). In the `run` block, the `echo "Building Docker image..."` provides an informative message to the developer in the GitHub Actions console. Following on, the `docker build` command builds an image of the application and tags it through the argument `-t` with a value of `${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GCP_GAR_REPO }}/${{ env.CONTAINER_IMAGE_NAME }}:${{ github.sha }}`. The tag includes the GAR URL (`GCP_REGION`, `GCP_PROJECT_ID`, and `GCP_GAR_REPO`), the container image name (`CONTAINER_IMAGE_NAME`), and the current GitHub commit SHA value (`github.sha`).
+This step concerns itself with building the actual image itself using the build instructions from the `Dockerfile` provided in the repository's root (see [`pacific-tours-ccse-cw1/Dockerfile`](https://github.com/iArcanic/pacific-tours-ccse-cw1/blob/main/Dockerfile)). In the `run` block, the `echo "Building Docker image..."` provides an informative message to the developer in the GitHub Actions console. Following on, the `docker build` command builds an image of the application and tags it through the argument `-t` with the following values:
+
+| Value                                               | Explanation                                                                              |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `${{ env.GCP_REGION }}-docker.pkg.dev`              | The URL for the Google Artifact Registry (GAR)                                           |
+| `${{ env.GCP_PROJECT_ID }}`                         | A reference to the GCP project via its ID.                                               |
+| `${{ env.GCP_GAR_REPO }}`                           | The name of the Docker image repository within the GAR.                                  |
+| `${{ env.CONTAINER_IMAGE_NAME }}:${{ github.sha }}` | A unique identifier for each image, with the container's name and the GitHub commit SHA. |
 
 ```yaml
 - name: Configure Docker client
@@ -324,7 +347,10 @@ Before pushing the Docker image to GAR, this step configures the Docker CLI clie
   run: |
     echo "Pushing Docker image to Google Artifact Registry..."
     docker push \
-        ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GCP_GAR_REPO }}/${{ env.CONTAINER_IMAGE_NAME }}:${{ github.sha }}
+      ${{ env.GCP_REGION }}-docker.pkg.dev/
+      ${{ env.GCP_PROJECT_ID }}/
+      ${{ env.GCP_GAR_REPO }}/
+      ${{ env.CONTAINER_IMAGE_NAME }}:${{ github.sha }}
 ```
 
 Finally, the Docker image is then pushed to the GAR via the `docker push` command, using the same image tag from the previous Docker build step.
@@ -379,7 +405,11 @@ Since the GitHub Actions runner machine needs access to `gcloud` commands, which
 - name: Deploy to Google Cloud Run
   run: |
     gcloud run deploy ${{ env.GCP_CLOUD_RUN_SERVICE }} \
-    --image=${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GCP_GAR_REPO }}/${{ env.CONTAINER_IMAGE_NAME }}:${{ github.sha }} \
+    --image=
+        ${{ env.GCP_REGION }}-docker.pkg.dev/
+        ${{ env.GCP_PROJECT_ID }}/
+        ${{ env.GCP_GAR_REPO }}/
+        ${{ env.CONTAINER_IMAGE_NAME }}:${{ github.sha }} \
     --region=${{ env.GCP_REGION }} \
     --allow-unauthenticated \
     --memory=1Gi \
@@ -394,14 +424,16 @@ Since the GitHub Actions runner machine needs access to `gcloud` commands, which
 
 Finally, to deploy the Docker image as a container to Google Cloud run, the `gcloud run deploy` command achieves this. This command includes a lot of flags and features:
 
-- **`gcloud run deploy ${{ env.GCP_CLOUD_RUN_SERVICE }}`**: the name of the Google Cloud Run service to be deployed.
-- **`--image`**: a reference to the Docker image being deployed, pulled from the GAR using the image tag from the previous step.
-- **`--region`**: the GCP region where the Cloud Run service is deployed.
-- **`--allow-unauthenticated`**: anyone on the public internet, i.e. those who are not authenticated by whitelisting their IPs, can access the Cloud Run service (only set for testing purposes, this will change when pushed to production).
-- **`--memory`**, **`--cpu`**, **`--min-instances`**, **`--max-instances`**, **`concurrency`**: all of these flags relate to the resources to be allocated (memory, CPU, minimum instances, and maximum instances) to the Cloud Run services (values set to a baseline to be in line with free tier usage).
-- **`--add-cloudsql-instances`**: references an existing Cloud SQL instance (i.e. relational SQL database) to be linked to the Google Cloud Run service.
-- **`--update-env-vars`**: updates the environment variables inside the Google Cloud Run service, which the Docker container also has access to, which in this case, setting the `ASPNETCORE_ENVIRONMENT` to `Development` (for testing purposes, but this will be changed to `Production` when pushed to the production environment).
-- **`--platform`**: states that the service deployment is to be managed by the Google Cloud Run platform.
+| Argument                                                | Explanation                                                                                         |
+| ------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `gcloud run deploy ${{ env.GCP_CLOUD_RUN_SERVICE }}`    | Name of the Google Cloud Run service to be deployed.                                                |
+| `--image`                                               | A reference to the Docker image to be pulled and deployed from the GAR using the image's tag.       |
+| `--region`                                              | The GCP region where the Cloud Run service is deployed.                                             |
+| `--allow-unauthenticated`                               | Anyone on the public internet can access the Cloud Run service (set for testing purposes).          |
+| `--memory`, `--cpu`, `--min-instances`, `max-instances` | All the resources for the Cloud Run services to be allocated (set to baseline for free-tier usage). |
+| `--add-cloudsql-instances`                              | References an existing Cloud SQL instance to be linked to the Google Cloud Run service.             |
+| `--update-env-vars`                                     | Updates environment variables inside the Google Cloud Run service for the application to reference. |
+| `--platform`                                            | The deployment of the service is to be managed by the Google Cloud Run platform.                    |
 
 ![`deploy` job success](Docs/CcseCw2Report/Images/deploy-job-success.png)
 
@@ -580,6 +612,8 @@ Using Snyk's specific .NET action (`snyk/actions/dotnet@master`), this step perf
 
 The SARIF file from the previous step generated by Snyk uploads this to the GitHub code scanning feature using the `github/codeql-action/upload-sarif@v3` action. The `sarif_file` input is where the path to the Synk SARIF file is passed, and the `category` input, `synk-sast-analysis`, provides a label on the UI for developers to identify the security results.
 
+![SAST scan vulnerabilities on GitHub Code Scanning](Docs/CcseCw2Report/Images/github-code-scan.png)
+
 ### 3.3.2 `dast`
 
 The `dast` job performs Dynamic Application Security Testing (DAST) on the final deployed ASP.NET Core C# web application via the OWASP ZAP tool. This is to identify additional vulnerabilities by simulating real-world attacks on the final form of the application.
@@ -588,7 +622,7 @@ The `dast` job performs Dynamic Application Security Testing (DAST) on the final
 runs-on: ubuntu-latest
 ```
 
-The job runs on the latest Ubuntu architecture on the GitHub Actions runner machine. Typically `ubuntu-latest` is the standard choice when system specific commands aren't required.
+The job runs on the latest Ubuntu architecture on the GitHub Actions runner machine. Typically `ubuntu-latest` is the standard choice when system-specific commands aren't required.
 
 ```yaml
 needs: deploy
@@ -626,7 +660,11 @@ Another step within this job needs access to the Google Cloud CLI i.e. the `gclo
 - name: Get Cloud Run Service URL
   id: get-url
   run: |
-    URL=$(gcloud run services describe ${{ env.GCP_CLOUD_RUN_SERVICE }} --region=${{ env.GCP_REGION }} --format 'value(status.url)')
+    URL=$(
+      gcloud run services describe ${{ env.GCP_CLOUD_RUN_SERVICE }} \
+        --region=${{ env.GCP_REGION }} \
+        --format 'value(status.url)'
+    )
     echo "::set-output name=url::$URL"
 ```
 
@@ -640,6 +678,8 @@ Using the installed `gcloud` commands from the previous step, the URL of the dep
 ```
 
 This step runs the OWASP ZAP tool to perform the DAST scan on the deployed website. The `zaproxy/action-full-scan@v.0.10.0` action requires a target URL (through the `target` input) to run the simulated attacks against. The URL is retrieved from the output of the previous step.
+
+![DAST scan vulnerabilities in `zap_scan` artifact file](Docs/CcseCw2Report/Images/zap-scan-artifact.png)
 
 ## 3.4 Vulnerability comparison with [Section A](#2-section-a-software-security-vulnerabilities)
 
@@ -657,7 +697,7 @@ A few additional vulnerabilities, aside from the ones in [Section A, 2.2.2](#222
 | -------------------- | ---------- | ---------------- |
 | CWE-1021 [@9cwe2023] | MEDIUM     | 6                |
 
-This vulnerability concerns either the lack of a Content Security Policy (CSP) header (see [Section A, 2.3.2.1 Content Security Policy (CSP) header not set](#2321-content-security-policy-csp-header-not-set)) with a "frame-ancestors" directive or any X-Frame-Options, to protect against "Clickjacking" attacks. A Clickjacking attack is one which fools users into thinking that they are clicking on one website element, when in reality, they are actually clicking on another [@synopsys2024]. Users think that they are interacting with the web page's genuine UI, but there is another underlying UI in control, i.e. the UI has been redressed [@synopsys2024].
+This vulnerability concerns either the lack of a Content Security Policy (CSP) header (see [Section A, 2.3.2.1 Content Security Policy (CSP) header not set](#2321-content-security-policy-csp-header-not-set)) with a "frame-ancestors" directive or any X-Frame-Options, to protect against "Clickjacking" attacks. A Clickjacking attack fools users into thinking that they are clicking on one website element when in reality, they are clicking on another [@synopsys2024]. Users think that they are interacting with the web page's genuine UI, but there is another underlying UI in control, i.e. the UI has been redressed [@synopsys2024].
 
 The vulnerability can be addressed in the following ways:
 
@@ -681,7 +721,7 @@ A simple solution to this vulnerability would be to upgrade to the latest versio
 | -------------------- | ---------- | ---------------- |
 | CWE-614 [@11cwe2023] | LOW        | 2                |
 
-The vulnerability details a cookie being set without a secure flag, meaning that it can be accessed via unencrypted connections [@6zapproxy2024]. It can also potentially mean information exposure as an attacker can eavesdrop on the network traffic leading to session tokens, sensitive data, and user credentials to be leaked [@2stackhawk2024]. It can also be a means for man-in-the-middle attacks, by intercepting the communication between the user and the server since the attacker could modify the contents of the cookie or inject malicious custom code for the user's session [@2stackhawk2024]. Furthermore, impersonation attacks can occur if the user's session is hijacked, allowing the attacker to perform actions as the user [@2stackhawk2024].
+The vulnerability details a cookie being set without a secure flag, meaning that it can be accessed via unencrypted connections [@6zapproxy2024]. It can also potentially mean information exposure as an attacker can eavesdrop on the network traffic leading to session tokens, sensitive data, and user credentials being leaked @2stackhawk2024]. It can also be a means for man-in-the-middle attacks, by intercepting the communication between the user and the server since the attacker could modify the contents of the cookie or inject malicious custom code for the user's session [@2stackhawk2024]. Furthermore, impersonation attacks can occur if the user's session is hijacked, allowing the attacker to perform actions as the user [@2stackhawk2024].
 
 The vulnerability can be addressed in the following ways:
 
