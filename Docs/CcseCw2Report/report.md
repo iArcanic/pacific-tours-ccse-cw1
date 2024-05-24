@@ -13,7 +13,12 @@ csl: Docs/Shared/harvard-imperial-college-london.csl
 
 # GitHub repository
 
-> [https://github.com/iArcanic/pacific-tours-ccse-cw1](https://github.com/iArcanic/pacific-tours-ccse-cw1)
+> Link: [https://github.com/iArcanic/pacific-tours-ccse-cw1](https://github.com/iArcanic/pacific-tours-ccse-cw1)
+>
+> PLEASE NOTE THE FOLLOWING:
+>
+> - The [`sast`](#331-sast) pipeline job requires the repository to be public in order to upload the results of the vulnerability scan to GitHub code scanning. If the repository is set to private, this job **WILL FAIL**.
+> - The workflow ([`ci-cd.yml`](https://github.com/iArcanic/pacific-tours-ccse-cw1/blob/main/.github/workflows/ci-cd.yml)) has **failed for a couple of the recent attempts intentionally**. This is because the workflow has been **MANUALLY CANCELLED** by me. I'm also running another workflow ([`report-pipeline.yml`]) repsonsible for building and compiling this documentation upon every push. In order to be conservative of resources and save time, **the `ci-cd.yml` workflow does not need to be run everytime**. Please visit this link for proof that the pipeline has succeeded and works as intended: [https://github.com/iArcanic/pacific-tours-ccse-cw1/actions/runs/9128239031](https://github.com/iArcanic/pacific-tours-ccse-cw1/actions/runs/9128239031).
 
 # 1 Executive summary
 
@@ -21,7 +26,7 @@ This report presents the results from the security vulnerability testing as well
 
 The report is split into two sections.
 
-The first section, [Section A](#2-section-a-software-security-vulnerabilities), showcases the results of Static Application Security Testing (SAST) using Synk [@snyk2024] and Dynamic Application Security Testing (DAST) using OWASP ZAP [@owaspzap2024]. The identified vulnerabilities are described in this report along with the steps recommended to remediate them. If a lack of vulnerabilities is found, then potential vulnerabilities with their mitigations are explored and mapped to OWASP guidelines [@owasptop102021].
+The first section, [Section A](#2-section-a-software-security-vulnerabilities), showcases the results of Static Application Security Testing (SAST) using Synk [@snyk2024] and Dynamic Application Security Testing (DAST) using OWASP ZAP [@owaspzap2024]. The identified vulnerabilities (5 in total) are described in this report along with the steps recommended to remediate them. If a lack of vulnerabilities is found, then potential vulnerabilities with their mitigations are explored and mapped to OWASP guidelines [@owasptop102021].
 
 The second section, [Section B](#3-section-b-software-automation), covers the practical implementation of the CI/CD pipeline using GitHub's CI/CD platform, GitHub actions [@github2024] as a way to automate the build, testing, and deployment process. The pipeline will also include the aforementioned SAST and DAST tools used in [Section A](#2-section-a-software-security-vulnerabilities) in alignment with DevSecOps practices [@paloalto2024]. Stages such as Docker build, image creation, and deployment to a cloud platform are also detailed. Furthermore, it also compares and contrasts any additional vulnerabilities
 
@@ -118,188 +123,6 @@ Any affected versions of the `Azure.Identity` packages are vulnerable to Remote 
 
 The vulnerability can be mitigated by simply updating the `Azure.Identity` package to `1.10.2`.
 
-#### 2.2.2.4 `Microsoft.Data.SqlClient` – Unprotected storage of credentials
-
-> CVE-2024-0056: Microsoft.Data.SqlClient and System.Data.SqlClient SQL Data Provider Security Feature Bypass Vulnerability [@2cve2024]
->
-> CWE-420: Unprotected Alternate Channel [@2cwe2024]
->
-> Introduced through:
->
-> - `Microsoft.EntityFrameworkCore.SqlServer@7.0.12`
-> - `Microsoft.Data.SqlClient@5.1.1`
->
-> Severity: HIGH
->
-> Priority score: 375
-
-The `Microsoft.EntityFrameworkCore.SqlServer` is a package that serves as a database provider for Entity Framework Core to bs used with a Microsoft SQL Server and Azure SQL (through database migrations) [@2microsoftlearn2024]. Entity Framework (EF) Core is a lightweight, extensible, open-source, and cross-platform of the popular Entity Framework technology, allowing .NET developers to dynamically work with databases using C# objects without the need for manual SQL queries that typically need to be written [@3microsoftlearn2024].
-
-This package, and its affected versions, are vulnerable to unprotected credential storage. In practicality, this means that an attacker can steal authentication credentials required for the database server through man-in-the-middle attacks between the SQL client and the SQL server. It can even occur if a secure connection is established over an encrypted channel such as TLS.
-
-To fix this, the `Microsoft.Data.SqlClient` can be updated or changed to the following versions: `2.1.7`, `3.1.5`, `4.0.5`, and `5.1.3`.
-
-#### 2.2.2.5 `System.Net.Http` – Denial of Service (DoS)
-
-> CVE-2017-0247 [@cve2017]
->
-> CWE-245: 7PK - Security Features [@3cwe2023]
->
-> Introduced through:
->
-> - `Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11`
-> - `Microsoft.DotNet.Scaffolding.Shared@7.0.11`
-> - `Microsoft.CodeAnalysis.CSharp.Features@4.4.0`
-> - `Microsoft.CodeAnalysis.Features@4.4.0`
-> - `Microsoft.DiaSymReader@1.4.0`
-> - `NETStandard.Library@1.6.1`
-> - `System.Net.Http@4.3.0`
->
-> Severity: HIGH
->
-> Priority score: 375
-
-The `System.Net.Http` NuGet package serves as a programming interface for modern HTTP applications, including all the necessary HTTP components required to consume web services over HTTP [@2nuget2024]. It allows HTTP components to be used by both clients and servers for understanding HTTP headers.
-
-Versions of this package that are affected are vulnerable to Denial of Service (DoS) attacks meaning that ASP.NET Core will fail to properly validate web requests. Attackers can use the `TestEncoder.EncodeCore` function in the `System.Text.Encodings.Web` package as part of `System.Net.Http` to trigger a denial of service attack by utilising a failure in code logic that incorrectly calculates the length of 4-byte characters in Unicode.
-
-The vulnerability can be remediated by updating or changing the `System.Net.Http` package to either version `4.1.2` or `4.3.2`.
-
-#### 2.2.2.6 `System.Net.Http` – Improper certificate validation
-
-> CVE-2017-0248 [@2cve2017]
->
-> CWE-287: Improper Authentication [@3cwe2024]
->
-> Introduced through:
->
-> - `Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11`
-> - `Microsoft.DotNet.Scaffolding.Shared@7.0.11`
-> - `Microsoft.CodeAnalysis.CSharp.Features@4.4.0`
-> - `Microsoft.CodeAnalysis.Features@4.4.0`
-> - `Microsoft.DiaSymReader@1.4.0`
-> - `NETStandard.Library@1.6.1`
-> - `System.Net.Http@4.3.0`
->
-> Severity: HIGH
->
-> Priority score: 375
-
-Affected versions of the `System.Net.Http` are vulnerable to improper certificate validation. Attackers can therefore bypass taggings such as "Enhanced Security Usage" when an invalid certificate is presented for a specific use.
-
-The vulnerability can be avoided by updating or changing the `System.Net.Http` package to either version `4.1.2` or `4.3.2`.
-
-#### 2.2.2.7 `System.Net.Http` – Information exposure
-
-> CVE-2018-8292 [@cve2018]
->
-> CWE-200: Exposure of Sensitive Information to an Unauthorized Actor [@4cwe2023]
->
-> Introduced through:
->
-> - `Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11`
-> - `Microsoft.DotNet.Scaffolding.Shared@7.0.11`
-> - `Microsoft.CodeAnalysis.CSharp.Features@4.4.0`
-> - `Microsoft.CodeAnalysis.Features@4.4.0`
-> - `Microsoft.DiaSymReader@1.4.0`
-> - `NETStandard.Library@1.6.1`
-> - `System.Net.Http@4.3.0`
->
-> Severity: HIGH
->
-> Priority score: 375
-
-The `System.Net.Http` package is vulnerable to information exposure, specifically HTTP authentication information from outbound requests that encounter an HTTP redirect. An attacker who manages to exploit this vulnerability can compromise the application further through the leaked information.
-
-This vulnerability can be mitigated by updating or changing the `System.Net.Http` package to the following versions: `2.0.20710`, `4.0.1-beta-23225` (although `beta` packages are not recommended – serves as a temporary fix), `4.1.4`, and `4.3.4`.
-
-#### 2.2.2.8 `System.Text.RegularExpressions` – Regular Expression Denial of Service (ReDoS)
-
-> Introduced through:
->
-> - `Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11`
-> - `Microsoft.DotNet.Scaffolding.Shared@7.0.11`
-> - `Microsoft.CodeAnalysis.CSharp.Features@4.4.0`
-> - `Microsoft.CodeAnalysis.Features@4.4.0`
-> - `Microsoft.DiaSymReader@1.4.0`
-> - `NETStandard.Library@1.6.1`
-> - `System.Net.Http@4.3.0`
-> - `System.Text.RegularExpressions@4.3.0`
->
-> Severity: HIGH
->
-> Priority score: 375
-
-`System.Text.RegularExpressions` is an implementation of a regular expressions (RegEx) engine [@3nuget2024], which is an engine that takes a sequence of characters and returns a matching pattern text.
-
-RegEx engines, such as this one, are commonly vulnerable to Regular Expression Denial of Service (ReDoS) attacks due to the improper processing of RegEx strings. It means that an attacker relies on the fact that a large majority of ReGex engine implementations may reach rare but extreme cases that cause them to function very slowly, at an exponential rate [@2owasp2024]. An attacker can therefore use a program or tool to manipulate RegEx engines to enter such states, causing them to hang for a very long time.
-
-The vulnerability for this package is addressed through its subsequent version update of `4.3.1`.
-
-#### 2.2.2.9 `System.Net.Http` – Privilege escalation
-
-> CVE-2017-0249 [@3cve2017]
->
-> CWE-269: Improper Privilege Management [@5cwe2023]
->
-> Introduced through:
->
-> - `Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11`
-> - `Microsoft.DotNet.Scaffolding.Shared@7.0.11`
-> - `Microsoft.CodeAnalysis.CSharp.Features@4.4.0`
-> - `Microsoft.CodeAnalysis.Features@4.4.0`
-> - `Microsoft.DiaSymReader@1.4.0`
-> - `NETStandard.Library@1.6.1`
-> - `System.Net.Http@4.3.0`
->
-> Severity: HIGH
->
-> Priority score: 365
-
-This affected versions of the `System.Net.Http` package leave it vulnerable to privilege escalation due to the improper sanitisation of any web requests. Privilege escalation is a type of attack in which an attacker can gain access elevated resource access that is normally restricted to the average application user.
-
-The versions `4.1.2` and `4.3.2` of the `System.Net.Http` properly resolve this vulnerability.
-
-#### 2.2.2.10 `Microsoft.IdentityModel.JsonWebTokens` and `System.IdentityModel.Tokens` – Resource exhaustion
-
-> Introduced through:
->
-> - `Microsoft.EntityFrameworkCore.SqlServer@7.0.12`
-> - `Microsoft.Data.SqlClient@5.1.1`
-> - `Microsoft.IdentityModel.JsonWebTokens@6.24.0` and `System.IdentityModel.Tokens.Jwt@6.24.0`
->
-> Severity: MEDIUM
->
-> Priority score: 340
-
-Both packages which have versions that are affected are vulnerable to resource extensions when processing JSON Web Encryption (JWE) tokens that have a high compression ratio. An attacker then therefore utilise this to cause excessive memory location and processing time during the decompression phase leading to an eventual denial-of-service. However, this is only a possible exploit if the attacker has access to the Microsoft Entra ID's (IDP) registered public encrypt key.
-
-The updated versions for both packages, i.e. `5.7.0`, `6.34.0`, and `7.1.2`, patch this vulnerability.
-
-#### 2.2.2.11 System.Net.Http – Authentication bypass
-
-> CVE-2017-0256 [@4cve2017]
->
-> CWE-20: Improper Input Validation [@6cwe2023]
->
-> Introduced through:
->
-> - `Microsoft.VisualStudio.Web.CodeGeneration.Design@7.0.11`
-> - `Microsoft.DotNet.Scaffolding.Shared@7.0.11`
-> - `Microsoft.CodeAnalysis.CSharp.Features@4.4.0`
-> - `Microsoft.CodeAnalysis.Features@4.4.0`
-> - `Microsoft.DiaSymReader@1.4.0`
-> - `NETStandard.Library@1.6.1`
-> - `System.Net.Http@4.3.0`
->
-> Severity: MEDIUM
->
-> Priority score: 265
-
-The ASP.NET Core HTTP framework, through the `System.Net.Http` NuGet package, does not properly sanitise the "Web Request Handler" component. This means that attackers can spoof and mimic legitimate HTTP web requests and therefore use this to bypass the application's authentication framework.
-
-The vulnerability is addressed in versions `4.1.2` and `4.3.2` of the `System.Net.Http` library.
-
 ## 2.3 Dynamic Application Security Testing (DAST)
 
 ### 2.3.1 Methodology
@@ -324,7 +147,7 @@ A simple solution for this would be to add a CSP header to the application web s
 - Restricting remote script execution, by preventing the page from executing scripts from other suspicious web servers for injection attacks [@owaspcheatsheetseries2024].
 - Restricting any unsafe JavaScript logic that the attacker can exploit [@owaspcheatsheetseries2024].
 - Restricting HTML form submissions and instead, use a more secure form framework [@owaspcheatsheetsseries2024].
-- Restricting HTML objects to prevent attackers from injecting their own malicious executables, such as deprecated or legacy executables i.e. Java/Flash player [@owaspcheatsheetsseries2024].
+- Restricting HTML objects to prevent attackers from injecting their malicious executables, such as deprecated or legacy executables i.e. Java/Flash player [@owaspcheatsheetsseries2024].
 
 #### 2.3.2.2 Proxy disclosure
 
@@ -343,42 +166,6 @@ This information helps the attacker to determine the following information:
 - Any vulnerabilities on the proxy server that also compromise the application.
 
 A straightforward solution to this would be to disable the `OPTIONS` method on the proxy server used by the application, as well as both the `TRACK` and `TRACE` methods [@zaproxy2024]. Furthermore, web and application servers should implement custom error pages to prevent fingerprinting, so server error information is not leaked to the attacker for profiling purposes [@zaproxy2024].
-
-#### 2.3.2.3 Application error disclosure
-
-> CWE-200: Exposure of Sensitive Information to an Unauthorized Actor [@4cwe2023]
->
-> Risk level: LOW
->
-> Number of instances: 2
-
-Any pages that contain too verbose of an error message may potentially contain information such as file location or server software information that the attacker could use to profile the application resources with [@2zaproxy2024]. However, it is important to note that this vulnerability can also be a false positive – if the error message is found inside a documentation page for example. Such information such as API key credentials, resource location, internal web server configurations, or user data is at risk [@scanrepeat2024].
-
-Like in [Section A, 2.3.2.2 Proxy disclosure](#2322-proxy-disclosure), implementing generic, custom error pages minimises the information available for the attacker on the client side, but verbose error logging on the server side for the developer [@scanrepeat2024]. This allows error references to still be available, without exposing any sensitive information.
-
-#### 2.3.2.4 Permissions Policy Header not set
-
-> CWE-693: Protection Mechanism Failure [@7cwe2023]
->
-> Risk level: LOW
->
-> Number of instances: 2
-
-The Permissions Policy Header, similar to the Content Security Policy Header from [Section A, 2.3.2.1](#2321-content-security-policy-csp-header-not-set), is another added layer of security that governs the restriction from unauthorised access or usage of browser and client features, such as camera, microphone, full screen, and location [@3zapproxy2024]. The policy header details user privacy by limiting the set of client device features that web resources can use via a standard set of HTTP headers that website owners can use to limit access [@3zapproxy2024].
-
-To fix this, the internet-facing components (web server, application server, load balancer, etc.) should have a Permissions Policy Header configured with secure settings. The `directive` setting governs what client feature is enabled, and the `allowlist` setting either permits or denies access [@mdn2024].
-
-#### 2.3.2.5 Strict-Transport-Security Header not set
-
-> CWE-319: Cleartext Transmission of Sensitive Information [@4cwe2024]
->
-> Risk level: LOW
->
-> Number of instances: 4
-
-Another security header similar to the previous two ([2.3.2.1 Content Security Policy (CSP) Header](#2321-content-security-policy-csp-header-not-set) and [2.3.2.4 Permissions Policy Header](#2324-permissions-policy-header-not-set)) is a security layer that informs browsers (and complying user agents) that HTTPS site access should be reinforced, and any future HTTP connection attempts are to be converted to HTTPS [@2mdn2024]. However, if this is not set, any visitors to the website can initially communicate with the unencrypted HTTP version before redirection to HTTP occurs. This creates a small window of opportunity for man-in-the-middle attacks whereby users could potentially be redirected to a malicious replica of the website instead of the secure original version [@2mdn2024].
-
-The application's web server and the load balancer will need to be configured to enforce a Strict-Transport-Security Header in any HTTP responses they make.
 
 # 3 Section B: Software automation
 
@@ -410,17 +197,17 @@ Docker is a platform that allows for the consistent development, shipping, and r
 - **Containers**: Docker uses the concept of containers, which allows each service to be individually managed, meaning that resources can be efficiently allocated as needed [@preeth2015].
 - **Container isolation**: each Docker container is isolated, helping to maintain the overall security of the system as the application is confined to its execution environment [@bui2015].
 - **Architecture variety**: similar to [3.1.2.1 GitHub Actions](#3121-github-actions), Docker containers are capable of running a variety of different architectures such as Linux, Windows, MacOS, and more.
-- **Pipeline integrtation**: containers can easily integrate with the CI/CD workflow, allowing code to be fixed of bugs, containerised, and redeployed to the test environment, then pushed to production [@docker2024].
+- **Pipeline integration**: containers can easily integrate with the CI/CD workflow, allowing code to be fixed of bugs, containerised, and redeployed to the test environment, then pushed to production [@docker2024].
 - **Cost**: Docker has a very generous free tier which has near to unlimited usage on any device.
 
 #### 3.1.2.3 Google Cloud Platform (GCP)
 
-Google Cloud Platform (GCP) is a set of various physical assets, those being computers, virtual resources, servers, and hard disk drives all being serves in the form of virtual machines (VMs) rhat are held in various data centers across different regional locations [@google2024]. GCP is therefore essentially a public cloud vendor that offers a suite of computing services that are globally accessible [@knox2023].
+Google Cloud Platform (GCP) is a set of various physical assets, those being computers, virtual resources, servers, and hard disk drives all being served in the form of virtual machines (VMs) that are held in various data centers across different regional locations [@google2024]. GCP is therefore essentially a public cloud vendor that offers a suite of computing services that are globally accessible [@knox2023].
 
 The following cloud resources that GCP offers make it suitable for this ASP.NET Core C# web application's components:
 
 - **Google Artifact Registry (GAR)**: a collection of repositories suitable for the storage of Docker container images, preparing them for containers to be deployed to the web [@2google2024].
-- **Google Cloud SQL**: a fully managed relational database compatible with database software such as MySQL, PostgreSQL, and SQL server for a deployed web application[@3google2024].
+- **Google Cloud SQL**: a fully managed relational database compatible with database software such as MySQL, PostgreSQL, and SQL server for a deployed web application [@3google2024].
 - **Google Cloud Run** a managed compute platform that uses the Docker containers from GAR and runs them to be publically accessible on the internet using Google's scalable infrastructure [@4google2024].
 
 ## 3.2 CI/CD pipeline implementation
@@ -551,7 +338,7 @@ Finally, the Docker image is then pushed to the GAR via the `docker push` comman
 
 ### 3.2.3 `deploy`
 
-The `deploy` pipeline job is responsible for deploying the Docker image from the GAR (pushed from the previous step, [3.2.2 `docker-build-and-push-to-gar`](#322-docker-build-and-push-to-gar)) to Google Cloud Run to be publically available via a URL.
+The `deploy` pipeline job is responsible for deploying the Docker image from the GAR (pushed from the previous step, [3.2.2 `docker-build-and-push-to-gar`](#322-docker-build-and-push-to-gar)) to Google Cloud Run to be publicly available via a URL.
 
 ```yaml
 runs-on: ubuntu-latest
